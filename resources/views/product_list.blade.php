@@ -1,0 +1,287 @@
+@extends('layout.app')
+@section('title', 'Product')
+@section('content')
+<div class="content-area">
+
+<!-- Banner Area -->
+<div class="page-headers">
+	<div class="container-fluid">
+		<div class="row align-items-center">
+			<div class="col-md-6 col-12">
+				<h1>{{$data['product_price']['category']}}</h1>
+			</div>
+			<div class="col-md-6 col-12">
+					<ul class="ph-breadcrumbs-list">
+					<li><a href="{{url('/index')}}">Home</a></li>
+					<li><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($data['product_price']['category'])) }}" class="">{{$data['product_price']['category']}}</a></li>
+					<li><a href="#" class="active">{{$data['product_price']['listing_name']}}</a></li>
+				</ul>
+			</div>			
+			
+		</div>
+	</div>
+</div>
+
+
+<!-- Products List -->
+<div class="product-single-area">	
+	<div class="container">
+	<div class="row justify-content-center align-items-start">
+	<div class="col-12">
+	<div class="product-title">
+				<ul class="prd-sub-link">
+					 <li><span class="new">New</span></li>
+	            </ul>
+				<h1 class="prd-name">{{$data['product_price']['listing_name']}}</h1>
+				@php
+				    $reviewRatings = $data['product_price']['reviewRatings'] ?? [];
+			        $numericRatings = array_map('intval', $reviewRatings);
+					 $averageRating = count($numericRatings) > 0 
+					        ? round(array_sum($numericRatings) / count($numericRatings)) 
+					        : 0;
+			        $reviewCount = count($data['product_price']['comment'] ?? []);
+			    @endphp
+				<ul class="star-rating">
+					 @for($i = 1; $i <= 5; $i++)
+					        <li><i class="las la-star {{ $i <= $averageRating  ? 'starred' : '' }}"></i></li>
+					  @endfor
+					<li><a href="#desc-reviews">({{ $reviewCount }} {{ Str::plural('customer review', $reviewCount) }})</a></li>
+				</ul>
+				<ul class="prd-sub-link">
+	                 <li><i class="fas fa-times red-color"></i> out of stock</li>
+	                 <li><i class="fas fa-check green-color"></i> in stock</li>
+	            </ul>
+            </div>
+	</div>
+	<div class="col-xxl-auto col-xl-auto col-lg-auto col-md-auto col-12">
+	<div class="pp-slider">
+		<div><a class="pv-icon" href="{{ asset('storage/uploads/category/'. $data['product_price']['category_file']) }}" data-lightbox="prd-view" data-title="{{$data['product_price']['listing_name']}}"><img src="{{ asset('storage/uploads/category/'. $data['product_price']['category_file']) }}" /></a></div>
+		@foreach($data['product_price']['galleries'] as $gallery)
+		<div><a class="pv-icon" href="{{ asset('storage/uploads/product/' . $gallery) }}" data-lightbox="prd-view" data-title="Product Name"><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></a></div>
+		@endforeach
+	</div>
+	<div class="pp-slider-thumbnail">
+		<div><img src="{{ asset('storage/uploads/category/'. $data['product_price']['category_file']) }}" /></div>
+		@foreach($data['product_price']['galleries'] as $gallery)
+		<div><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></div>
+		@endforeach
+	</div>
+	</div>
+	
+	
+	<div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-12">
+
+            <!-- Product Cost -->
+            
+            <div class="prd-price">
+	            <h1 class="">
+	            <span class="dc-price"><i>TSh</i>{{$data['product_price']['offer_price']}}</span><i>TSh</i>{{$data['product_price']['product_cost']}}</h1>
+			</div>
+			
+			<!-- Add to Wishlist / Add to Cart -->
+			
+			<form class="standard-form-rules add-to-cart">
+					<div class="row">
+					<div class="col-xl-8 col-lg-10 col-md-10 col-12">
+					<p>Desired Quantity</p>
+						<div class="qty-input">
+							<input type="button" value="-" class="button-minus" data-field="quantity">
+							<input type="number" step="1" max="" value="0" name="quantity" class="quantity-field">
+							<input type="button" value="+" class="button-plus" data-field="quantity">
+						</div>
+					<p><small>Max Allowed : 1000</small></p>
+					<ul class="general-button-list">
+					<li><a href="{{ route('wishlist.add', $data['product_price']['id']) }}" class="redbutton"><i class="material-symbols-outlined">favorite</i>Wishlist</a></li>
+					<li><a href="javascript:void(0);" class="blackbutton"><i class="material-symbols-outlined">add_shopping_cart</i>Add to Cart</a></li>
+					</ul>
+					</div>
+					</div>
+
+			
+			</form>
+			
+			<!-- Add to Wishlist / Add to Cart -->
+			<div class="ac-tab-container">
+			<div id="ac-tab" class="ac-tab">
+							<h2 class="ac-title active">Product Details</h2>
+							<div class="ac-content active">
+							<!-- <p><b>Barcode No. :</b> 12253463424 </p> -->
+							<p><b>Product Weight :</b>{{$data['product_price']['packing_weight']}} </p>
+								</div>
+							<h2 class="ac-title">Product Description</h2>
+							<div class="ac-content">
+							<div class="richtext-content">
+                                    <p>{{$data['product_price']['description']}}</p>
+                                    </ul>   
+                                </div>
+							</div>
+							<h2 class="ac-title">Reviews ({{ $reviewCount }})</h2>
+							<div class="ac-content">
+								@foreach($data['product_price']['comment'] as $index => $comment)
+								<div class="each-review">
+									<div class="content">
+									<p class="mb-0">{{ $comment }}</p>
+									</div>
+									<ul class="star-rating">
+										@php
+							                $rating = isset($data['product_price']['reviewRatings'][$index]) 
+							                    ? (int)$data['product_price']['reviewRatings'][$index] 
+							                    : 0;
+							            @endphp
+
+							            @for($i = 1; $i <= 5; $i++)
+							                <li>
+							                    <i class="las la-star {{ $i <= $rating ? 'starred' : '' }}"></i>
+							                </li>
+							            @endfor
+									</ul>
+								</div>
+								@endforeach
+							</div>
+							<h2 class="ac-title">Add Review</h2>
+							<div class="ac-content">
+							<form class="standard-form-rules">
+									<p>Please <a href="login.html">Login</a> to Add Review.</p>
+									<p>Greetings, <b class="darkgrey-color">Customer Name</b>, please post your review using the form. Please note all reviews are moderated to check for spamming.</p>
+									
+									<div class="sta-form-group">
+									<fieldset class="rating-stars">
+									    <input type="checkbox" id="5-star" name="rating" value="5" /><label for="5-star" title="Excellent Quality"></label>
+									    <input type="checkbox" id="4-star" name="rating" value="4" /><label for="4-star" title="Very Good Quality"></label>
+									    <input type="checkbox" id="3-star" name="rating" value="3" /><label for="3-star" title="Good Quality"></label>
+									    <input type="checkbox" id="2-star" name="rating" value="2" /><label for="2-star" title="Average Quality"></label>
+									    <input type="checkbox" id="1-star" name="rating" value="1" /><label for="1-star" title="Poor Quality"></label>
+									</fieldset>
+									</div>
+									<div class="sta-form-group">
+									    <label for="review">Add Review</label>
+                                        <textarea name="review" id="review" cols="30" rows="6" class="sta-form-control"></textarea>
+									</div>
+									<div class="sta-form-group">
+                                        <button type="submit" class="general-button blackbutton"><i class="material-symbols-outlined">save</i>Submit Review</button>
+                                    </div>
+									</form>
+							
+							</div>
+							
+						</div>
+				</div>		
+			
+	</div>	
+	</div>
+<div class="row">
+			<div class="col-lg-12">
+				<div class="main-title pb-5">
+					<h1>More Options<span class="">Category Name</span></h1>
+				</div>
+			</div>
+		</div>
+<div class="row product-list justify-content-start">
+				<div class="col-lg-3 col-md-4 col-6 each-item">
+				<div class="prd-item">
+					<figure onclick="location.href = 'product-single.html';">
+						<span class="prd-tag new">New</span>
+						<img src="assets/images/products/prd-11.jpg" />
+						<ul class="pab-list">
+							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
+							<li><a href="product-single.html"><span class="material-symbols-rounded">
+open_in_new
+</span></a></li>
+							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+						</ul>
+					</figure>
+										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-4 col-6 each-item">
+				<div class="prd-item">
+					<figure onclick="location.href = 'product-single.html';">
+						<span class="prd-tag new">New</span>
+						<img src="assets/images/products/prd-12.jpg" />
+						<ul class="pab-list">
+							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
+							<li><a href="product-single.html"><span class="material-symbols-rounded">
+open_in_new
+</span></a></li>
+							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+						</ul>
+					</figure>
+										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
+				</div>
+			</div>	
+			<div class="col-lg-3 col-md-4 col-6 each-item">
+				<div class="prd-item">
+					<figure onclick="location.href = 'product-single.html';">
+						<span class="prd-tag new">New</span>
+						<img src="assets/images/products/prd-13.jpg" />
+						<ul class="pab-list">
+							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
+							<li><a href="product-single.html"><span class="material-symbols-rounded">
+open_in_new
+</span></a></li>
+							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+						</ul>
+					</figure>
+										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-4 col-6 each-item">
+				<div class="prd-item">
+					<figure onclick="location.href = 'product-single.html';">
+						<span class="prd-tag new">New</span>
+						<img src="assets/images/products/prd-14.jpg" />
+						<ul class="pab-list">
+							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
+							<li><a href="product-single.html"><span class="material-symbols-rounded">
+open_in_new
+</span></a></li>
+							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+						</ul>
+					</figure>
+										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
+				</div>
+			</div>
+											
+		</div>
+	
+	</div>
+</div>
+
+<!-- eCom Features-->
+
+<div class="ecom-feat-container">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="ecom-features">
+			<div class="item">
+			<div class="ef-item">
+				<span class="material-symbols-outlined ef-icon">workspace_premium</span>
+				<span><h4>Premium Quality</h4>
+				<p>Best grade products made in Tanzania</p></span>
+			</div>	
+			</div>
+			<div class="item">
+			<div class="ef-item">
+				<span class="material-symbols-outlined ef-icon">local_shipping</span>
+				<span><h4>Free Shipping &amp; Returns</h4><p>Free Shipping above 187,650.000 order</p></span>
+			</div>
+			</div>
+			<div class="item">
+			<div class="ef-item">
+				<span class="material-symbols-outlined ef-icon">payments</span>
+				<span><h4>Money Back Guarantee</h4><p>100% refund on cancelled orders*</p></span>
+			</div>	
+			</div>
+						
+		</div>
+		</div>
+		</div>
+
+</div>
+
+</div>
+@endsection

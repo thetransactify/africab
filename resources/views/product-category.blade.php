@@ -1,0 +1,125 @@
+@extends('layout.app')
+@section('title', 'Product')
+@section('content')
+<div class="content-area">
+
+<!-- Banner Area -->
+<div class="page-headers">
+	<div class="container-fluid">
+		<div class="row align-items-center">
+			<div class="col-md-6 col-12">
+				<h1>{{ $category->name }}</h1>
+			</div>
+			<div class="col-md-6 col-12">
+					<ul class="ph-breadcrumbs-list">
+					<li><a href="{{url('/index')}}">Home</a></li>
+					<li><a href="page-category.html" class="active">{{ $category->name }}</a></li>
+				</ul>
+			</div>			
+			
+		</div>
+	</div>
+</div>
+
+
+<!-- Products List -->
+<div class="product-list-area">	
+	<div class="container-fluid">
+	
+	<div class="row justify-content-start align-items-center product-settings">
+	<div class="col-4">
+	<ul class="grid-settings">
+			<li><a href="javascript:void(0);" class="grid-4 active"><i class="material-symbols-outlined">background_grid_small</i></a></li>
+			<li><a href="javascript:void(0);" class="grid-3"><i class="material-symbols-outlined">grid_on</i></a></li>
+			<li class="mobile-only"><a href="javascript:void(0);" class="grid-2 active"><i class="material-symbols-outlined">window</i></a></li>
+			<li class="mobile-only"><a href="javascript:void(0);" class="grid-1"><span></span></a></li>
+				</ul>
+	</div>
+	<div class="col-8">
+	<form class="standard-form-rules product-sorter">
+				<p>Sort By:</p>
+				<select>
+					<option>Show All</option>
+					<option>Show Bestsellers</option>
+					<option>Show On Sale</option>
+					<option>Show New Launch</option>
+					<option>Name (A -Z)</option>
+					<option>Name (Z -A)</option>
+					<option>Price (Low - High)</option>
+					<option>Price (High - Low)</option>
+				</select>
+			</form>
+	</div>
+	
+	</div>
+	<div class="row justify-content-start sub-cat-list">
+		<div class="col-12">
+			<ul class="cat-subs">
+					 <li class="label"><span>Available Varieties :</span></li>
+					 <li><a href="#" class="active">All</a></li>
+					 @if(!empty($subcategoriesList))
+					 @foreach($subcategoriesList as $list)
+	                 <li><a href="#">{{$list['name']}}</a></li>
+	                 @endforeach
+	                 @else
+	                 <li class="no-sub"><span>Not Available</span></li>
+	                 @endif
+	            </ul>
+		</div>
+	</div>
+	
+	<div class="row product-list justify-content-start">
+			<div class="col-lg-3 col-md-4 col-6 each-item">
+			@foreach($productsList as $listname)
+				<div class="prd-item">
+					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}';">
+						<span class="prd-tag new">New</span>
+						<img src="{{$listname['category_image']}}" />
+						<ul class="pab-list">
+							<li><a href="{{ route('wishlist.add', $listname['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
+							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
+							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+						</ul>
+					</figure>
+				<h3 class="prd-name"><span>{{$listname['productname']}}</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}">{{$listname['category']}}</a></h3>
+			<h5 class="prd-price"><span class="dc-price">{{$listname['offer_price']}}</span>{{$listname['product_cost']}}</h5>
+				</div>
+		    @endforeach		
+			</div>
+        </div>
+</div>
+
+<!-- eCom Features-->
+
+<div class="ecom-feat-container">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="ecom-features">
+			<div class="item">
+			<div class="ef-item">
+				<span class="material-symbols-outlined ef-icon">workspace_premium</span>
+				<span><h4>Premium Quality</h4>
+				<p>Best grade products made in Tanzania</p></span>
+			</div>	
+			</div>
+			<div class="item">
+			<div class="ef-item">
+				<span class="material-symbols-outlined ef-icon">local_shipping</span>
+				<span><h4>Free Shipping &amp; Returns</h4><p>Free Shipping above 187,650.000 order</p></span>
+			</div>
+			</div>
+			<div class="item">
+			<div class="ef-item">
+				<span class="material-symbols-outlined ef-icon">payments</span>
+				<span><h4>Money Back Guarantee</h4><p>100% refund on cancelled orders*</p></span>
+			</div>	
+			</div>
+						
+		</div>
+		</div>
+		</div>
+
+</div>
+
+</div>
+@endsection
