@@ -135,7 +135,7 @@ Route::get('/index', [HomeController::class, 'GetClientHomepage'])->name('get.Ge
 Route::get('/product-category/{slug}', [CategoryProductController::class, 'Clientshow'])->name('product-category.show');
 Route::get('/product/{slug}', [CategoryProductController::class, 'GetProduct'])->name('product.shows');
 Route::get('/reviews', [ClientController::class, 'ClientReviews'])->name('ClientReviews.shows');
-
+Route::get('/offers', [ClientController::class, 'OffersDatils'])->name('offers.shows');
 
 Route::get('/login', [LoginController::class, 'ClientLogin'])->name('get.ClientLogin');
 Route::post('/clientlogins', [LoginController::class, 'ClientLoginCreadintial']);

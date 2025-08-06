@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Orders;
 use App\Models\Wishlist;
 use App\Models\offerlist;
+use App\Models\RecentViews;
 use Illuminate\Support\Facades\DB;
 
 
@@ -462,8 +463,21 @@ class CategoryProductController extends Controller
             ];
         }
     }    
+
+     $recentviews = RecentViews::with(['productprice','galleries'])->orderbydesc('id')
+        ->where('user_id', auth()->id())
+        ->get();
+        $recentviewlist =[];
+        foreach ($recentviews as $lists) {
+             $product = $lists->productprice;
+              $file = optional($product->galleries->first())->file;
+            $recentviewlist[] = [
+            'product_name' => $product->listing_name ?? '',
+            'file' => $file ?? 'default.jpg',
+            ];
+        }
   //return $productsList;
-    return view('product-category', compact('productsList', 'subcategoriesList','category'));
+    return view('product-category', compact('productsList', 'subcategoriesList','category','recentviewlist'));
    }
 
    public function GetProduct($slug){
@@ -517,7 +531,36 @@ class CategoryProductController extends Controller
             'comment' => $reviewComment
         ]
         ];
-        return view('product_list', compact('data'));
+
+    if (auth()->check()) {
+        $userId = auth()->id();
+        RecentViews::updateOrCreate(
+            ['user_id' => $userId, 'product_id' => $productDetails->id],
+            ['created_at' => now()]
+        );
+        $recentViews = RecentViews::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($recentViews->count() > 5) {
+            $extra = $recentViews->slice(5)->pluck('id');
+            RecentViews::whereIn('id', $extra)->delete();
+        }
+    }
+
+     $recentviews = RecentViews::with(['productprice','galleries'])->orderbydesc('id')
+        ->where('user_id', auth()->id())
+        ->get();
+        $recentviewlist =[];
+        foreach ($recentviews as $lists) {
+             $product = $lists->productprice;
+              $file = optional($product->galleries->first())->file;
+            $recentviewlist[] = [
+            'product_name' => $product->listing_name ?? '',
+            'file' => $file ?? 'default.jpg',
+            ];
+        }
+        return view('product_list', compact('data','recentviewlist'));
    }
 
    public function search(Request $request)

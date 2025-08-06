@@ -131,6 +131,19 @@
     font-weight: bold;
     color: #e53935;
 }
+.responsive-product-img {
+    width: 100%;
+    height: 200px; /* Fixed height */
+    object-fit: contain; /* Full image visible */
+    object-position: center;
+    display: block;
+    
+    /* Optional enhancements */
+    background: #f8f9fa; /* Placeholder color */
+    border-radius: 4px;
+    padding: 5px;
+    box-sizing: border-box;
+}
 </style>
 </head>
 <body>

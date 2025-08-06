@@ -267,6 +267,30 @@ open_in_new
 </div>
 
 <!-- eCom Features-->
+<!-- recent view-->
+<!-- Recent -->
+<div class="browse-category">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-lg-3 col-md-4 col-12">
+                <div class="main-title">
+                    <h1>Recent<span>Views</span></h1>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-12">
+                <div class="category-slider">
+                    @foreach($recentviewlist as $recentlist)
+                    <div class="item">
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>	
+<!-- recent view-->
 
 <div class="ecom-feat-container">
 	<div class="container">

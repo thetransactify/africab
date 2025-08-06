@@ -14,6 +14,7 @@
     </ul>
     </li>
     <li class=""><a href="{{url('/reviews')}}">Reviews</a></li>
+<!--     <li class=""><a href="{{url('/offers')}}">Offers</a></li> -->
     <li class="desktop-hidden"><a href="{{url('/register')}}">Register Account</a></li>
     <li class="desktop-hidden"><a href="{{url('/login')}}">Account Login</a></li>
     <li class="desktop-hidden"><a href="{{url('/my-account')}}">My Account</a></li>

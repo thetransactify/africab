@@ -15,6 +15,7 @@ use App\Models\ProductPrice;
 use App\Models\Orders;
 use App\Models\offerlist;
 use App\Models\Review;
+use App\Models\RecentViews;
 use Illuminate\Support\Facades\DB;
 
 
@@ -242,11 +243,24 @@ class HomeController extends Controller
                 ];
             })->values();
 
+        $recentviews = RecentViews::with(['productprice','galleries'])->orderbydesc('id')
+        ->where('user_id', auth()->id())
+        ->get();
+        $recentviewlist =[];
+        foreach ($recentviews as $lists) {
+             $product = $lists->productprice;
+              $file = optional($product->galleries->first())->file;
+            $recentviewlist[] = [
+            'product_name' => $product->listing_name ?? '',
+            'file' => $file ?? 'default.jpg',
+            ];
+        }
+        //return $recentviewlist;
 
 
         // return response()->json($grouped);
 
-        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped'));
+        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped','recentviewlist'));
     }
 
     #view CreateAdvertisement

@@ -38,6 +38,7 @@
         <div class="container-fluid px-0 px-sm-3">
             @foreach($grouped as $val)
                 <div class="discount-banner mb-4 p-2 p-sm-3 bg-light rounded">
+
                     <h2 class="text-danger text-center mb-2 mb-sm-3">{{ $val['label'] }}</h2>
                     
                     @if(isset($val['discount_percentage']))
@@ -126,7 +127,7 @@
 			<ul class="htp-list" role="tablist">
 			<li role="presentation"><a class="active" href="javascript:void(0);" id="new-tab" data-bs-toggle="tab" data-bs-target="#new-tab-pane" type="button" role="tab" aria-controls="new-tab-pane" aria-selected="true"><span>New</span></a></li>
 			<li role="presentation"><a class="" href="javascript:void(0);" id="bestsellers-tab" data-bs-toggle="tab" data-bs-target="#bestsellers-tab-pane" type="button" role="tab" aria-controls="bestsellers-tab-pane" aria-selected="false"><span>Bestsellers</span></a></li>
-			<li role="presentation"><a class="" href="javascript:void(0);" id="onsale-tab" data-bs-toggle="tab" data-bs-target="#onsale-tab-pane" type="button" role="tab" aria-controls="onsale-tab-pane" aria-selected="false"><span>On Sale</span></a></li>
+			<!-- <li role="presentation"><a class="" href="javascript:void(0);" id="onsale-tab" data-bs-toggle="tab" data-bs-target="#onsale-tab-pane" type="button" role="tab" aria-controls="onsale-tab-pane" aria-selected="false"><span>On Sale</span></a></li> -->
 			</ul>
 			</div>
 		</div>
@@ -143,15 +144,15 @@
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}'">
 						<span class="prd-tag new">New</span>
-						<img src="{{ asset('storage/uploads/product/' . $product->product->file) }}" />
+						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $product->product->file) }}" />
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $product['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="product-single.html"><span class="material-symbols-rounded">open_in_new</span></a></li>
+							<li><a href="#"><span class="material-symbols-rounded">open_in_new</span></a></li>
 							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
 						</ul>
 					</figure>
 					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="product-single.html">{{$product->product->name}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price">{{$product->offer_price}}</span>{{$product->product_cost}}</h5>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span><i>TSh</i>{{$product->product_cost}}</h5>
 				</div>
 			</div>
 		@endforeach	 		
@@ -169,7 +170,7 @@
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}'">
 						<span class="prd-tag bestsell">Bestsellers</span>
-						<img src="{{ asset('storage/uploads/product/' . $bestlist['product_file']) }}" />
+						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $bestlist['product_file']) }}" />
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $bestlist['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
@@ -177,7 +178,7 @@
 						</ul>
 					</figure>
 					<h3 class="prd-name"><span>{{$bestlist['category_name']}}</span><a href="product-single.html">{{$bestlist['product_name']}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price">{{$bestlist['offer_price']}}</span>{{$bestlist['product_cost']}}</h5>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$bestlist['offer_price']}}</span><i>Tsh</i>{{$bestlist['product_cost']}}</h5>
 				</div>
 			</div>
 	@endforeach		  
@@ -193,7 +194,7 @@
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}';">
 						<span class="prd-tag onsale">On Sale</span>
-						<img src="{{ asset('storage/uploads/product/' . $product->product->file) }}" />
+						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $product->product->file) }}" />
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $product['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="product-single.html"><span class="material-symbols-rounded">open_in_new</span></a></li>
@@ -201,7 +202,7 @@
 						</ul>
 					</figure>
 					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="product-single.html">{{$product->product->name}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price">{{$product->offer_price}}</span>{{$product->product_cost}}</h5>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span><i>TSh</i>{{$product->product_cost}}</h5>
 				</div>
 			</div>
 		 @endforeach	
@@ -345,7 +346,29 @@ open_in_new
 	
 	</div>
 	</div>
-	
+
+<!-- Recent -->
+<div class="browse-category">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-lg-3 col-md-4 col-12">
+                <div class="main-title">
+                    <h1>Recent<span>Views</span></h1>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-12">
+                <div class="category-slider">
+                    @foreach($recentviewlist as $recentlist)
+                    <div class="item">
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>	
 <!-- eCom Features-->
 
 <div class="ecom-feat-container">

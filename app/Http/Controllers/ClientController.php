@@ -282,10 +282,18 @@ class ClientController extends Controller
         'product_id' => $request->product_price_id,
         'rating' => $request->rating,
         'comment' => $request->review,
-        'status' => 1, // pending approval
+        'status' => 1, 
     ]);
 
     return redirect()->back()->with('success', 'Review submitted for approval.');    
     }
+
+  #offer list
+  #auth vivek
+
+   public function OffersDatils(){
+    
+       return view('offers');
+   }
 
 }
