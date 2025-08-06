@@ -32,12 +32,12 @@
                         <span>Reviews</span>
                     </a>
                 </li>
-                <li>
+                <!-- <li>
                     <a href="#ecom-management">
                         <i class="iconsminds-tag"></i>
                         <span>eCommerce Management</span>
                     </a>
-                </li>   
+                </li>  -->  
                 <li>
                     <a href="#cms-management">
                         <i class="iconsminds-equalizer"></i>
@@ -118,6 +118,11 @@
 							<li>
                                 <a href="{{url('tsfy-admin/product-price')}}">
                                     <i class="simple-icon-list"></i> <span class="d-inline-block">Product List</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{url('tsfy-admin/manage-offers')}}">
+                                    <i class="simple-icon-plus"></i> <span class="d-inline-block">Products Offers</span>
                                 </a>
                             </li>
                             <li>
@@ -208,12 +213,17 @@
                         <i class="simple-icon-star"></i> <span class="d-inline-block">Home Ad Popup</span>
                    </a>
                 </li> 
-               <!--  <li>
-                    <a href="CMS.Recipes.List.html">
-                        <i class="simple-icon-cup"></i> <span class="d-inline-block">Recipes Page CMS</span>
+                <li>
+                    <a href="{{url('tsfy-admin/shipping-zone')}}">
+                        <i class="simple-icon-cup"></i> <span class="d-inline-block">Shipping Zones</span>
                     </a>
                 </li>
-				<li> -->
+                 <li>
+                    <a href="{{url('tsfy-admin/shop-list')}}">
+                        <i class="simple-icon-plus"></i> <span class="d-inline-block">Store List</span>
+                    </a>
+                </li>
+				<!-- <li> -->
                <!--      <a href="#" data-toggle="collapse" data-target="#manageNews" aria-expanded="true"
                         aria-controls="collapseDataTables" class="rotate-arrow-icon opacity-50">
                         <i class="simple-icon-arrow-down"></i> <span class="d-inline-block">Manage News & Events</span>

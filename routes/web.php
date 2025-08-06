@@ -8,12 +8,14 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CartController;
+
 //start admin 
 
 
 
 Route::get('/tsfy-admin', function () {
-    return view('admin.index'); // loads resources/views/admin/index.blade.php
+    return view('Admin.index'); // loads resources/views/admin/index.blade.php
 });
 //Route::prefix('admin')->group(function () {
     // Route::get('/africabe-shop/admin/', function () {
@@ -56,6 +58,7 @@ Route::post('/update-product/{id}', [CategoryProductController::class, 'UpdatePr
 Route::get('/delete-category/{id}', [CategoryProductController::class, 'DeleteProduct'])->name('product.delete');
 Route::get('/product-price', [CategoryProductController::class, 'ProdcutPriceList'])->name('get.productlist');
 Route::get('/get-products/{category_id}', [CategoryProductController::class, 'getProducts'])->name('get.products');
+Route::get('/get-productslist/{category_id}', [CategoryProductController::class, 'getProductlist'])->name('get.productlist');
 Route::post('/add-productlist', [CategoryProductController::class, 'CreateProductList']);
 Route::get('/edit-productlist/{id}', [CategoryProductController::class, 'EditProductList']);
 Route::post('/update-productlist/{id}', [CategoryProductController::class, 'UpdateProductList'])->name('category.productprice');
@@ -64,7 +67,13 @@ Route::get('/delete-productlist/{id}', [CategoryProductController::class, 'Delet
 Route::get('/product-permission', [CategoryProductController::class, 'GetPermission']);
 Route::get('/product-orders', [CategoryProductController::class, 'GetOrders']);
 Route::post('/products-permission/{id}/toggle-visibility', [CategoryProductController::class, 'toggleVisibility']);
-
+// offer list start
+Route::get('/manage-offers', [CategoryProductController::class, 'ProdcutOffer'])->name('get.ProdcutOffer');
+Route::post('/add-productoffers', [CategoryProductController::class, 'CreateProductListoffers']);
+Route::get('/delete-offers/{id}', [CategoryProductController::class, 'DeleteOffersProductList'])->name('productlistoffers.delete');
+Route::get('/edit-offers/{id}', [CategoryProductController::class, 'EditProductOffersList']);
+Route::post('/update-productlistoffers/{id}', [CategoryProductController::class, 'UpdateProductOffersList'])->name('category.productpriceOffers');
+// offer list end
 //Product Gallery
 Route::get('/product-gallery', [CategoryProductController::class, 'ProdcutGallery'])->name('get.productgallery');
 Route::post('/post-gallery', [CategoryProductController::class, 'CreateGallery']);
@@ -104,7 +113,14 @@ Route::get('/frequently-asked-questions', [HomeController::class, 'Getfasq'])->n
 Route::post('/post-fasq', [HomeController::class, 'Createfasq'])->name('get.Createfasq');
 Route::get('/delete-fasq/{id}', [HomeController::class, 'Deletefasq'])->name('fasq.delete');
 
-
+//shhiping zone 
+Route::get('/shipping-zone', [WishlistController::class, 'Getshipping'])->name('get.shipping');
+ Route::post('/post-shipping', [WishlistController::class, 'Createshipping'])->name('get.Createshipping');
+ Route::get('/delete-shipping/{id}', [WishlistController::class, 'Deleteshipping'])->name('product.gallery');
+// store list 
+Route::get('/shop-list', [WishlistController::class, 'Getshop'])->name('get.Getfasq');
+ Route::post('/post-shop', [WishlistController::class, 'Createshop'])->name('get.Createshop');
+ Route::get('/delete-shop/{id}', [WishlistController::class, 'Deleteshop'])->name('product.shop');
 // end admin
 });
 
@@ -145,6 +161,16 @@ Route::post('/profile/update', [ClientController::class, 'update'])->name('profi
 Route::get('/change-password', [LoginController::class, 'ChangePasswords'])->name('profile.password');
 Route::get('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
 Route::get('/wishlist/delete/{id}', [WishlistController::class, 'delete'])->name('wishlist.delete');
+Route::post('/add-reviews', [ClientController::class, 'AddReviews'])->name('addReviews.shows');
+Route::get('/cart', [CartController::class, 'GetCart'])->name('cart.get');
+Route::post('/add-cart', [CartController::class, 'CreateCart'])->name('cart.create');
+Route::get('/cart-delete/{id}', [CartController::class, 'destroy'])->name('cart.delete');
+Route::get('/checkout', [CartController::class, 'GetCheckout'])->name('checkout.get');
+Route::post('/address/store', [CartController::class, 'store'])->name('address.store');
+Route::get('/address/delete/{id}', [CartController::class, 'DeleteAddress'])->name('address.delete');
+Route::post('/checkout/cod', [CartController::class, 'codCheckout'])->name('checkout.cod');
+
+Route::get('/order-status', [CartController::class, 'orderStatus'])->name('order.success');
 
 });
 Route::get('/support-centre', [ClientController::class, 'SupportCentre'])->name('SupportCentre.shows');

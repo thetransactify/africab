@@ -33,6 +33,60 @@
         </div>
     </div>
 </div>
+@if(!empty($grouped) && count($grouped) > 0)
+    <div class="home-advertisement">
+        <div class="container-fluid px-0 px-sm-3">
+            @foreach($grouped as $val)
+                <div class="discount-banner mb-4 p-2 p-sm-3 bg-light rounded">
+                    <h2 class="text-danger text-center mb-2 mb-sm-3">{{ $val['label'] }}</h2>
+                    
+                    @if(isset($val['discount_percentage']))
+                        <div class="badge bg-success mb-2 mb-sm-3 fs-6 d-block d-md-inline-block text-center">
+                            {{ $val['discount_percentage'] }}% OFF
+                        </div>
+                    @endif
+                    
+                    <div class="row g-2 g-sm-3">
+                        @foreach($val['products'] as $product)
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 mb-sm-3">
+                                <div class="category-item p-2 p-sm-3 border h-100 d-flex flex-column">
+                                    @if(!empty($product['gallery']) && count($product['gallery']) > 0)
+                                    <figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($product['listing_name'])) }}';">
+                                    <div class="product-gallery mb-2 mb-sm-3 text-center flex-grow-0">
+                                        <img src="{{ asset('storage/uploads/product/' . $product['gallery'][0]) }}" 
+                                        class="img-fluid rounded mx-auto"
+                                        style="max-height: 150px; width: auto; max-width: 100%;"
+                                        alt="{{ $product['listing_name'] }}">
+                                    </div>
+                                    @endif
+                                    <h5 class="product-name mb-1 mb-sm-2 fs-6 fs-sm-5">{{ $product['listing_name'] }}</h5>
+                                    <div class="price-section mt-auto">
+                                        <div class="d-flex align-items-center flex-wrap">
+                                            <span class="offer-price fw-bold text-danger fs-6 fs-sm-5 me-1 me-sm-2">
+                                               TSh{{ number_format($product['offer_price'], 2) }}
+                                            </span>
+                                            @if($product['offer_price'] < $product['product_cost'])
+                                                <span class="original-price text-muted text-decoration-line-through fs-7 fs-sm-6">
+                                                    TSh{{ number_format($product['product_cost'], 2) }}
+                                                </span>
+                                            @endif
+                                        </div> 
+                                        @php
+                                            $discount = 0;
+                                            if($product['product_cost'] > 0) {
+                                                $discount = (($product['product_cost'] - $product['offer_price']) / $product['product_cost']) * 100;
+                                            }
+                                        @endphp
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
 @if(!empty($ads) && count($ads) > 0)
 <div class="home-advertisement">
 	<div class="container-fluid">

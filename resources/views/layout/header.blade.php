@@ -9,7 +9,7 @@
 <li class="has-submenu"><a href="javascript:void(0);">Shop For Products</a>
     <ul class="sub-menu">
     @foreach($Categories as $category)
-        <li><a href="{{ url('product-category/' .\Illuminate\Support\Str::slug($category->name)) }}" class=""><img src="{{ asset('storage/uploads/category/'. $category->file) }}" /><span>Light Fittings</span></a></li>
+        <li><a href="{{ url('product-category/' .\Illuminate\Support\Str::slug($category->name)) }}" class=""><img src="{{ asset('storage/uploads/category/'. $category->file) }}" /><span>{{$category->name}}</span></a></li>
     @endforeach
     </ul>
     </li>

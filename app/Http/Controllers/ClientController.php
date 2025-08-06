@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Review;
 use App\Models\Orders;
 use App\Models\Wishlist;
+use App\Models\address;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
@@ -132,14 +133,14 @@ class ClientController extends Controller
             $Orderhistory[]=[
               'order_number' => $orderdeatils->order_number,
               'order_status' => $statusTexts,
-              'order_date' => $orderdeatils->created_at->format('d-m-y'),
+              'order_date' => $orderdeatils->created_at->format('d-m-y') ?? '',
               'payment_method' => $orderdeatils->method
             ];
           } 
 
 
           }   
-         //return  $Orderhistory;
+        // return  $Orderhistory;
         return view('my-account',compact('latestorder','Orderhistory'));
     }
 
@@ -208,7 +209,25 @@ class ClientController extends Controller
     # client ManageAddress
     # auth: vivek
     public function ManageAddress(){
-        return view('manage-address');
+        $id = Auth::user()->id;
+        //return $id;
+        $addresslist = address::orderByDesc('id')->where('user_id',$id)->get();
+        $addressDetails = [];
+        if($addresslist){
+           foreach ($addresslist as $value) {
+            $addressDetails [] = [
+            'id' => $value['id'] ?? '',
+            'name' => $value['name'] ?? '',
+            'label' => $value->label ?? '',
+            'home_address' => $value->home_address ?? '',
+            'office_address' => $value->office_address ?? '',
+            'other_address' => $value->other_address ?? '',
+            'mobile_no' => $value->mobile_no ?? '',
+            'pincode' => $value->pincode ?? '',
+            ];
+           }
+        }
+        return view('manage-address',compact('addressDetails'));
     }
 
     # client ManageAddress
@@ -249,9 +268,24 @@ class ClientController extends Controller
   }
 
 
+  # client reviewlist
+  # auth: vivek
+    public function AddReviews(Request $request){
+        $request->validate([
+        'product_price_id' => 'required',
+        'rating' => 'required',
+        'review' => 'required',
+        'user_id' => 'required',
+    ]);
+     Review::create([
+        'user_id' => $request->user_id,
+        'product_id' => $request->product_price_id,
+        'rating' => $request->rating,
+        'comment' => $request->review,
+        'status' => 1, // pending approval
+    ]);
 
-  
-
-
+    return redirect()->back()->with('success', 'Review submitted for approval.');    
+    }
 
 }

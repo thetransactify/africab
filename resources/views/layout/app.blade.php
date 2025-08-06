@@ -43,7 +43,95 @@
   cursor: pointer;
 }
 </style>        
+<style type="text/css">
+	.home-advertisement {
+    font-family: Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
+.discount-banner {
+    background-color: #f8f8f8;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.discount-banner h2 {
+    color: #e53935;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.categories-row {
+    margin-bottom: 15px;
+}
+
+.category-item {
+    text-align: center;
+    padding: 10px;
+}
+
+.category-item p {
+    margin: 0;
+    font-weight: bold;
+}
+
+.see-all {
+    text-align: center;
+}
+
+.see-all a {
+    color: #0066c0;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.sign-in-section {
+    background-color: #f0f2f2;
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.sign-in-section p {
+    margin-bottom: 10px;
+}
+
+.sign-in-btn {
+    background-color: #FFD814;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.product-features {
+    background-color: #f8f8f8;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.feature-item {
+    text-align: center;
+    padding: 10px;
+}
+
+.feature-item p {
+    margin: 0;
+    font-weight: bold;
+}
+
+.new-tag {
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #e53935;
+}
+</style>
 </head>
 <body>
 <div class="wrapper">

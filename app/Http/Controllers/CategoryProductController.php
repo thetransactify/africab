@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Orders;
 use App\Models\Wishlist;
+use App\Models\offerlist;
 use Illuminate\Support\Facades\DB;
 
 
@@ -165,6 +166,13 @@ class CategoryProductController extends Controller
         return response()->json($products);
     }
 
+    #product Name 
+    #authr: vivek
+    public function getProductlist($category_id){
+        $products = ProductPrice::where('category_id', $category_id)->get();
+        return response()->json($products);
+    }
+
     #Add ProdcutList
     #authr: vivek
     public function CreateProductList(Request $request){
@@ -262,7 +270,7 @@ class CategoryProductController extends Controller
     #authr: vivek
     public function ProdcutGallery(){
             $productlist = ProductPrice::orderbydesc('id')->get();
-            $ProdcutGallery = ProductGallery::with(['category','product'])->orderbydesc('id')->where('status','1')->get();
+            $ProdcutGallery = ProductGallery::with(['category','ProductPrice'])->orderbydesc('id')->where('status','1')->get();
             //return $ProdcutGallery;
             $categories = Category::all();
         // $category = Category::orderbydesc('id')->get();
@@ -473,7 +481,9 @@ class CategoryProductController extends Controller
             $query->select('id', 'name','file');
         },
         'galleries',
-        'reviews'
+        'reviews' => function($query) {
+        $query->orderByDesc('id');
+        }
         ])
         ->where('id', $productPriceId)
         ->first();
@@ -576,5 +586,89 @@ return $html;
 }
 
 
+   #Offer list 
+   #authr: vivek
+    public function ProdcutOffer(){
+            $productlist = offerlist::orderbydesc('id')->get();
+            $categories = Category::all();
+        // $category = Category::orderbydesc('id')->get();
+        return view('Admin.manage_offer',compact('categories','productlist'));
+    }
+
+    
+    #Add ProdcutList
+    #authr: vivek
+    public function CreateProductListoffers(Request $request){
+       // return $request->all();
+        $request->validate([
+            'productList' => 'required',
+            'CategoryList' => 'required',
+            'name' => 'required',
+            'productName' => 'required',
+        ]);
+         $ProductOfferList = new offerlist();
+            $ProductOfferList->label = $request->input('name');
+            $ProductOfferList->category_id = $request->input('productList');
+            $ProductOfferList->subcategory_id = $request->input('productList');
+            $ProductOfferList->proudct_deatils_id = implode(',', $request->input('productName'));
+            $ProductOfferList->product_online = $request->input('OnlineProduct',2);
+            $ProductOfferList->save();
+        return redirect()->back()->with('success', 'Product Offer List added successfully!');
+    }
+
+    #soft delete Offers list
+    #authr: vivek
+   public function DeleteOffersProductList($id){
+        try {
+            $decryptedId = Crypt::decrypt($id);
+            $ProductList = offerlist::findOrFail($decryptedId);
+            $ProductList->delete();
+
+            return redirect()->back()->with('success', 'Product offerlist List deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong.');
+        }
+    }
+    #offers Edit
+    #authr: vivek
+    public function EditProductOffersList($id){
+        //return $id;
+        try {
+        $decryptedId = Crypt::decrypt($id);
+        $productList = offerlist::with(['category','productDetails','subcategory'])
+        ->where('id',$decryptedId)
+        ->first();
+        $categories = Category::all();
+        $products = Product::all();
+        $productLists = ProductPrice::all();
+        //return $productList;
+        return view(' Admin.edit_productoffers', compact('productList','categories','products','productLists'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Invalid or expired link.');
+        }
+    }
+
+    #Update productPriceListoffer
+    #authr: vivek
+    public function UpdateProductOffersList(Request $request, $encryptedId)
+    {
+        //return $request->all();
+        $id = Crypt::decrypt($encryptedId);
+        $ProdcutOffer = offerlist::findOrFail($id);
+        $request->validate([
+            'label' => 'required',
+            'CategoryList' => 'required',
+            'productList' => 'required',
+            'Subcategories' => 'required',
+        ]);
+
+        $ProdcutOffer->label = $request->label;
+        $ProdcutOffer->category_id = $request->CategoryList;
+        $ProdcutOffer->subcategory_id = $request->Subcategories;
+        $ProdcutOffer->proudct_deatils_id = implode(',', $request->input('productList'));
+        $ProdcutOffer->product_online = $request->input('Online', 2);
+        $ProdcutOffer->save();
+        return redirect()->route('get.ProdcutOffer')->with('success', 'Product Offer updated successfully!');
+   }
 
 }

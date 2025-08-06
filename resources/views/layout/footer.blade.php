@@ -4,12 +4,12 @@
 			<div class="col-xl-3 col-lg-3 col-12">
                 <ul class="footer-menu">
                     <li><a href="javascript:void(0)" class="title">Customer Section</a></li>
-                    <li><a href="cart.html">My Cart</a></li>
-                    <li><a href="my-wishlist.html">My Wishlist</a></li>
-                    <li><a href="register.html">Register Account</a></li>
-			  <li><a href="login.html">Account Login</a></li>
-                    <li><a href="my-account.html">My Account</a></li>
-                    <li><a href="support-centre.html">Support Centre</a></li>
+                    <li><a href="{{route('cart.get')}}">My Cart</a></li>
+                    <li><a href="{{url('/my-wishlist')}}}">My Wishlist</a></li>
+                    <li><a href="{{url('/register')}}">Register Account</a></li>
+			        <li><a href="{{route('get.ClientLogin')}}">Account Login</a></li>
+                    <li><a href="{{route('MyAccount.shows')}}">My Account</a></li>
+                    <li><a href="{{url('/support-centre')}}">Support Centre</a></li>
                 </ul>
 			</div>
 			<div class="col-xl-3 col-lg-3 col-12">
@@ -113,11 +113,12 @@
 
             </div>
             <ul class="sc-button-list">
-            <li><a href="cart.html">View Cart</a></li>
-            <li><a href="checkout.html">Checkout</a></li>
+            <li><a href="{{route('cart.get')}}">View Cart</a></li>
+            <li><a href="{{url('checkout')}}">Checkout</a></li>
             </ul>
 
         </div>
+
 
 
 <!-- Mobile Side Menu -->
@@ -130,6 +131,70 @@
             </div>
         </div>
 
+<!-- Address Modal -->
+<!-- =================================================================================================== -->
+<div class="modal fade" id="addWindow" tabindex="-1" aria-labelledby="addWindowLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="row align-items-center">
+           <div class="col-12">
+<a class="close-icon"href="javascript:void(0);" data-bs-dismiss="modal"><i class="la la-times"></i></a>
+        </button>
+                <h4><i class="material-symbols-outlined">edit_document</i>New <span>Address</span></h4>
+        </div>
+        </div>  
+        <div class="row">
+           <div class="col-12">
+           <form class="standard-form-rules" action="{{ route('address.store') }}" method="POST">
+            @csrf
+            <div class="sta-form-group">
+                <select id="state" name="region" placeholder="select label" required>
+                    <option  selected disabled>Select Country/Region</option>
+                @foreach($shipping as $list)    
+                    <option  value="{{$list->id}}">{{$list->name}}</option>
+                @endforeach    
+                </select>
+            </div>
+            <div class="sta-form-group">
+                <select id="state" name="label" placeholder="select label" required>
+                    <option  selected disabled>Select label</option>
+                    <option  value="1">Home Address</option>
+                    <option  value="2">Office Address</option>
+                    <option  value="3">Other Address</option>
+                </select>
+            </div>
+            <div class="sta-form-group">
+                <input type="text" id="contact_name" name="full_name" class="" placeholder="Full Name">
+            </div>
+            <div class="sta-form-group">
+                <input type="text" id="contact_phone" name="mobile" class="callnoinput" placeholder="Alt. Mobile No." required>
+            </div>
+            <div class="sta-form-group">
+                <textarea class="" id="contact_message" name="address" placeholder="Full Address*" required></textarea>
+            </div>
+                               <!--  <div class="sta-form-group">
+                                    <select id="state" class="" name="state" placeholder="Select State">
+                                          <option>Select State</option>
+
+                                    </select>
+                                </div> -->
+
+                                <div class="sta-form-group">
+                                    <input type="text" id="contact_name" name="pincode" class="" placeholder="Pincode" required>
+                                </div>
+                                <div class="sta-form-group">
+                                    <button type="submit" class="general-button redbutton mb-3"><i class="material-symbols-outlined">save</i>Save Address</button>
+                                </div>
+                                <div class="form__output"></div>
+                            </form>
+                            
+           </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>

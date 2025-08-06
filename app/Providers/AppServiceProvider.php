@@ -10,7 +10,9 @@ use App\Models\Homeslider;
 use App\Models\Category;
 use App\Models\Wishlist;
 use App\Models\Product;
+use App\Models\shipping;
 use App\Models\ProductGallery;
+use App\Models\offerlist;
 use Illuminate\Support\Facades\DB;
 
 
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $view->with([
             'homeslider' => Homeslider::latest()->take(3)->get(),
             'Categories' => Category::where('status',1)->get(),
+            'offerlist' => offerlist::where('product_online',1)->get(),
             'message' => 'Welcome to MySite!'
         ]);
     });
@@ -78,19 +81,12 @@ class AppServiceProvider extends ServiceProvider
     });
 
 
-    // View::composer('layout.footer', function ($view) {
-    //    if (Auth::check()) {
-    //     $categories = Category::where('status', 1)->take(5)->get();
-    // } else {
-    //     $categories = collect();
-    // }
-
-    // dd($categories); // <-- Debug output
-
-    // $view->with([
-    //     'footerCategories' => $categories,
-    // ]);
-    // });
+    View::creator('layout.footer', function ($view) {
+        $view->with([
+            'shipping' => shipping::orderbydesc('id')->get(),
+            'message' => 'Welcome to MySite!'
+        ]);
+    });
 
 
     }

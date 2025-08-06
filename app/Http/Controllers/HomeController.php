@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Category;
 use App\Models\ProductPrice;
 use App\Models\Orders;
+use App\Models\offerlist;
 use App\Models\Review;
+use Illuminate\Support\Facades\DB;
+
 
 class HomeController extends Controller
 {
@@ -157,15 +160,18 @@ class HomeController extends Controller
         $ads = advertisement::orderbydesc('id')->get();
         $Categories = Category::where('status',1)->get();
         $productlist = ProductPrice::with(['category'])->orderbydesc('id')->get();
-        $bestsallerlist = Orders::with(['product.category','product.productPrices'])->orderbydesc('id')->get()->unique('product_id')->values();
+        $bestsallerlist = Orders::with(['products','products.category','products.galleries'])->orderbydesc('id')->get()->unique('product_id')->values();
         //return $bestsallerlist ;
 
         $data = [];
 
         foreach ($bestsallerlist as $order) {
-            $product = $order->product;
-            $category = $product->category ?? null;
-            $price = $product->productPrices->first(); // First price only
+            $product = $order->products;
+            //dd($product);
+            $category = $product?->category ?? null;
+            //$galleriess = $product?->galleries ?? null;
+            $price = $order->products->first(); // First price only
+            $galleriess = $order->products->galleries->first(); // First price only
 
             $data[] = [
                 'id'         => $price->id,
@@ -175,8 +181,8 @@ class HomeController extends Controller
                 'payment_status'   => $order->payment_status,
                 'order_status'     => $order->order_status,
                 'shipping_address' => $order->shipping_address,
-                'product_name'     => $product->name ?? 'N/A',
-                'product_file'     => $product->file ?? null,
+                'product_name'     => $product->listing_name ?? 'N/A',
+                'product_file'     => $galleriess->file ?? null,
                 'category_name'    => $category->name ?? 'N/A',
                 'offer_price'      => $price->offer_price ?? 'N/A',
                 'listing_name'     => $price->listing_name ?? '',
@@ -195,10 +201,52 @@ class HomeController extends Controller
             ];
           }
 
-         $brandList = Brand::orderbydesc('id')->get(); 
-         //return  $data;
+         $brandList = Brand::orderbydesc('id')->get();
+         $rawData = DB::table('products_offers as po')
+            ->leftJoin('product_details as pp', DB::raw('FIND_IN_SET(pp.id, po.proudct_deatils_id)'), '>', DB::raw('0'))
+            ->leftJoin('product_gallery as pg', 'pg.product_id', '=', 'pp.id')
+            ->where('po.product_online', 1)
+            ->select(
+                'po.id as offer_id',
+                'po.label',
+                'po.product_online',
+                'po.proudct_deatils_id',
+                'pp.id as product_id',
+                'pp.listing_name',
+                'pp.product_cost',
+                'pp.offer_price',
+                'pg.file'
+            )
+            ->get();
+           // return  $rawData;
+            $grouped = $rawData->groupBy('offer_id')->map(function ($items) {
+                $first = $items->first();
 
-        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads'));
+                $products = $items->groupBy('product_id')->map(function ($productItems) {
+                    $firstProduct = $productItems->first();
+
+                    return [
+                        'id' => $firstProduct->product_id,
+                        'listing_name' => $firstProduct->listing_name,
+                        'product_cost' => $firstProduct->product_cost,
+                        'offer_price' => $firstProduct->offer_price,
+                        'gallery' => $productItems->pluck('file')->filter()->unique()->values(),
+                    ];
+                })->values();
+
+                return [
+                    'id' => $first->offer_id,
+                    'label' => $first->label,
+                    'product_online' => $first->product_online,
+                    'products' => $products,
+                ];
+            })->values();
+
+
+
+        // return response()->json($grouped);
+
+        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped'));
     }
 
     #view CreateAdvertisement

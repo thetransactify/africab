@@ -46,6 +46,10 @@ class ProductPrice extends Model
     return $this->hasMany(Review::class,'product_id');
     }
 
+    public function productPricess(){
+    return $this->belongsTo(ProductPrice::class, 'id');
+    }
+
     
 
 }

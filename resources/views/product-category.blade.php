@@ -13,7 +13,7 @@
 			<div class="col-md-6 col-12">
 					<ul class="ph-breadcrumbs-list">
 					<li><a href="{{url('/index')}}">Home</a></li>
-					<li><a href="page-category.html" class="active">{{ $category->name }}</a></li>
+					<li><a href="#" class="active">{{ $category->name }}</a></li>
 				</ul>
 			</div>			
 			

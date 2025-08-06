@@ -43,16 +43,16 @@
 					</div>
 					<div class="row">
 					<div class="col-md-4 col-12">
-					<h5>Order Date:<span>{{$latestorder[0]['order_date']}}</span></h5>
+					<h5>Order Date:<span>{{$latestorder[0]['order_date'] ?? ''}}</span></h5>
 					</div>
 					<div class="col-md-4 col-12">
-					<h5>Order No:<span>{{$latestorder[0]['order_number']}}</span></h5>
+					<h5>Order No:<span>{{$latestorder[0]['order_number'] ?? ''}}</span></h5>
 					</div>
 					<div class="col-md-4 col-12">
-					<h5>Order Status:<span>{{$latestorder[0]['order_status']}}</span></h5>
+					<h5>Order Status:<span>{{$latestorder[0]['order_status'] ?? ''}}</span></h5>
 					</div>
 					<div class="col-md-4 col-12">
-					<h5>Payment Type:<span>{{$latestorder[0]['payment_method']}}</span></h5>
+					<h5>Payment Type:<span>{{$latestorder[0]['payment_method'] ?? ''}}</span></h5>
 					</div>
 					<!-- <div class="col-md-4 col-12">
 					<h5>Txn ID:<span></span></h5>

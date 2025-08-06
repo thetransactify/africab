@@ -9,16 +9,20 @@ class Orders extends Model
 {
     //
     use HasFactory;
-    protected $table = 'Orders';
+    protected $table = 'orders';
 
     protected $fillable = [
     	'user_id',
         'product_id',
+        'quantity',
+        'order_group_id',
         'order_number',
+        'shipping_charge',
         'total_amount',
         'payment_status',
         'method',
         'order_status',
+        'billing_address',
         'shipping_address',
         'created_at',
         'updated_at',
@@ -30,6 +34,10 @@ class Orders extends Model
 
     public function product(){
     return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function products(){
+    return $this->belongsTo(ProductPrice::class, 'product_id');
     }
 
     

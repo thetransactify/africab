@@ -21,6 +21,11 @@
 		</div>
 	</div>
 </div>
+@if (session('success'))
+    <div id="success-message" class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 
 
 <!-- Products List -->
@@ -80,19 +85,22 @@
 			
 			<!-- Add to Wishlist / Add to Cart -->
 			
-			<form class="standard-form-rules add-to-cart">
+			<form class="standard-form-rules add-to-cart" id="addToCartForm">
+					<input type="hidden" name="product_id" value="{{$data['product_price']['id']}}" id="product_id">
+					<input type="hidden" name="price_id" value="{{$data['product_price']['product_cost']}}" id="price_id">
+
 					<div class="row">
 					<div class="col-xl-8 col-lg-10 col-md-10 col-12">
 					<p>Desired Quantity</p>
 						<div class="qty-input">
 							<input type="button" value="-" class="button-minus" data-field="quantity">
-							<input type="number" step="1" max="" value="0" name="quantity" class="quantity-field">
+							<input type="number" step="1" max="" value="0" name="quantity" class="quantity-field" id="quantity">
 							<input type="button" value="+" class="button-plus" data-field="quantity">
 						</div>
 					<p><small>Max Allowed : 1000</small></p>
 					<ul class="general-button-list">
 					<li><a href="{{ route('wishlist.add', $data['product_price']['id']) }}" class="redbutton"><i class="material-symbols-outlined">favorite</i>Wishlist</a></li>
-					<li><a href="javascript:void(0);" class="blackbutton"><i class="material-symbols-outlined">add_shopping_cart</i>Add to Cart</a></li>
+					<li><a href="javascript:void(0);" class="blackbutton" id="addToCartBtn"><i class="material-symbols-outlined" >add_shopping_cart</i>Add to Cart</a></li>
 					</ul>
 					</div>
 					</div>
@@ -140,8 +148,13 @@
 							</div>
 							<h2 class="ac-title">Add Review</h2>
 							<div class="ac-content">
-							<form class="standard-form-rules">
-									<p>Please <a href="login.html">Login</a> to Add Review.</p>
+							<form action="{{route('addReviews.shows')}}" method="Post" class="standard-form-rules">
+								@csrf
+								@if(isset(auth()->user()->id))
+									<p> Add Review.</p>
+                                @else
+                                  <p>Please <a href="{{route('get.ClientLogin')}}">Login</a> to Add Review.</p>
+                                @endif
 									<p>Greetings, <b class="darkgrey-color">Customer Name</b>, please post your review using the form. Please note all reviews are moderated to check for spamming.</p>
 									
 									<div class="sta-form-group">
@@ -157,6 +170,8 @@
 									    <label for="review">Add Review</label>
                                         <textarea name="review" id="review" cols="30" rows="6" class="sta-form-control"></textarea>
 									</div>
+									<input type="hidden" name="product_price_id" value="{{$data['product_price']['id']}}">
+									<input type="hidden" name="user_id" value="{{ auth()->user()->id ?? '' }}">
 									<div class="sta-form-group">
                                         <button type="submit" class="general-button blackbutton"><i class="material-symbols-outlined">save</i>Submit Review</button>
                                     </div>
@@ -284,4 +299,72 @@ open_in_new
 </div>
 
 </div>
+<!-- jQuery 3.6.0 CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    setTimeout(function() {
+        let msg = document.getElementById('success-message');
+        if (msg) {
+            msg.style.display = 'none';
+        }
+    }, 5000);
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+	const minValue = 1;
+	const maxValue = 1000;
+
+	// Handle + / - quantity
+	document.querySelectorAll(".button-minus, .button-plus").forEach(function (button) {
+		button.addEventListener("click", function () {
+			const input = this.closest(".qty-input").querySelector(".quantity-field");
+			let currentValue = parseInt(input.value) || minValue;
+
+			if (this.classList.contains("button-minus")) {
+				if (currentValue > minValue) input.value = currentValue - 1;
+			} else {
+				if (currentValue < maxValue) input.value = currentValue + 1;
+			}
+		});
+	});
+	document.getElementById("addToCartBtn").addEventListener("click", function () {
+		const quantity = document.getElementById("quantity").value;
+		const productId = document.getElementById("product_id").value;
+		const priceId = document.getElementById("price_id").value;
+
+		if (quantity < 1 || quantity > 1000) {
+			alert("Quantity must be between 1 and 1000");
+			return;
+		}
+
+		fetch("{{ url('/add-cart') }}", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRF-TOKEN": "{{ csrf_token() }}"
+			},
+			body: JSON.stringify({
+				product_id: productId,
+				priceId: priceId,
+				quantity: quantity
+			})
+		})
+		.then(res => res.json())
+		.then(data => {
+			if (data.success) {
+				alert("Product added to cart!");
+				// You can also update cart UI here dynamically
+			} else {
+				alert(data.message || "Something went wrong.");
+			}
+		})
+		.catch(err => {
+			console.error(err);
+			alert("Failed to add to cart.");
+		});
+	});
+});
+</script>
+
+
 @endsection

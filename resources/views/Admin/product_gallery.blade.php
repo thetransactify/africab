@@ -52,7 +52,7 @@
                                         <td>{{ $gallery->created_at->format('d-m-Y') }}</td>
                                         <td><div class="img prd lightbox"><a href="{{ asset('storage/uploads/product/' . $gallery->file) }}"><img src="{{ asset('storage/uploads/product/' . $gallery->file) }}"/></a></div></td>
                                         <td>{{$gallery->category->name}}</td>
-                                        <td>{{$gallery->product->name}}</td>
+                                        <td>{{$gallery->ProductPrice->listing_name ?? ''}}</td>
                                         <td>{{$gallery->label}}</td>
                                         <td class="text-center"><a href="{{ url('tsfy-admin/delete-gallery', Crypt::encrypt($gallery->id)) }}" onclick="return confirm('Are you sure you want to delete this gallery item?')" class="las la-trash-alt btn btn-secondary mx-1"></a></td>
                                     </tr>
