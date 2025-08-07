@@ -267,6 +267,22 @@ class ClientController extends Controller
     return back()->with('success', 'Profile updated successfully.');
   }
 
+  #client reviewlist
+  #auth: vivek
+    public function AddReviews(Request $request){
+        $request->validate([
+        'product_price_id' => 'required',
+        'rating' => 'required',
+        'review' => 'required',
+        'user_id' => 'required',
+    ]);
+     Review::create([
+        'user_id' => $request->user_id,
+        'product_id' => $request->product_price_id,
+        'rating' => $request->rating,
+        'comment' => $request->review,
+        'status' => 1, // pending approval
+    ]);
 
   # client reviewlist
   # auth: vivek

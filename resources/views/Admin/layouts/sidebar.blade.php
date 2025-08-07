@@ -32,12 +32,11 @@
                         <span>Reviews</span>
                     </a>
                 </li>
-                <!-- <li>
                     <a href="#ecom-management">
                         <i class="iconsminds-tag"></i>
                         <span>eCommerce Management</span>
                     </a>
-                </li>  -->  
+
                 <li>
                     <a href="#cms-management">
                         <i class="iconsminds-equalizer"></i>
