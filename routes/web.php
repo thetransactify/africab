@@ -9,6 +9,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 
 //start admin 
 
@@ -56,7 +57,7 @@ Route::post('/post-product', [CategoryProductController::class, 'CreateProduct']
 Route::get('edit-SubCategories/{id}', [CategoryProductController::class, 'EditProduct'])->name('product.edit');
 Route::post('/update-product/{id}', [CategoryProductController::class, 'UpdateProduct'])->name('product.update');
 Route::get('/delete-category/{id}', [CategoryProductController::class, 'DeleteProduct'])->name('product.delete');
-Route::get('/product-price', [CategoryProductController::class, 'ProdcutPriceList'])->name('get.productlist');
+Route::get('/product-price', [CategoryProductController::class, 'ProdcutPriceList'])->name('get.productlists');
 Route::get('/get-products/{category_id}', [CategoryProductController::class, 'getProducts'])->name('get.products');
 Route::get('/get-productslist/{category_id}', [CategoryProductController::class, 'getProductlist'])->name('get.productlist');
 Route::post('/add-productlist', [CategoryProductController::class, 'CreateProductList']);
@@ -67,6 +68,9 @@ Route::get('/delete-productlist/{id}', [CategoryProductController::class, 'Delet
 Route::get('/product-permission', [CategoryProductController::class, 'GetPermission']);
 Route::get('/product-orders', [CategoryProductController::class, 'GetOrders']);
 Route::post('/products-permission/{id}/toggle-visibility', [CategoryProductController::class, 'toggleVisibility']);
+
+Route::get('/add-product', [CategoryProductController::class, 'GetExcelProduct']);
+Route::post('/add-excel-product', [CategoryProductController::class, 'AddExcelProduct'])->name('GetExcelProduct.product');
 // offer list start
 Route::get('/manage-offers', [CategoryProductController::class, 'ProdcutOffer'])->name('get.ProdcutOffer');
 Route::post('/add-productoffers', [CategoryProductController::class, 'CreateProductListoffers']);
@@ -174,4 +178,14 @@ Route::get('/order-status', [CartController::class, 'orderStatus'])->name('order
 
 });
 Route::get('/support-centre', [ClientController::class, 'SupportCentre'])->name('SupportCentre.shows');
+
+// payment method
+Route::get('/selcom-test', [ClientController::class, 'createOrderSelcoms']);
+Route::post('/payment', [PaymentController::class, 'createOrderSelcom'])->name('selcom.create.order');
+Route::get('/payment-page', [PaymentController::class, 'paymentPage'])->name('payment.page');
+Route::get('/payment-cancel/{orderId}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
+Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
+
+
+
 //end client

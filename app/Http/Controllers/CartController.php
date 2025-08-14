@@ -140,6 +140,7 @@ class CartController extends Controller
 					'category_file' => $category?->file,
 					'price'         => $product->product_cost,
 					'offer_price'   => $product->offer_price,
+                    'color'         => explode(',', $product->color_name),
 					'total'         => $total,
 					'quantity'      => $item->quantity,
 					'gallery_file'  => $latestGallery?->file,
@@ -180,8 +181,8 @@ class CartController extends Controller
         	];
         }
 		//return $subtotal;
-		//return $addressDetails;
-        return view('checkout',compact('cartDetails','subtotal','addressDetails','shopdeatils'));
+		//return $cartDetails;
+        return view('checkout',compact('cartDetails','subtotal','addressDetails','shopdeatils','id'));
     }
 
     #add adsress
@@ -270,18 +271,17 @@ class CartController extends Controller
                     'method' => '2',
                     'shipping_charge' => ($index === 0) ? $shippingCharge : 0,
                     'order_status' => '1',
+                    'shipping_address' => $request->shiping_address,
+                    'color' => $request->color,
                     'payment_status' => '1',
                     'order_number' => Str::random(14),
                     'billing_address' => $request->billing_address,
-                    'shipping_address' => $request->shiping_address,
                     'total_amount' => $item->product->product_cost * $item->quantity,
                 ]);
             }
             Cart::where('user_id', $user->id)->delete();
 
             DB::commit();
-
-            // Step 6: Redirect to success page
             return redirect()->route('order.success')->with('success', 'Order placed successfully using Cash on Delivery!');
         } catch (ValidationException $e) {
             logger()->error('Validation failed', $e->errors());

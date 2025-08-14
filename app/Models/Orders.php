@@ -22,6 +22,7 @@ class Orders extends Model
         'payment_status',
         'method',
         'order_status',
+        'color',
         'billing_address',
         'shipping_address',
         'created_at',

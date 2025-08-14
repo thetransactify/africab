@@ -35,7 +35,7 @@
 
     <div class="row">
     <div class="col-12 mb-container">
-  <form action="{{ route('checkout.cod') }}" method="post" class="standard-form-rules">
+  <form action="{{ route('checkout.cod') }}" method="post" id="checkoutForm" class="standard-form-rules">
         @csrf
     <!-- <div class="message-box coupon-added">
     <p>Coupon Code NEWATAFRICAB Applied! You got a <sup>TSh</sup>75,060.00 discount on order. <a class="expand-btn"
@@ -76,7 +76,7 @@
                                     @php
                                                 $fullAddress = ($address['home_address'] ?? $address['office_address'] ?? $address['other_address']) . ', ' . $address['pincode'];
                                     @endphp
-                                    <h6 class="address-label"><input addressid="15" class="address-selected" name="billing_address" type="radio" value="{{ $address['id'] }}">
+                                    <h6 class="address-label"><input addressid="15" class="address-selected" name="billing_address" id="billing_address" type="radio" value="{{ $address['id'] }}">
                                         <span>
                                             @if($address['label'] == 1)
                                             Home Address
@@ -102,7 +102,7 @@
                                     <label class="checkboxLarge ship-to-address"><input type="checkbox" id="showShopOption" name="shipping_option" value="cash_on_shop"><b>Pick in store</b>
                                     </label>
 
-                                    <div class="show-more-address" id="show-more-address">
+                                    <div class="show-more-address"  id="show-more-address">
                                         <div class="address-box">
                                             @foreach($addressDetails as $address)
                                             @php
@@ -152,8 +152,23 @@
                                 </div>
                                 </div>
                             <!-- <div class="space-y-2"> -->
-
+                            @if(collect($cartDetails)->pluck('color')->flatten()->filter()->isNotEmpty())
+    
+                                <div id="shopDropdownContainer">
+                                 <label for="shopSelect">Select Product Color</label>
+                                  <select name="color" class="form-control" id="color" required>
+                                    <option selected disabled>Select Product Color</option>
+                                    @foreach($cartDetails as $item)
+                                               @foreach((array) $item['color'] as $clr)
+                                    <option value="{{ $clr }}">{{ $clr }}</option>
+                                     @endforeach
+                                    @endforeach
+                                </select>
+                                 </div>
+                            @endif     
                             </div>
+
+    
 
                                @if(count($cartDetails) > 0)
                                <div class="col-md-5 offset-md-1">
@@ -201,11 +216,13 @@
                                 @else
                                 No product found.
                                 @endif  
+<input type="hidden" name="total_ammount" class="order-total-ammount"  id="totalAmountInput">
+<input type="hidden" name="user_id" class="order-total-ammount"  value="{{Crypt::encrypt($id)}}" id="user_id" required>
 <div class="checkout-payment">
   
         <div class="payment-group mb--10">
             <div class="custom-radio">
-                <input type="radio" value="payu" name="payment-method" id="payu">
+                <input type="radio" value="payu"  name="payment-method" id="payu">
                 <label class="payment-label" for="payu">Pay via Payment Gateway</label>
             </div><div class="payment-info payu hide-in-default" data-method="payu">
                 <p>Make Payment via <b>Payment Gateway</b></p>
@@ -286,6 +303,8 @@ $(document).ready(function () {
         let total = subtotal + shippingCharge;
         $('#shippingChargeAmount').text(shippingCharge.toFixed(2));
         $('#totalAmount').text(total.toFixed(2));
+       document.getElementById('totalAmountInput').value = total;
+
     }
     $('#showaddress').change(function () {
         if ($(this).is(':checked')) {
@@ -382,5 +401,41 @@ $('#confirmOrderBtn').click(function (e) {
 
 </script>
 
+<script type="text/javascript">
+    document.getElementById("checkoutForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
+    let selectedPayment = document.querySelector('input[name="payment-method"]:checked');
+
+    if (!selectedPayment) {
+        alert("Please select a payment method.");
+        return;
+    }
+
+    if (selectedPayment.value === "payu") {
+        let formData = new FormData(this);
+
+        fetch("{{ route('selcom.create.order') }}", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    } 
+    else {
+        this.submit();
+    }
+});
+
+</script>
 @endsection

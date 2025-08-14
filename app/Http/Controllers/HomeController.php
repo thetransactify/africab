@@ -171,17 +171,17 @@ class HomeController extends Controller
             //dd($product);
             $category = $product?->category ?? null;
             //$galleriess = $product?->galleries ?? null;
-            $price = $order->products->first(); // First price only
-            $galleriess = $order->products->galleries->first(); // First price only
-
+            $price = $order->products?->first(); // First price only
+            $galleriess = optional($order->products->galleries)->first(); // First price only
+// return $galleriess ;
             $data[] = [
-                'id'         => $price->id,
-                'order_id'         => $order->id,
-                'order_number'     => $order->order_number,
-                'total_amount'     => $order->total_amount,
-                'payment_status'   => $order->payment_status,
-                'order_status'     => $order->order_status,
-                'shipping_address' => $order->shipping_address,
+                'id'         => $price->id ?? '',
+                'order_id'         => $order->id ?? '',
+                'order_number'     => $order->order_number ?? '',
+                'total_amount'     => $order->total_amount ?? '',
+                'payment_status'   => $order->payment_status ?? '',
+                'order_status'     => $order->order_status ?? '',
+                'shipping_address' => $order->shipping_address ?? '',
                 'product_name'     => $product->listing_name ?? 'N/A',
                 'product_file'     => $galleriess->file ?? null,
                 'category_name'    => $category->name ?? 'N/A',

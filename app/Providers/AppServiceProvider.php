@@ -67,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
             'pp.description',
             'pp.listing_name',
             'pp.offer_price',
+            'pp.code',
             'pp.product_cost',
             'pg.file as file'
         )

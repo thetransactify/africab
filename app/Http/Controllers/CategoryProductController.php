@@ -16,6 +16,9 @@ use App\Models\Wishlist;
 use App\Models\offerlist;
 use App\Models\RecentViews;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProductsImport;
+
 
 
 
@@ -188,17 +191,19 @@ class CategoryProductController extends Controller
             'Item_cost' => 'required|string',
         ]);
          $ProductList = new ProductPrice();
-            $ProductList->product_id = $request->input('CategoryList');
-            $ProductList->category_id = $request->input('productList');
+            $ProductList->product_id = $request->input('productList');
+            $ProductList->category_id = $request->input('CategoryList');
             $ProductList->listing_name = $request->input('name');
             $ProductList->description = $request->input('description');
             $ProductList->packing_weight = $request->input('Weight');
             $ProductList->packing_type = $request->input('packing_type');
             $ProductList->product_cost = $request->input('Item_cost');
             $ProductList->product_online = $request->input('OnlineProduct',2);
+            $ProductList->code = $request->input('Code');
+            $ProductList->color_name =  implode(',', $request->input('colors'));
             $ProductList->offer_price = $request->input('offer_price');
             $ProductList->status = $request->input('sellSingle',2);
-            $ProductList->save();
+            $ProductList->save();   
         return redirect()->back()->with('success', 'Product List added successfully!');
     }
 
@@ -212,7 +217,7 @@ class CategoryProductController extends Controller
         ->first();
         $categories = Category::all();
         $products = Product::all();
-        //return $category;
+        //return $productList;
         return view(' Admin.edit_productlist', compact('productList','categories','products'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Invalid or expired link.');
@@ -226,6 +231,7 @@ class CategoryProductController extends Controller
         //return $request->all();
         $id = Crypt::decrypt($encryptedId);
         $ProductPrice = ProductPrice::findOrFail($id);
+
         $request->validate([
             'CategoryList' => 'required|max:255',
             'productList' => 'required|string',
@@ -237,18 +243,20 @@ class CategoryProductController extends Controller
             'offer_price' => 'required|string'
         ]);
 
-        $ProductPrice->product_id = $request->CategoryList;
-        $ProductPrice->category_id = $request->productList;
+        $ProductPrice->product_id = $request->productList;
+        $ProductPrice->category_id = $request->CategoryList;
         $ProductPrice->listing_name = $request->price_list;
         $ProductPrice->description = $request->description;
         $ProductPrice->packing_weight = $request->weight;
         $ProductPrice->packing_type = $request->type;
         $ProductPrice->product_cost = $request->cost;
         $ProductPrice->offer_price = $request->offer_price;
+        $ProductPrice->code = $request->Code;
+        $ProductPrice->color_name =  implode(',', $request->colors);
         $ProductPrice->product_online = $request->input('Online', 2);
         $ProductPrice->status = $request->input('Sell',2);
         $ProductPrice->save();
-        return redirect()->route('get.productlist')->with('success', 'Product Price updated successfully!');
+        return redirect()->route('get.productlists')->with('success', 'Product Price updated successfully!');
    }
 
 
@@ -575,18 +583,20 @@ class CategoryProductController extends Controller
         ->where(function ($query) use ($search) {
             $query->where('p.name', 'LIKE', "%{$search}%")
                   ->orWhere('c.name', 'LIKE', "%{$search}%")
+                  ->orWhere('pd.code', 'LIKE', "%{$search}%")
                   ->orWhere('pd.listing_name', 'LIKE', "%{$search}%");
         })
         ->select(
             'p.id',
             'p.name as product_name',
             'pd.listing_name',
+            'pd.code',
             'c.name as category_name',
             'c.file as category_image',
             'g.file as product_image'
 
         )
-        ->groupBy('p.id', 'p.name', 'pd.listing_name', 'c.name','category_image','product_image')
+        ->groupBy('p.id','pd.code', 'p.name', 'pd.listing_name', 'c.name','category_image','product_image')
         ->limit(10)
         ->get();
 
@@ -713,5 +723,24 @@ return $html;
         $ProdcutOffer->save();
         return redirect()->route('get.ProdcutOffer')->with('success', 'Product Offer updated successfully!');
    }
+   
+   #get ecxel upload
+   #auth vivek
+   public function GetExcelProduct(){
+       return view('Admin.import-form');
+   }
+    
+   #add ecxel upload
+   #auth vivek
+    public function AddExcelProduct(Request $request){
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        Excel::import(new ProductsImport, $request->file('excel_file'));
+
+        return back()->with('success', 'Products Imported Successfully!');
+    }
+
 
 }

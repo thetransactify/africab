@@ -31,4 +31,11 @@ return [
         ],
     ],
 
+    'selcom' => [
+    'api_key'      => env('SELCOM_API_KEY'),
+    'api_secret'   => env('SELCOM_API_SECRET'),
+    'vendor_id'    => env('SELCOM_VENDOR_ID'),
+    'api_url'    => env('SELCOM_URL'),
+   ],
+
 ];

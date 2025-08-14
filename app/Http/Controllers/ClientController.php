@@ -12,6 +12,11 @@ use App\Models\Wishlist;
 use App\Models\address;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+
+
 
 
 class ClientController extends Controller
@@ -295,5 +300,108 @@ class ClientController extends Controller
     
        return view('offers');
    }
+
+
+
+
+
+    private $vendor      = "config('services.selcom.vendor_id')";
+    private $apiKeyRaw   = "config('services.selcom.api_key')";
+    private $apiSecret   = "config('services.selcom.api_secret')";
+    private $url         = "config('services.selcom.url')";
+    private $baseUrl     = "https://apigw.selcommobile.com/v1/checkout/create-order";
+    private $caCertPath  = "C:\\Users\\vivek kumar yadav\\Downloads\\cacert.pem"; // local path to cacert.pem
+
+public function createOrderSelcoms(Request $request)
+    {
+        $apiKey = base64_encode($this->apiKeyRaw);
+        $timestamp = now()->format('Y-m-d\TH:i:sP');
+        $fields = [
+            'vendor'             => $vendor,
+            'order_id'           => 'ORD' . time(),
+            'buyer_email'        => 'john@example.com',
+            'buyer_name'         => 'John Doe',
+            'buyer_phone'        => '255774786247',
+            'amount'             => '1000',
+            'currency'           => 'TZS',
+            'payment_methods'    => 'ALL',
+            'gateway_buyer_uuid' => '',
+            'cancel_url'         => 'aHR0cHM6Ly9zaG9wLmFmcmljYWIuY28udHovcGcvDDDSDc2VsY29tLWFwaWd3LDHSHDSWNsaWVudC9jYW5jZWwtcGF5LnBocD9vaWQ9b2lkLTE2ODg0MDQzMzg=',
+            'webhook'            => 'aHR0cHM6Ly9zaG9wLmFmcmljYWIuY28udHovcGcvcSSDSD2VsY29tLWFwaWd3LWDGSGNsaWVudC90aGFuay15b3UucGhwP29pZD1vaWQtMTY4ODQwNDMzOA==',
+            'redirect_url'      => 'aHR0cHM6Ly9zaG9wLmFmcmljYWIuY2DDSD8udHovcGcvc2VsY29tLWFwaWd3LHSHHSWNsaWVudC90aGFuay15b3UucGhwP29pZD1vaWQtMTY4ODQwNDMzOA==',
+            'buyer_remarks'      => 'None',
+            'merchant_remarks'   => 'None',
+            'no_of_items'        => '1'
+        ];
+
+        // Signed-Fields must match order exactly as per API docs
+        $signedFields = [
+            'vendor',
+            'order_id',
+            'buyer_email',
+            'buyer_name',
+            'buyer_phone',
+            'amount',
+            'currency',
+            'payment_methods',
+            'gateway_buyer_uuid',
+            'redirect_url',
+            'cancel_url',
+            'webhook',
+            'buyer_remarks',
+            'merchant_remarks',
+            'no_of_items'
+        ];
+
+        // Build string for digest – starts with timestamp
+        $digestParts = ["timestamp={$timestamp}"];
+        foreach ($signedFields as $key) {
+            $digestParts[] = "{$key}={$fields[$key]}";
+        }
+        $digestString = implode('&', $digestParts);
+
+        // Log for debugging
+        Log::info('DigestString: ' . $digestString);
+
+        // Generate digest (HMAC-SHA256 + Base64)
+        $digest = base64_encode(hash_hmac('sha256', $digestString, $this->apiSecret, true));
+        Log::info('Digest: ' . $digest);
+
+        // Headers
+        $headers = [
+            'Authorization'  => "SELCOM {$apiKey}",
+            'Digest-Method'  => 'HS256',
+            'Digest'         => $digest,
+            'Signed-Fields'  => implode(',', $signedFields),
+            'Timestamp'      => $timestamp,
+            'Content-Type'   => 'application/json',
+            'Accept'         => 'application/json',
+        ];
+
+        // Guzzle with SSL verify
+        $client = new Client(['verify' => $this->caCertPath]);
+
+        try {
+            $res = $client->post($url, [
+                'headers' => $headers,
+                'json'    => $fields
+            ]);
+
+            $body = json_decode($res->getBody(), true);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ]);
+        }
+
+        return response()->json([
+            'status'     => 'success',
+            'digestString' => $digestString,
+            'digestValue'  => $digest,
+            'selcom_response' => $body
+        ]);
+    }
+
 
 }

@@ -130,6 +130,11 @@
                                     <i class="simple-icon-picture"></i> <span class="d-inline-block">Product Gallery</span>
                                 </a>
                             </li>
+                             <li>
+                                <a href="{{url('tsfy-admin/add-product')}}">
+                                    <i class="simple-icon-picture"></i> <span class="d-inline-block">Bulk upload</span>
+                                </a>
+                            </li>
 						<div id="manageProductsSecurity" class="collapse show">
                         <ul class="list-unstyled inner-level-menu">
                             <li>

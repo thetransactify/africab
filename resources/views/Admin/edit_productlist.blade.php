@@ -53,6 +53,20 @@
 
                                 <div class="form-group mb-4">
                                     <label class="form-group has-float-label mb-1">
+                                        <input data-role="tagsinput" name="Code" value="{{$productList->code}}" type="text"> <span>Code</span>
+                                    </label> 
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label for="colors" class="form-group has-float-label mb-1"> <span>Colors</span></label>
+                                    <div id="color-wrapper">
+                                        <input type="text" name="colors[]" value="{{$productList->color_name}}" class="form-control mb-2" placeholder="Enter color">
+                                    </div>
+                                    <button type="button" id="add-color" class="btn btn-sm btn-secondary">+ Add More</button>
+                                </div>
+
+                                <div class="form-group mb-4">
+                                    <label class="form-group has-float-label mb-1">
                                     <textarea class="form-control" rows="7" name="description" required>{{$productList->description}}</textarea>
                                     <span>Description</span></label>
                                 </div>
@@ -147,4 +161,15 @@ function validateImage(input) {
     }
 }
 </script>
+<script>
+document.getElementById('add-color').addEventListener('click', function () {
+    let wrapper = document.getElementById('color-wrapper');
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'colors[]';
+    input.className = 'form-control mb-2';
+    input.placeholder = 'Enter color';
+    wrapper.appendChild(input);
+});
+</script> 
 @endsection
