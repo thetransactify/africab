@@ -12,9 +12,6 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 
 //start admin 
-
-
-
 Route::get('/tsfy-admin', function () {
     return view('Admin.index'); // loads resources/views/admin/index.blade.php
 });
@@ -134,8 +131,11 @@ Route::get('/shop-list', [WishlistController::class, 'Getshop'])->name('get.Getf
 // Route::get('/', function () {
 //     return view('index'); // loads resources/views/admin/index.blade.php
 // });
-Route::get('/', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
-Route::get('/index', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
+Route::get('/', [HomeController::class, 'GetClientHomepagessss'])->name('get.Getfasqss');
+Route::get('/index', [HomeController::class, 'GetClientHomepagessss'])->name('get.Getfasqss');
+
+Route::get('/testing', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
+Route::get('/test', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
 Route::get('/product-category/{slug}', [CategoryProductController::class, 'Clientshow'])->name('product-category.show');
 Route::get('/product/{slug}', [CategoryProductController::class, 'GetProduct'])->name('product.shows');
 Route::get('/reviews', [ClientController::class, 'ClientReviews'])->name('ClientReviews.shows');
@@ -166,6 +166,7 @@ Route::get('/change-password', [LoginController::class, 'ChangePasswords'])->nam
 Route::get('/wishlist/add/{id}', [WishlistController::class, 'addToWishlist'])->name('wishlist.add');
 Route::get('/wishlist/delete/{id}', [WishlistController::class, 'delete'])->name('wishlist.delete');
 Route::post('/add-reviews', [ClientController::class, 'AddReviews'])->name('addReviews.shows');
+
 Route::get('/cart', [CartController::class, 'GetCart'])->name('cart.get');
 Route::post('/add-cart', [CartController::class, 'CreateCart'])->name('cart.create');
 Route::get('/cart-delete/{id}', [CartController::class, 'destroy'])->name('cart.delete');
@@ -178,7 +179,6 @@ Route::get('/order-status', [CartController::class, 'orderStatus'])->name('order
 
 });
 Route::get('/support-centre', [ClientController::class, 'SupportCentre'])->name('SupportCentre.shows');
-
 // payment method
 Route::get('/selcom-test', [ClientController::class, 'createOrderSelcoms']);
 Route::post('/payment', [PaymentController::class, 'createOrderSelcom'])->name('selcom.create.order');
@@ -189,3 +189,4 @@ Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])-
 
 
 //end client
+

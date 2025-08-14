@@ -27,7 +27,9 @@ class HomeController extends Controller
     	$Homeslider = Homeslider::orderbydesc('id')->get();
     	return view('Admin.home',compact('Homeslider'));
     }
-
+ public function GetClientHomepagessss(){
+    	return view('lunch');
+    }
 
     #Add CreateHomepage
     #authr: vivek

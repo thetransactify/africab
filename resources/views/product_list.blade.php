@@ -17,7 +17,6 @@
 					<li><a href="#" class="active">{{$data['product_price']['listing_name']}}</a></li>
 				</ul>
 			</div>			
-			
 		</div>
 	</div>
 </div>
@@ -26,7 +25,6 @@
         {{ session('success') }}
     </div>
 @endif
-
 
 <!-- Products List -->
 <div class="product-single-area">	
@@ -148,15 +146,17 @@
 							</div>
 							<h2 class="ac-title">Add Review</h2>
 							<div class="ac-content">
-							<form action="{{route('addReviews.shows')}}" method="Post" class="standard-form-rules">
-								@csrf
+
+							<form class="standard-form-rules" action="{{route('addReviews.shows')}}" method="Post">
+                                                         @csrf
 								@if(isset(auth()->user()->id))
 									<p> Add Review.</p>
-                                @else
-                                  <p>Please <a href="{{route('get.ClientLogin')}}">Login</a> to Add Review.</p>
-                                @endif
+                                                                @else
+                                                                    <p>Please <a href="{{route('get.ClientLogin')}}">Login</a> to Add Review.</p>
+                                                                @endif
+
 									<p>Greetings, <b class="darkgrey-color">Customer Name</b>, please post your review using the form. Please note all reviews are moderated to check for spamming.</p>
-									
+
 									<div class="sta-form-group">
 									<fieldset class="rating-stars">
 									    <input type="checkbox" id="5-star" name="rating" value="5" /><label for="5-star" title="Excellent Quality"></label>
@@ -168,12 +168,13 @@
 									</div>
 									<div class="sta-form-group">
 									    <label for="review">Add Review</label>
-                                        <textarea name="review" id="review" cols="30" rows="6" class="sta-form-control"></textarea>
+                                                                             <textarea name="review" id="review" cols="30" rows="6" class="sta-form-control"></textarea>
 									</div>
 									<input type="hidden" name="product_price_id" value="{{$data['product_price']['id']}}">
+
 									<input type="hidden" name="user_id" value="{{ auth()->user()->id ?? '' }}">
 									<div class="sta-form-group">
-                                        <button type="submit" class="general-button blackbutton"><i class="material-symbols-outlined">save</i>Submit Review</button>
+                                                                       <button type="submit" class="general-button blackbutton"><i class="material-symbols-outlined">save</i>Submit Review</button>
                                     </div>
 									</form>
 							
