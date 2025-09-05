@@ -62,12 +62,12 @@
                                     @foreach($reviewlist as $index => $review)
                                     <tr>
                                         <td>{{$review->created_at->format('d-m-Y')}}</td>
-                                        <td>{{$review->product->name}}</td>
+                                        <td>{{$review->product->listing_name}}</td>
                                         <td>{{$review->users->name}}</td>
                                         <td>{{$review->rating}}</td>
                                         <td class="text-center">
                                         <a href="javascript:void(0)" class="las la-eye btn btn-secondary mx-1 openReviewModal" data-id="{{ Crypt::encrypt($review->id) }}"></a>
-                                        <a href="{{ url('/delete-reviews/', Crypt::encrypt($review->id)) }}" onclick="return confirm('Are you sure you want to delete this review?')"  class="las la-trash-alt btn btn-secondary mx-1"></a></td>
+                                        <a href="{{ url('tsfy-admin/delete-reviews', Crypt::encrypt($review->id)) }}" onclick="return confirm('Are you sure you want to delete this review?')"  class="las la-trash-alt btn btn-secondary mx-1"></a></td>
                                     </tr>   
                                     @endforeach                                
                                 </tbody>
@@ -84,7 +84,80 @@
             </div> 
             </div>
         </div>
+<!-- Review Toggle Modal -->
+   
+<div class="modal fade" id="reviewWindow" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Toggle Review Visibility</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
+            <div class="modal-body">
+                <!-- Loader -->
+                <div id="modalLoader" class="text-center">
+                    <p>Loading...</p>
+                </div>
+
+                <!-- Modal Content -->
+                <div id="modalContent" style="display:none;">
+                    <div class="alert alert-warning mb-5" role="alert">
+                        * You can only Publish or Unpublish Comments from here. To delete, use Delete Button in the list.
+                    </div>
+
+                    <div class="row text-left">
+                        <div class="col-md-6 col-12">
+                            <p><b>Review Date:</b><br><span id="modalReviewDate"></span></p>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <p><b>Customer Name:</b><br><span id="modalCustomerName"></span></p>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <p><b>Customer Email:</b><br><span id="modalCustomerEmail"></span></p>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <p><b>Product Reviewed:</b><br><span id="modalProductName"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="row text-justify">
+                        <div class="col-12">
+                            <div class="form-group mb-1">
+                                <label class="d-block">Product Rated</label>
+                                <select class="rating"  data-current-rating="4" data-readonly="true">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                            <p><b>Customer Comment:</b><br><span id="modalCustomerComment"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="row text-center">
+                        <div class="col-12">
+                            <label class="form-label font-weight-bold" id="switch5-label">Publish Review</label>
+                            <div class="custom-switch custom-switch-primary-inverse mb-2">
+                                <input type="hidden" id="reviewIds" value="">
+                                <input class="custom-switch-input" id="modalPublishSwitch" type="checkbox">
+                                <label class="custom-switch-btn" for="modalPublishSwitch"></label>
+                            </div>
+
+                            <div class="form-group text-center mt-3">
+                                <button type="button" class="btn btn-secondary update-review-btn">Update Review</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- Modal Content -->
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -97,7 +170,7 @@
     $('#reviewWindow').modal('show');
 
     $.ajax({
-        url: 'tsfy-admin/get-review/' + reviewId,
+        url: 'get-review/' + reviewId,
         type: 'GET',
         success: function(response) {
             $('#modalReviewDate').text(response.review_date);
@@ -124,7 +197,7 @@
         var reviewId = $('#reviewIds').val();
         var newStatus = $('#modalPublishSwitch').is(':checked') ? 2 : 3;
         $.ajax({
-            url: 'tsfy-admin/update-review-status',
+            url: 'update-review-status',
             type: 'POST',
             data: {
                 review_id: reviewId,

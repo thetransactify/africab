@@ -15,6 +15,7 @@ use App\Models\Orders;
 use App\Models\Wishlist;
 use App\Models\offerlist;
 use App\Models\RecentViews;
+use App\Models\videourl;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductsImport;
@@ -68,7 +69,6 @@ class CategoryProductController extends Controller
     #authr: vivek
     public function ViewProduct(){
         $productlist = Product::with('category')->orderBy('id', 'desc')->paginate(10);
-        //return $productlist;
         if ($productlist->isEmpty()) {
             return view(' Admin.view_product',compact('productlist'));
         }
@@ -166,9 +166,18 @@ class CategoryProductController extends Controller
     #product List 
     #authr: vivek
     public function getProducts($category_id){
+        $products = ProductPrice::where('category_id', $category_id)->get();
+        return response()->json($products);
+    }
+
+    #product List 
+    #authr: vivek
+    public function subcategiores($category_id){
         $products = Product::where('category_id', $category_id)->get();
         return response()->json($products);
     }
+
+
 
     #product Name 
     #authr: vivek
@@ -375,20 +384,25 @@ class CategoryProductController extends Controller
     #auth vivek
   public function fetchWishlist(Request $request)
 {
-    $user = User::with('wishlists.product.category')->find($request->customer_id);
+    $user = User::with('wishlists.productPrice.category')->find($request->customer_id);
+    //return $user;
 
     if (!$user) {
         return response()->json(['wishlists' => []]);
     }
 
     $wishlists = $user->wishlists->map(function ($wishlist, $index) {
+         $product = $wishlist->productPrice;
+         $image = $product && $product->galleries->count() > 0
+        ? $product->galleries->first()->file
+        : ($product->file ?? 'no-image.png');
         return [
             'id'         => $index + 1,
             'added_on'   => $wishlist->created_at->format('d/m/Y'),
-            'image_url'  => asset('storage/uploads/product/' . ($wishlist->product->file ?? 'no-image.png')),
-            'product'    => $wishlist->product->name ?? '—',
-            'category'   => $wishlist->product->category->name ?? '—',
-            'label'      => $wishlist->product->label ?? '—',
+            'image_url'  => asset('storage/uploads/product/' . ($image ?? 'no-image.png')),
+            'product'    => $wishlist->productPrice->listing_name ?? '—',
+            'category'   => $wishlist->productPrice->category->name ?? '—',
+            'label'      => $wishlist->productPrice->label ?? '—',
         ];
     });
 
@@ -418,7 +432,32 @@ class CategoryProductController extends Controller
     #view Orders
     #authr: vivek
     public function GetOrders(){
-         return view(' Admin.product_orders');
+       $orderlist = Orders::with(['users','products'])
+       ->latest()
+       ->get()
+       ->groupBy('order_group_id');
+       //return   $orderlist;
+
+       $ordergroups = [];
+
+       foreach ($orderlist as $groupId => $orders) {
+        $firstOrder = $orders->first();
+
+        $ordergroups[] = [
+            'order_group'    => $groupId,
+            'id'    => Crypt::encrypt($firstOrder->id),
+            'txn_id'   => $firstOrder->order_number,
+            'customer_name'  => $firstOrder->users->name ?? 'Guest',
+            'customer_email' => $firstOrder->users->email ?? '-',
+            'customer_mobile'=> $firstOrder->users->mobile ?? '-',
+            'amount'         => $orders->sum(fn($o) => $o->total_amount + ($o->shipping_charge ?? 0)),
+            'order_status'   => [1 => 'Processing', 2 => 'Shipped', 3 => 'Delivered'][$firstOrder->order_status] ?? 'Unknown',
+            'payment_status' => [1 => 'Pending', 2 => 'Paid', 3 => 'Failed'][$firstOrder->payment_status] ?? 'Unknown',
+            'method'         => [1 => 'Online', 2 => 'Cash on Delivery'][$firstOrder->method] ?? 'Unknown',
+            'created_at'     => $firstOrder->created_at->format('d/m/Y'),
+        ];
+    }
+         return view(' Admin.product_orders', compact('ordergroups'));
     }
 
 
@@ -435,13 +474,21 @@ class CategoryProductController extends Controller
     if (!$category) {
         abort(404, 'Category not found.');
     }
-    $products = Product::with(['productPrices','category'])
+    // $products = Product::with(['productPrices','category'])
+    //             ->where('category_id', $category->id)
+    //             ->where('status',1)
+    //              ->get();
+    $products = Product::with(['productPrices' => function($query) {
+                    $query->with(['galleries' => function($q) {
+                        $q->orderByDesc('id')->limit(1); // only latest gallery
+                    }]);
+                }, 'category'])
                 ->where('category_id', $category->id)
-                ->where('status',1)
-                 ->get();
+                ->where('status', 1)
+                ->get();
     $productsList = [];
     $subcategoriesList = [];
-
+//return $products;
     foreach ($products as $product) {
         if ($product->relationLoaded('productPrices') && $product->productPrices->isNotEmpty()) {
         $onlinePrices = $product->productPrices->where('product_online', 1);
@@ -454,6 +501,9 @@ class CategoryProductController extends Controller
                     'product_cost' => $product_price->product_cost ?? 'N/A',
                     'offer_price' => $product_price->offer_price ?? 'N/A',
                     'category' => $product->category->name ?? 'N/A',
+                    'product_image' => $product_price->galleries->isNotEmpty()
+    ? asset('storage/uploads/category/' . $product_price->galleries->first()->file)
+    : asset('storage/no-image.png'),
                     'category_image' => asset('storage/uploads/category/' . $category->file), 
                 ];
             }
@@ -489,7 +539,12 @@ class CategoryProductController extends Controller
    }
 
    public function GetProduct($slug){
-        $ProductList = ProductPrice::whereRaw("LOWER(REPLACE(listing_name, ' ', '-')) = ?", [$slug])->first();
+        // $ProductList = ProductPrice::whereRaw("LOWER(REPLACE(listing_name, ' ', '-')) = ?", [$slug])->first();
+       $normalizedSlug = Str::slug($slug);
+        $ProductList = ProductPrice::get()->first(function($product) use ($normalizedSlug) {
+            return Str::slug(trim($product->listing_name)) === $normalizedSlug;
+        });          
+
 
         if (!$ProductList) {
         abort(404, 'Product not found.');
@@ -652,7 +707,7 @@ return $html;
     #Add ProdcutList
     #authr: vivek
     public function CreateProductListoffers(Request $request){
-       // return $request->all();
+        //return $request->all();
         $request->validate([
             'productList' => 'required',
             'CategoryList' => 'required',
@@ -661,10 +716,16 @@ return $html;
         ]);
          $ProductOfferList = new offerlist();
             $ProductOfferList->label = $request->input('name');
-            $ProductOfferList->category_id = $request->input('productList');
+            $ProductOfferList->category_id = $request->input('CategoryList');
             $ProductOfferList->subcategory_id = $request->input('productList');
             $ProductOfferList->proudct_deatils_id = implode(',', $request->input('productName'));
             $ProductOfferList->product_online = $request->input('OnlineProduct',2);
+            if ($request->hasFile('file')) {
+                $image = $request->file('file');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->storeAs('uploads/product', $imageName, 'public');
+                $ProductOfferList->file = $imageName;  
+            }
             $ProductOfferList->save();
         return redirect()->back()->with('success', 'Product Offer List added successfully!');
     }
@@ -720,6 +781,17 @@ return $html;
         $ProdcutOffer->subcategory_id = $request->Subcategories;
         $ProdcutOffer->proudct_deatils_id = implode(',', $request->input('productList'));
         $ProdcutOffer->product_online = $request->input('Online', 2);
+         if($request->hasFile('file') && $request->file('file') != null){
+            if ($request->hasFile('file')) {
+                $image = $request->file('file');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->storeAs('uploads/product', $imageName, 'public');
+                $ProdcutOffer->file = $imageName;
+            }
+        }else{
+            $imageName = $request->banner_file_old;
+            $ProdcutOffer->file = $imageName;
+        }
         $ProdcutOffer->save();
         return redirect()->route('get.ProdcutOffer')->with('success', 'Product Offer updated successfully!');
    }
@@ -741,6 +813,100 @@ return $html;
 
         return back()->with('success', 'Products Imported Successfully!');
     }
+
+    #auth vivek
+    # offer list
+     public function showOffer($label)
+    {   
+
+        $id = Crypt::decrypt($label);
+        $rawData = DB::table('products_offers as po')
+            ->leftJoin('product_details as pp', DB::raw('FIND_IN_SET(pp.id, po.proudct_deatils_id)'), '>', DB::raw('0'))
+            ->leftJoin('product_gallery as pg', 'pg.product_id', '=', 'pp.id')
+            ->where('po.product_online', 1)
+            ->where('po.id', $id)
+            ->select(
+                'po.id as offer_id',
+                'po.label',
+                'po.product_online',
+                'po.proudct_deatils_id',
+                'pp.id as product_id',
+                'pp.listing_name',
+                'pp.product_cost',
+                'pp.offer_price',
+                'po.file as image',
+                'pg.file'
+            )
+            ->get();
+            //return  $rawData;
+            $grouped = $rawData->groupBy('offer_id')->map(function ($items) {
+                $first = $items->first();
+
+                $products = $items->groupBy('product_id')->map(function ($productItems) {
+                    $firstProduct = $productItems->first();
+
+                    return [
+                        'id' => $firstProduct->product_id,
+                        'listing_name' => $firstProduct->listing_name,
+                        'product_cost' => $firstProduct->product_cost,
+                        'offer_price' => $firstProduct->offer_price,
+                        'images' => $firstProduct->image,
+                        'gallery' => $productItems->pluck('file')->filter()->unique()->values(),
+                    ];
+                })->values();
+
+                return [
+                    'id' => $first->offer_id,
+                    'label' => $first->label,
+                    'product_online' => $first->product_online ?? '',
+                    'products' => $products,
+                ];
+            })->values();
+        $recentviews = RecentViews::with(['productprice','galleries'])->orderbydesc('id')
+        ->where('user_id', auth()->id())
+        ->get();
+        $recentviewlist =[];
+        foreach ($recentviews as $lists) {
+             $product = $lists->productprice;
+              $file = optional($product->galleries->first())->file;
+            $recentviewlist[] = [
+            'product_name' => $product->listing_name ?? '',
+            'file' => $file ?? 'default.jpg',
+            ];
+        }
+        return view('offerlist', compact('grouped','recentviewlist') );
+    }
+
+    #view video
+    #authr: vivek
+    public function GetUploadvideo(){
+        $videourl = videourl::orderbydesc('id')->get();
+        return view('Admin.upload_video',compact('videourl'));
+    }
+    #Add CreateVideo
+    #authr: vivek
+    public function CreateUploadvideo(Request $request){
+         $videourl = new videourl();
+            $videourl->url = $request->input('videourl');
+            $videourl->save();
+        return redirect()->back()->with('success', 'Video url added successfully!');
+    }
+
+    #delete url
+    #authr: vivek
+    public function Deleteurl($id){
+        try {
+            $decryptedId = Crypt::decrypt($id);
+            $homepage = videourl::findOrFail($decryptedId);
+            $homepage->delete();
+
+            return redirect()->back()->with('success', 'Url deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong.');
+        }
+
+    }
+
 
 
 }

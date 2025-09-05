@@ -64,7 +64,7 @@
                         @foreach($moderatedlist as $index=> $review)
                         <tr>
                             <td>{{$review->created_at->format('d-m-Y')}}</td>
-                            <td>{{$review->product->name}}</td>
+                            <td>{{$review->product->listing_name}}</td>
                             <td>{{$review->users->name}}</td>
                             <td>{{$review->rating}}</td>
                             <td>
@@ -77,7 +77,7 @@
                             <td>{{$review->updated_at->format('d-m-Y')}}</td>
                             <td class="text-center">
                             <a href="javascript:void(0)" data-id="{{ Crypt::encrypt($review->id) }}" class="las la-eye btn btn-secondary mx-1 openReviewModal"></a>
-                            <a href="{{ url('tsfy-admin/delete-reviews/', Crypt::encrypt($review->id)) }}"  onclick="return confirm('Are you sure you want to delete this Moderated review?')" class="las la-trash-alt btn btn-secondary mx-1"></a></td>
+                            <a href="{{ url('tsfy-admin/delete-reviews', Crypt::encrypt($review->id)) }}"  onclick="return confirm('Are you sure you want to delete this Moderated review?')" class="las la-trash-alt btn btn-secondary mx-1"></a></td>
                         </tr>  
                         @endforeach                                 
                     </tbody>
@@ -180,7 +180,7 @@
     $('#reviewWindow').modal('show');
 
     $.ajax({
-        url: 'tsfy-admin/get-review/' + reviewId,
+        url: 'get-review/' + reviewId,
         type: 'GET',
         success: function(response) {
             $('#modalReviewDate').text(response.review_date);
@@ -207,7 +207,7 @@
         var reviewId = $('#reviewIds').val();
         var newStatus = $('#modalPublishSwitch').is(':checked') ? 2 : 3;
         $.ajax({
-            url: 'tsfy-admin/update-review-status',
+            url: 'update-review-status',
             type: 'POST',
             data: {
                 review_id: reviewId,

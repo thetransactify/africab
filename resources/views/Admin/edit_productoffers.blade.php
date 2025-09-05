@@ -24,6 +24,12 @@
                                         <input data-role="tagsinput" name="label" type="text" value="{{$productList->label}}"> <span>label</span>
                                     </label> 
                             </div>
+
+                             <div class="form-group mb-4">
+                                    <label class="form-group has-float-label mb-1">
+                                        <input  name="file" type="file"> <span>Banner file</span>
+                                    </label>
+                            </div>  
                         <div class="form-group mb-4">
                             <label class="form-group has-float-label mb-4">                      
                                 <select id="CategoryList" name="CategoryList" class="form-control select2-single" data-width="100%">
@@ -76,6 +82,7 @@
                                           <label class="custom-switch-btn" for="switch3"></label>
                                          <!--  <input type="hidden" name="Online" value="0"> -->
                                     </div>
+                                    <input type="text" name="banner_file_old" value="{{$productList['file']}}" hidden>
                                 </div>                             
                                 </div>                      
                                 <div  class="form-group text-right">                                                            
@@ -84,6 +91,15 @@
                             </form>
                         </div>
                     </div>
+                </div>
+
+                 <div class="col-12 col-md-6 mb-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="mb-4 font-weight-bold">Offer Banner</h5>
+                            <div class="img fullwidth lightbox"><a href="{{ asset('storage/uploads/product/' . $productList['file']) }}"><img src="{{ asset('storage/uploads/product/' . $productList['file']) }}"/></a></div>
+                        </div>
+                    </div>        
                 </div>
                 
                 </div>

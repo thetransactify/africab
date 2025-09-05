@@ -98,14 +98,19 @@ la-trash-alt btn btn-secondary mx-1"></a></td>
                                         </div>
                                         <div class="modal-body">
                             
-                            <form action="{{url('tsfy-admin/add-productoffers')}}" method="post">
+                            <form action="{{url('tsfy-admin/add-productoffers')}}" method="post"  enctype="multipart/form-data">
                             	@csrf
 
                              <div class="form-group mb-4">
 									<label class="form-group has-float-label mb-1">
 										<input data-role="tagsinput" name="name" type="text"> <span>Offer label</span>
 									</label> 
-							</div> 	
+							</div>
+                             <div class="form-group mb-4">
+                                    <label class="form-group has-float-label mb-1">
+                                        <input  name="file" type="file" required> <span>Banner file</span>
+                                    </label> 
+                            </div> 	
                             <div class="form-group mb-4">
                             <label class="form-group has-float-label mb-4">
                                <select id="CategoryList" name="CategoryList" class="form-control select2-single" data-width="100%" required>
@@ -163,12 +168,12 @@ $(document).ready(function () {
         var categoryId = $(this).val();
         if (categoryId) {
             $.ajax({
-                url: "get-products/" + categoryId,
+                url: "get-subcategiores/" + categoryId,
                 type: 'GET',
                 success: function (data) {
                     $('#productList').empty().append('<option label="&nbsp;">Select Product</option>');
                     $.each(data, function (key, value) {
-                        $('#productList').append('<option value="' + value.id + '">' + value.name + '</option>');
+                        $('#productList').append('<option value="' + value.category_id + '">' + value.name + '</option>');
                     });
                 }
             });
@@ -188,7 +193,7 @@ $(document).ready(function () {
                 success: function (data) {
                     $('#productName').empty().append('<option label="&nbsp;">Select Product</option>');
                     $.each(data, function (key, value) {
-                        $('#productName').append('<option value="' + value.id + '">' + value.listing_name + '</option>');
+                        $('#productName').append('<option value="' + value.product_id + '">' + value.listing_name + '</option>');
                     });
                 }
             });

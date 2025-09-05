@@ -14,6 +14,7 @@ use App\Models\Category;
 use App\Models\ProductPrice;
 use App\Models\Orders;
 use App\Models\offerlist;
+use App\Models\videourl;
 use App\Models\Review;
 use App\Models\RecentViews;
 use Illuminate\Support\Facades\DB;
@@ -27,9 +28,9 @@ class HomeController extends Controller
     	$Homeslider = Homeslider::orderbydesc('id')->get();
     	return view('Admin.home',compact('Homeslider'));
     }
- public function GetClientHomepagessss(){
-    	return view('lunch');
-    }
+ // public function GetClientHomepagessss(){
+ //    	return view('lunch');
+ //    }
 
     #Add CreateHomepage
     #authr: vivek
@@ -162,20 +163,20 @@ class HomeController extends Controller
         $Homeslider = Homeslider::latest()->take(3)->get();
         $ads = advertisement::orderbydesc('id')->get();
         $Categories = Category::where('status',1)->get();
-        $productlist = ProductPrice::with(['category'])->orderbydesc('id')->get();
+        $videourl = videourl::first();
+        $productlist = ProductPrice::with(['category','galleries'])->orderbydesc('id')->get()
+       ->groupBy(fn($product) => $product->category->id) 
+                ->map(fn($products) => $products->first()) 
+                ->values();
         $bestsallerlist = Orders::with(['products','products.category','products.galleries'])->orderbydesc('id')->get()->unique('product_id')->values();
-        //return $bestsallerlist ;
-
         $data = [];
+        //return  $bestsallerlist;
 
         foreach ($bestsallerlist as $order) {
             $product = $order->products;
-            //dd($product);
             $category = $product?->category ?? null;
-            //$galleriess = $product?->galleries ?? null;
-            $price = $order->products?->first(); // First price only
-            $galleriess = optional($order->products->galleries)->first(); // First price only
-// return $galleriess ;
+            $price = $order->products?->first();
+            $galleriess = optional($order->products->galleries)->first();
             $data[] = [
                 'id'         => $price->id ?? '',
                 'order_id'         => $order->id ?? '',
@@ -218,21 +219,25 @@ class HomeController extends Controller
                 'pp.listing_name',
                 'pp.product_cost',
                 'pp.offer_price',
+                'po.file as image',
                 'pg.file'
             )
             ->get();
-           // return  $rawData;
+            //return  $rawData;
             $grouped = $rawData->groupBy('offer_id')->map(function ($items) {
                 $first = $items->first();
 
-                $products = $items->groupBy('product_id')->map(function ($productItems) {
+                $products = $items->groupBy('id')->map(function ($productItems) {
                     $firstProduct = $productItems->first();
 
                     return [
                         'id' => $firstProduct->product_id,
+                        'ids' => $firstProduct->offer_id,
+                        'label' => $firstProduct->label,
                         'listing_name' => $firstProduct->listing_name,
                         'product_cost' => $firstProduct->product_cost,
                         'offer_price' => $firstProduct->offer_price,
+                        'images' => $firstProduct->image,
                         'gallery' => $productItems->pluck('file')->filter()->unique()->values(),
                     ];
                 })->values();
@@ -240,29 +245,31 @@ class HomeController extends Controller
                 return [
                     'id' => $first->offer_id,
                     'label' => $first->label,
-                    'product_online' => $first->product_online,
+                    'product_online' => $first->product_online ?? '',
                     'products' => $products,
                 ];
             })->values();
-
+       // return $grouped;
         $recentviews = RecentViews::with(['productprice','galleries'])->orderbydesc('id')
         ->where('user_id', auth()->id())
         ->get();
+        // return  $recentviews;
+
         $recentviewlist =[];
         foreach ($recentviews as $lists) {
              $product = $lists->productprice;
-              $file = optional($product->galleries->first())->file;
+              $file = optional($product->galleries->first())->file ?? '-';
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
             'file' => $file ?? 'default.jpg',
             ];
         }
-        //return $recentviewlist;
+        //return $productlist;
 
 
-        // return response()->json($grouped);
+         //return response()->json($grouped);
 
-        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped','recentviewlist'));
+        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped','recentviewlist','videourl'));
     }
 
     #view CreateAdvertisement
@@ -308,6 +315,5 @@ class HomeController extends Controller
         }
 
     }
-
 
 }

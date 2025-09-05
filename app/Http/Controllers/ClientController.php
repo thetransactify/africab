@@ -10,6 +10,7 @@ use App\Models\Review;
 use App\Models\Orders;
 use App\Models\Wishlist;
 use App\Models\address;
+use App\Models\faqs;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -26,6 +27,7 @@ class ClientController extends Controller
     # auth: vivek
     public function ShowReview(){
     	$reviewlist = Review::with(['Product','users'])->where('status',1)->get();
+      //return $reviewlist;
     	return view(' Admin.reviewlist',compact('reviewlist'));
     }
 
@@ -36,13 +38,13 @@ class ClientController extends Controller
 	    $ids = Crypt::decrypt($id);
 	    $review = Review::with(['Product','users'])->findOrFail($ids);
 	    return response()->json([
-	    	'ids' => Crypt::encrypt($review->id),
+	    	 'ids' => Crypt::encrypt($review->id),
 	        'review_date' => $review->created_at->format('d-m-y'),
 	        'customer_name' => $review->users->name,
 	        'customer_email' => $review->users->email,
-	        'product_name' => $review->product->name,
+	        'product_name' => $review->product->listing_name,
 	        'rating' => $review->rating,
-	        'comment' => $review->comment,
+	        'comment' => $review->comment
 	    ]);
 	}
 
@@ -167,8 +169,10 @@ class ClientController extends Controller
               default => 'Unknown'
             };
             $Orderhistory[]=[
+              'id'           => $orderdeatils->id,
               'order_number' => $orderdeatils->order_number,
               'order_status' => $statusTexts,
+              'payment'     =>  $orderdeatils->payment_status == 1  ? 'Pending' : ($orderdeatils->payment_status == 2 ? 'Paid'  : ($orderdeatils->payment_status == 3  ? 'Failed' : 'Unknown')), 
               'order_date' => $orderdeatils->created_at->format('d-m-y'),
               'payment_method' => $orderdeatils->method
             ]; 
@@ -180,13 +184,13 @@ class ClientController extends Controller
    # auth: vivek
     public function MyWishlist(){
         $id = Auth::user()->id;
-        $MyWishlist = Wishlist::leftJoin('product_details as pd', 'Wishlists.product_id', '=', 'pd.id')
+        $MyWishlist = Wishlist::leftJoin('product_details as pd', 'wishlists.product_id', '=', 'pd.id')
                 ->leftJoin('category as cat', 'pd.category_id', '=', 'cat.id')
-                ->leftJoin(DB::raw('(SELECT * FROM product_gallery pg1 WHERE pg1.id = (SELECT MIN(id) FROM product_gallery WHERE product_id = pg1.product_id)) as pg'), 'Wishlists.product_id', '=', 'pg.product_id')
+                ->leftJoin(DB::raw('(SELECT * FROM product_gallery pg1 WHERE pg1.id = (SELECT MIN(id) FROM product_gallery WHERE product_id = pg1.product_id)) as pg'), 'wishlists.product_id', '=', 'pg.product_id')
                 ->where('user_id', $id)
                 ->select(
                     'pd.id',
-                    'Wishlists.id as ids',
+                    'wishlists.id as ids',
                     'cat.name',
                     'pd.listing_name',
                     'pd.product_cost',
@@ -238,7 +242,8 @@ class ClientController extends Controller
     # client ManageAddress
     # auth: vivek
     public function SupportCentre(){
-        return view('support-centre');
+         $faqs = faqs::orderbydesc('id')->get();
+        return view('support-centre',compact('faqs'));
     }
 
     #edit client
@@ -272,31 +277,16 @@ class ClientController extends Controller
     return back()->with('success', 'Profile updated successfully.');
   }
 
-  #client reviewlist
-  #auth: vivek
-    public function AddReviews(Request $request){
-        $request->validate([
-        'product_price_id' => 'required',
-        'rating' => 'required',
-        'review' => 'required',
-        'user_id' => 'required',
-    ]);
-     Review::create([
-        'user_id' => $request->user_id,
-        'product_id' => $request->product_price_id,
-        'rating' => $request->rating,
-        'comment' => $request->review,
-        'status' => 1, // pending approval
-    ]);
 
   # client reviewlist
   # auth: vivek
     public function AddReviews(Request $request){
+     // return $request;
         $request->validate([
         'product_price_id' => 'required',
         'rating' => 'required',
         'review' => 'required',
-        'user_id' => 'required',
+        'user_id' => 'required'
     ]);
      Review::create([
         'user_id' => $request->user_id,

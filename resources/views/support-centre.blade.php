@@ -32,24 +32,13 @@
 				</div>
 				<p>We are glad to help. If you have any questions regarding our products or purchases you have made, you can refer to our Frequently Asked Questions Section for self resolutions.</p>
 				<div id="ac-tab" class="ac-tab pt-3">
-					<h2 class="ac-title">I am only able to add 6 items per product type to my cart..</h2>
-					<div class="ac-content">
-						<p>We are currently limiting to 6 items per product type order . Incase you need to order more then 2 items, you can always create a new order. You can however buy another items (2 items per product type).</p>
+					 @foreach($faqs as $faq)
+					 <h2 class="ac-title">{{ $faq->question }}</h2>
+                     <div class="ac-content">
+                    <p>{!! nl2br(e($faq->answer)) !!}</p>
+                       </div>
+					 @endforeach
 					</div>
-					<h2 class="ac-title">I am outside India, I need to buy from Enjoy.</h2>
-					<div class="ac-content">
-						<p>We are currently only shipping our products within India. If you have a specific requirements, please get in touch.</p></div>
-					<h2 class="ac-title">I made a purchase, and my money got debited but I am yet to recieve a confirmation Email or SMS</h2>
-					<div class="ac-content">
-						<p>We have a no return and refund policy. Incase you have any complaints or recieved damaged goods, please contact us immediately or incase the goods were damaged on transit, please click a photo of the package opened 
-							and email us. Please do not forget to mention your Order ID along with your email after which we will provide a resolution.</p>
-					</div>
-					<h2 class="ac-title">Do you have a emailing list? How to subscribe or unsubscribe.</h2>
-					<div class="ac-content">
-						<p>When you register, you are asked if you would like to get information and updates from Enjoy. 
-							Incase you have opted out and want to opt in again, visit your dashboard and click on "<b><a href="user-settings.html"><u>Settings</u></a></b>". 
-							Similarly you can opt out at the same page.</p>
-					</div></div>
 				
 				
 			</div>

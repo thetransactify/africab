@@ -34,9 +34,11 @@ Route::get('/forget-password', [LoginController::class, 'ForgetPassword']);
 
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:2'])->group(function () {
 //Dashboard
 Route::get('/dashboard', [DashboardController::class, 'GetDashboard']);
+Route::get('/Dashboard-Orders/{id}', [DashboardController::class, 'DashboardOrders'])->name('Dashboard-Orders');
+Route::post('/orders/update-group', [DashboardController::class, 'updateGroup'])->name('orders.updateGroup');
 
 //Category
 Route::get('/manage-profile', [DashboardController::class, 'ManageProfile']);
@@ -46,7 +48,7 @@ Route::get('/view-category', [CategoryController::class, 'Viewcategory'])->name(
 Route::post('/post-category', [CategoryController::class, 'CreateCategory']);
 Route::get('edit-category/{id}', [CategoryController::class, 'EditCategory'])->name('category.edit');
 Route::post('/update-category/{id}', [CategoryController::class, 'UpdateCategory'])->name('category.update');
-Route::get('/delete-category/{id}', [CategoryController::class, 'DeleteCategory'])->name('category.delete');
+Route::get('/delete-categorys/{id}', [CategoryController::class, 'DeleteCategory'])->name('category.delete');
 // product
 Route::get('/create-subcategory', [CategoryProductController::class, 'showProduct']);
 Route::get('/view-subcategory', [CategoryProductController::class, 'ViewProduct'])->name('prodcut.view');
@@ -56,6 +58,7 @@ Route::post('/update-product/{id}', [CategoryProductController::class, 'UpdatePr
 Route::get('/delete-category/{id}', [CategoryProductController::class, 'DeleteProduct'])->name('product.delete');
 Route::get('/product-price', [CategoryProductController::class, 'ProdcutPriceList'])->name('get.productlists');
 Route::get('/get-products/{category_id}', [CategoryProductController::class, 'getProducts'])->name('get.products');
+Route::get('/get-subcategiores/{category_id}', [CategoryProductController::class, 'subcategiores'])->name('get.productssd');
 Route::get('/get-productslist/{category_id}', [CategoryProductController::class, 'getProductlist'])->name('get.productlist');
 Route::post('/add-productlist', [CategoryProductController::class, 'CreateProductList']);
 Route::get('/edit-productlist/{id}', [CategoryProductController::class, 'EditProductList']);
@@ -94,6 +97,10 @@ Route::get('/customer-wishlist', [CategoryProductController::class, 'Getwishlist
 Route::post('/customers/{id}/toggle-status', [CategoryProductController::class, 'toggleStatus']);
 Route::post('/customer-orders', [CategoryProductController::class, 'fetchOrders'])->name('customer.orders');
 Route::post('/customer/wishlists', [CategoryProductController::class, 'fetchWishlist'])->name('customer.wishlist');
+// upload video
+Route::get('/upload-video', [CategoryProductController::class, 'GetUploadvideo'])->name('get.GetUploadvideo');
+Route::post('/post-video', [CategoryProductController::class, 'CreateUploadvideo'])->name('get.CreateUploadvideo');
+Route::get('/delete-url/{id}', [CategoryProductController::class, 'Deleteurl'])->name('url.delete');
 
 //Admin Homepage
 Route::get('/homepage', [HomeController::class, 'GetHomepage'])->name('get.GetHomepage');
@@ -138,6 +145,8 @@ Route::get('/testing', [HomeController::class, 'GetClientHomepage'])->name('get.
 Route::get('/test', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
 Route::get('/product-category/{slug}', [CategoryProductController::class, 'Clientshow'])->name('product-category.show');
 Route::get('/product/{slug}', [CategoryProductController::class, 'GetProduct'])->name('product.shows');
+Route::get('/offerlist/{label}', [CategoryProductController::class, 'showOffer'])->name('offerlist.show');
+
 Route::get('/reviews', [ClientController::class, 'ClientReviews'])->name('ClientReviews.shows');
 Route::get('/offers', [ClientController::class, 'OffersDatils'])->name('offers.shows');
 
@@ -154,7 +163,7 @@ Route::post('/post-register', [LoginController::class, 'postregister']);
 Route::get('/search-products', [CategoryProductController::class, 'search'])->name('search.products');
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','role:1'])->group(function () {
 Route::get('/my-account', [ClientController::class, 'MyAccount'])->name('MyAccount.shows');
 Route::get('/order-history', [ClientController::class, 'Orderhistory'])->name('Orderhistory.shows');
 Route::get('/my-wishlist', [ClientController::class, 'MyWishlist'])->name('MyWishlist.shows');
@@ -183,7 +192,7 @@ Route::get('/support-centre', [ClientController::class, 'SupportCentre'])->name(
 Route::get('/selcom-test', [ClientController::class, 'createOrderSelcoms']);
 Route::post('/payment', [PaymentController::class, 'createOrderSelcom'])->name('selcom.create.order');
 Route::get('/payment-page', [PaymentController::class, 'paymentPage'])->name('payment.page');
-Route::get('/payment-cancel/{orderId}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
+Route::get('/payment-cancel/{order}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
 Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
 
 

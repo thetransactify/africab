@@ -51,20 +51,20 @@
 					<li><a href="#desc-reviews">({{ $reviewCount }} {{ Str::plural('customer review', $reviewCount) }})</a></li>
 				</ul>
 				<ul class="prd-sub-link">
-	                 <li><i class="fas fa-times red-color"></i> out of stock</li>
+	                <!--  <li><i class="fas fa-times red-color"></i> out of stock</li> -->
 	                 <li><i class="fas fa-check green-color"></i> in stock</li>
 	            </ul>
             </div>
 	</div>
 	<div class="col-xxl-auto col-xl-auto col-lg-auto col-md-auto col-12">
 	<div class="pp-slider">
-		<div><a class="pv-icon" href="{{ asset('storage/uploads/category/'. $data['product_price']['category_file']) }}" data-lightbox="prd-view" data-title="{{$data['product_price']['listing_name']}}"><img src="{{ asset('storage/uploads/category/'. $data['product_price']['category_file']) }}" /></a></div>
+
 		@foreach($data['product_price']['galleries'] as $gallery)
 		<div><a class="pv-icon" href="{{ asset('storage/uploads/product/' . $gallery) }}" data-lightbox="prd-view" data-title="Product Name"><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></a></div>
 		@endforeach
 	</div>
 	<div class="pp-slider-thumbnail">
-		<div><img src="{{ asset('storage/uploads/category/'. $data['product_price']['category_file']) }}" /></div>
+		<div></div>
 		@foreach($data['product_price']['galleries'] as $gallery)
 		<div><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></div>
 		@endforeach
@@ -185,7 +185,7 @@
 			
 	</div>	
 	</div>
-<div class="row">
+<!-- <div class="row">
 			<div class="col-lg-12">
 				<div class="main-title pb-5">
 					<h1>More Options<span class="">Category Name</span></h1>
@@ -265,7 +265,7 @@ open_in_new
 		</div>
 	
 	</div>
-</div>
+</div> -->
 
 <!-- eCom Features-->
 <!-- recent view-->
@@ -385,7 +385,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		})
 		.catch(err => {
 			console.error(err);
-			alert("Failed to add to cart.");
+			//alert("Failed to add to cart.");
+			 window.location.href = "/login";
 		});
 	});
 });

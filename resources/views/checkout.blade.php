@@ -424,8 +424,8 @@ $('#confirmOrderBtn').click(function (e) {
         })
         .then(res => res.json())
         .then(data => {
-            if (data.redirect_url) {
-                window.location.href = data.redirect_url;
+            if (data.status === "success" && data.redirect_url) {
+            window.location.href = data.redirect_url;
             } else {
                 alert("Error: " + data.message);
             }

@@ -33,61 +33,95 @@
         </div>
     </div>
 </div>
-@if(!empty($grouped) && count($grouped) > 0)
-    <div class="home-advertisement">
-        <div class="container-fluid px-0 px-sm-3">
-            @foreach($grouped as $val)
-                <div class="discount-banner mb-4 p-2 p-sm-3 bg-light rounded">
 
-                    <h2 class="text-danger text-center mb-2 mb-sm-3">{{ $val['label'] }}</h2>
-                    
-                    @if(isset($val['discount_percentage']))
-                        <div class="badge bg-success mb-2 mb-sm-3 fs-6 d-block d-md-inline-block text-center">
-                            {{ $val['discount_percentage'] }}% OFF
-                        </div>
-                    @endif
-                    
-                    <div class="row g-2 g-sm-3">
-                        @foreach($val['products'] as $product)
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 mb-sm-3">
-                                <div class="category-item p-2 p-sm-3 border h-100 d-flex flex-column">
-                                    @if(!empty($product['gallery']) && count($product['gallery']) > 0)
-                                    <figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($product['listing_name'])) }}';">
-                                    <div class="product-gallery mb-2 mb-sm-3 text-center flex-grow-0">
-                                        <img src="{{ asset('storage/uploads/product/' . $product['gallery'][0]) }}" 
-                                        class="img-fluid rounded mx-auto"
-                                        style="max-height: 150px; width: auto; max-width: 100%;"
-                                        alt="{{ $product['listing_name'] }}">
-                                    </div>
-                                    @endif
-                                    <h5 class="product-name mb-1 mb-sm-2 fs-6 fs-sm-5">{{ $product['listing_name'] }}</h5>
-                                    <div class="price-section mt-auto">
-                                        <div class="d-flex align-items-center flex-wrap">
-                                            <span class="offer-price fw-bold text-danger fs-6 fs-sm-5 me-1 me-sm-2">
-                                               TSh{{ number_format($product['offer_price'], 2) }}
-                                            </span>
-                                            @if($product['offer_price'] < $product['product_cost'])
-                                                <span class="original-price text-muted text-decoration-line-through fs-7 fs-sm-6">
-                                                    TSh{{ number_format($product['product_cost'], 2) }}
-                                                </span>
-                                            @endif
-                                        </div> 
-                                        @php
-                                            $discount = 0;
-                                            if($product['product_cost'] > 0) {
-                                                $discount = (($product['product_cost'] - $product['offer_price']) / $product['product_cost']) * 100;
-                                            }
-                                        @endphp
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+@if(!empty($grouped) && count($grouped) > 0)
+    <div class="home-advertisement mt-4">
+        <div class="container-fluid px-0 px-sm-3">
+            <div class="col-lg-6 col-md-6 col-12">
+                <div class="main-title">
+                    <h1>Offer<span>Lists</span></h1>
                 </div>
-            @endforeach
+            </div>
+            
+            <div class="row align-items-center">
+                <!-- Left side product images (2 items) -->
+                <div class="col-md-3 col-sm-3 col-12">
+                    <div class="row align-items-center">
+                        @foreach($grouped as $index => $ad)
+                            @if($index < 2) {{-- Display first 2 products on left --}}
+                                @foreach($ad['products'] as $product)
+                                    <div class="col-md-12 col-sm-12 col-6">
+                                        <a href="{{ url('offerlist/' . Crypt::encrypt($product['ids'])) }}" class="home-single-ad my-2 d-block">
+                                            <img src="{{ asset('storage/uploads/product/' . $product['images']) }}"
+                                                 class="img-fluid rounded shadow-sm"
+                                                 alt="{{ $product['listing_name'] }}">
+                                        </a>
+                                    </div>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    </div>    
+                </div>            
+                
+                <!-- Center video section -->
+                <div class="col-md-6 col-sm-6 col-12">
+                    <iframe class="home-videoad my-1 w-100" src="{{$videourl->url}}" 
+                            title="YouTube video player" frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen
+                            style="height: 300px;"></iframe>
+                </div>
+                <div class="col-md-3 col-sm-3 col-12">
+                    <div class="row align-items-center">
+                        @foreach($grouped as $index => $ad)
+                            @if($index >= 2 && $index < 4) {{-- Display next 2 products on right --}}
+                                @foreach($ad['products'] as $product)
+                                    <div class="col-md-12 col-sm-12 col-6">
+                                        <a href="{{ url('offerlist/' . Crypt::encrypt($product['ids'])) }}" class="home-single-ad my-2 d-block">
+                                            <img src="{{ asset('storage/uploads/product/' . $product['images']) }}"
+                                                 class="img-fluid rounded shadow-sm"
+                                                 alt="{{ $product['listing_name'] }}">
+                                        </a>
+                                    </div>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    </div>    
+                </div>
+            </div>
         </div>
     </div>
 @endif
+
+@if(!empty($grouped) && count($grouped) > 0)
+    <div class="home-advertisement mt-4">
+        <div class="container-fluid px-0 px-sm-3">
+        	<div class="col-lg-6 col-md-6 col-12">
+				<div class="main-title">
+				<h1>Offer<span>Lists</span></h1>
+				</div>
+			</div>
+            <div class="row g-3">
+                @foreach($grouped as $ad)
+                    @foreach($ad['products'] as $product)
+                        <div class="col-md-6 col-sm-6 col-12">
+                            <div class="card h-100 shadow-sm border-0 rounded overflow-hidden">
+                                <a href="{{ url('offerlist/' . Crypt::encrypt($product['ids'])) }}" class="d-block">
+                                    <img src="{{ asset('storage/uploads/product/' . $product['images']) }}"
+                                         class="card-img-top img-fluid"
+                                         alt="{{ $product['listing_name'] }}"
+                                         >
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                @endforeach
+            </div>
+        </div>
+    </div>
+@endif
+
+
 @if(!empty($ads) && count($ads) > 0)
 <div class="home-advertisement">
 	<div class="container-fluid">
@@ -142,16 +176,20 @@
 		@foreach($productlist as $product)
 			<div class="col-xxl-3 col-xl-4 col-lg-4 col-6">
 				<div class="prd-item">
-					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}'">
+					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category?->name ?? '')) }}'">
 						<span class="prd-tag new">New</span>
-						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $product->product->file) }}" />
+
+                        @if($product->galleries && count($product->galleries) > 0)
+						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $product->galleries[0]->file) }}" />
+						@endif
+
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $product['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="#"><span class="material-symbols-rounded">open_in_new</span></a></li>
 							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
 						</ul>
 					</figure>
-					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="product-single.html">{{$product->product->name}}</a></h3>
+					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}">{{$product->product->name}}</a></h3>
 					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span><i>TSh</i>{{$product->product_cost}}</h5>
 				</div>
 			</div>

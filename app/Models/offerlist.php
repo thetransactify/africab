@@ -17,6 +17,7 @@ class offerlist extends Model
         'subcategory_id',
         'proudct_deatils_id',
         'product_online',
+        'file',
         'created_at',
         'updated_at',
     ];

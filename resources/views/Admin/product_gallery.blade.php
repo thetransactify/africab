@@ -138,7 +138,7 @@ $(document).ready(function () {
                 success: function (data) {
                     $('#productList').empty().append('<option label="&nbsp;">Select Product</option>');
                     $.each(data, function (key, value) {
-                        $('#productList').append('<option value="' + value.id + '">' + value.name + '</option>');
+                        $('#productList').append('<option value="' + value.id + '">' + value.listing_name + '</option>');
                     });
                 }
             });

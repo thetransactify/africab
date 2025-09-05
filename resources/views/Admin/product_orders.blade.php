@@ -25,28 +25,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                @foreach($ordergroups as $order)
                                     <tr>
-                                        <td><a href="javascript:void(0);" data-toggle="modal" data-target="#orderDetails" title="Manage Order" title="Go to Order">HBT5000</a></td>
-                                        <td>09/04/2020</td>
-                                        <td>John Smith</td>
-                                        <td><small class="font-weight-bold ">TsH</small>1215.00</td>
-                                        <td>t5bj8eu98oqn4e5wrkd</td>
-                                        <td>New</td>
+                                        <td><a href="{{ route('Dashboard-Orders', $order['order_group']) }}" data-toggle="modal" data-target="#orderDetails" title="Manage Order" title="Go to Order">{{ $order['order_group'] }}</a></td>
+                                        <td>{{ $order['created_at'] }}</td>
+                                        <td>{{ $order['customer_name'] }}</td>
+                                        <td><small class="font-weight-bold ">TsH</small>{{ number_format($order['amount'], 2) }}</td>
+                                        <td>{{ $order['txn_id'] }}</td>
+                                        <td>{{ $order['order_status'] }}</td>
                                         <td>
-                                        <a href="javascript:void(0);" data-toggle="modal" data-target="#orderDetails" class="las la-eye btn btn-secondary mx-1 my-3" title="Manage Order"></a>
+                                        <a href="{{ route('Dashboard-Orders', $order['id']) }}"  class="las la-eye btn btn-secondary mx-1 my-3" title="Manage Order"></a>
                                         <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Order"></a></td>
                                     </tr>
-                                    <tr>
-                                        <td><a href="javascript:void(0);" data-toggle="modal" data-target="#orderDetails" title="Manage Order" title="Go to Order">HBT4999</a></td>
-                                        <td>09/04/2020</td>
-                                        <td>John Smith</td>
-                                        <td><small class="font-weight-bold ">TsH</small>1215.00</td>
-                                        <td>ikrtrcyzf82ga1dk4ebz</td>
-                                        <td>Packed</td>
-                                        <td>
-                                        <a href="javascript:void(0);" data-toggle="modal" data-target="#orderDetails" class="las la-eye btn btn-secondary mx-1 my-3" title="Manage Order"></a>
-                                        <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Order"></a></td>
-                                    </tr>                                   
+                                @endforeach                                      
 								</tbody>
 							</table>
 							</div>

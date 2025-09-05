@@ -62,7 +62,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $product->created_at->format('d-m-Y') }}</td>
                                     <td>{{ $product->name }}</td>
-                                    <td>{{ $product->category->name }}</td>
+                                    <td>{{ $product->category->name}}</td>
                                     @if($product->check_remark=2)
                                     <td><span class="badge badge-pill badge-primary m-1">New</span></td>
                                     @elseif($product->check_remark=3)

@@ -220,11 +220,11 @@ if (Auth::attempt($credentials)) {
 
     $user = Auth::user();
 
-    if ($user->role == 1) {
         if ($user->is_suspended == 0) {
             Auth::logout();
             return back()->with('error', 'Your account is suspended. Contact the admin.');
         }
+        if ($user->role == 1) {
 
         return redirect()->intended('/my-account')->with('success', 'Logged in successfully');
     } else {
@@ -233,6 +233,7 @@ if (Auth::attempt($credentials)) {
     }
 
 } else {
+    Auth::logout();
     return back()->with('error', 'Invalid credentials or unauthorized access. Contact the admin.');
 }
 

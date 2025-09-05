@@ -8,12 +8,12 @@
 	<div class="container-fluid">
 		<div class="row align-items-center">
 			<div class="col-md-6 col-12">
-				<h1>{{ $category->name }}</h1>
+				<h1>{{ $grouped[0]['label'] ?? '' }}</h1>
 			</div>
 			<div class="col-md-6 col-12">
 					<ul class="ph-breadcrumbs-list">
 					<li><a href="{{url('/index')}}">Home</a></li>
-					<li><a href="#" class="active">{{ $category->name }}</a></li>
+					<li><a href="#" class="active">{{ $grouped[0]['label'] ?? '' }}</a></li>
 				</ul>
 			</div>			
 			
@@ -54,38 +54,66 @@
 	</div>
 	<div class="row justify-content-start sub-cat-list">
 		<div class="col-12">
-			<ul class="cat-subs">
-					 <li class="label"><span>Available Varieties :</span></li>
-					 <li><a href="#" class="active">All</a></li>
-					 @if(!empty($subcategoriesList))
-					 @foreach($subcategoriesList as $list)
-	                 <li><a href="#">{{$list['name']}}</a></li>
-	                 @endforeach
-	                 @else
-	                 <li class="no-sub"><span>Not Available</span></li>
-	                 @endif
-	            </ul>
 		</div>
 	</div>
 	
 	<div class="row product-list justify-content-start">
-		@foreach($productsList as $listname)
-			<div class="col-lg-3 col-md-4 col-6 each-item">
-				<div class="prd-item">
-					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}';">
-						<span class="prd-tag new">New</span>
-						<img src="{{$listname['product_image']}}" />
-						<ul class="pab-list">
-							<li><a href="{{ route('wishlist.add', $listname['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
-						</ul>
-					</figure>
-				<h3 class="prd-name"><span>{{$listname['productname']}}</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}">{{$listname['category']}}</a></h3>
-			<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$listname['offer_price']}}</span><i>TSh</i>{{$listname['product_cost']}}</h5>
-				</div>	
-			</div>	
-        @endforeach  
+@if(!empty($grouped) && count($grouped) > 0)
+    <div class="row">
+        @foreach($grouped as $val)
+            @foreach($val['products'] as $listname)
+                <div class="col-lg-3 col-md-4 col-6 each-item">
+                    <div class="prd-item">
+                        <figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['listing_name'])) }}';">
+                            <span class="prd-tag new">New</span>
+
+                            {{-- image --}}
+                            @if(!empty($listname['gallery']) && count($listname['gallery']) > 0)
+                                <img src="{{ asset('storage/uploads/product/' . $listname['gallery'][0]) }}" 
+                                     alt="{{ $listname['listing_name'] }}"
+                                     class="img-fluid" 
+                                     style="object-fit:cover; height:200px; width:100%;">
+                            @else
+                                <img src="{{ asset('images/no-image.png') }}" 
+                                     alt="No Image" 
+                                     class="img-fluid" 
+                                     style="object-fit:cover; height:200px; width:100%;">
+                            @endif
+
+                            {{-- action buttons --}}
+                            <ul class="pab-list">
+                                <li>
+                                    <a href="{{ route('wishlist.add', $listname['id']) }}">
+                                        <i class="material-symbols-outlined fav">heart_plus</i>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['listing_name'])) }}">
+                                        <span class="material-symbols-rounded">open_in_new</span>
+                                    </a>
+                                </li>
+                               
+                            </ul>
+                        </figure>
+
+                        {{-- product info --}}
+                        <h3 class="prd-name">
+                            <span>{{ $listname['listing_name'] }}</span>
+                            <a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['listing_name'])) }}">
+                                {{ $val['label'] ?? 'Category' }}
+                            </a>
+                        </h3>
+                        <h5 class="prd-price">
+                            <span class="dc-price"><i>TSh</i>{{ $listname['offer_price'] }}</span>
+                            <i>TSh</i>{{ $listname['product_cost'] }}
+                        </h5>
+                    </div>  
+                </div>
+            @endforeach
+        @endforeach
+    </div>
+@endif
+ 
 </div>
 </div>
 </div>

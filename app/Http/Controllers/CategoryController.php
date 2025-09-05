@@ -21,7 +21,7 @@ class CategoryController extends Controller
     #Category List
     #authr: vivek
     public function Viewcategory(){
-        $categories = Category::orderBy('id', 'desc')->paginate(10);
+        $categories = Category::orderBy('id', 'desc')->where('status','1')->paginate(10);
         if ($categories->isEmpty()) {
             return view(' Admin.view_category',compact('categories'));
         }
@@ -111,16 +111,17 @@ class CategoryController extends Controller
     #soft delete Category
     #authr: vivek
    public function DeleteCategory($id){
+
         try {
             $decryptedId = Crypt::decrypt($id);
-            $category = Category::findOrFail($decryptedId);
+            $category = Category::where('id',$decryptedId)->first();
 
-            // Optional: delete image if exists
-            if ($category->file) {
+            if ($category && $category->file) {
                 Storage::disk('public')->delete('uploads/category/' . $category->file);
             }
-
-            $category->delete();
+            if ($category) {
+             $category->delete();
+            }
 
             return redirect()->back()->with('success', 'Category deleted successfully!');
         } catch (\Exception $e) {

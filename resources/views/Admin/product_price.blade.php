@@ -213,7 +213,7 @@ $(document).ready(function () {
         var categoryId = $(this).val();
         if (categoryId) {
             $.ajax({
-                url: "get-products/" + categoryId,
+                url: "get-subcategiores/" + categoryId,
                 type: 'GET',
                 success: function (data) {
                     $('#productList').empty().append('<option label="&nbsp;">Select Product</option>');

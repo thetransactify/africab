@@ -63,6 +63,7 @@ class CartController extends Controller
 			}
 			$subtotal = collect($cartDetails)->sum('total');
 		}	
+                    $subtotal = collect($cartDetails)->sum('total') ?? '';
 		//return $subtotal;
         return view('add-to-cart',compact('cartDetails','subtotal'));
     }
@@ -276,6 +277,7 @@ class CartController extends Controller
                     'payment_status' => '1',
                     'order_number' => Str::random(14),
                     'billing_address' => $request->billing_address,
+                    'shop_id' => $request->selected_shop,
                     'total_amount' => $item->product->product_cost * $item->quantity,
                 ]);
             }

@@ -32,10 +32,10 @@
                         <span>Reviews</span>
                     </a>
                 </li>
-                    <a href="#ecom-management">
+                    <!-- <a href="#ecom-management">
                         <i class="iconsminds-tag"></i>
                         <span>eCommerce Management</span>
-                    </a>
+                    </a> -->
 
                 <li>
                     <a href="#cms-management">
@@ -134,6 +134,12 @@
                                     <i class="simple-icon-picture"></i> <span class="d-inline-block">Bulk upload</span>
                                 </a>
                             </li>
+                             <li>
+                                <a href="{{url('tsfy-admin/upload-video')}}">
+                                    <i class="simple-icon-picture"></i> <span class="d-inline-block">Upload Video</span>
+                                </a>
+                            </li>
+
 						<div id="manageProductsSecurity" class="collapse show">
                         <ul class="list-unstyled inner-level-menu">
                             <li>

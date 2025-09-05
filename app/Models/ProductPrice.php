@@ -41,7 +41,7 @@ class ProductPrice extends Model
     }
 
     public function galleries() {
-    return $this->hasMany(ProductGallery::class,'product_id');
+    return $this->hasMany(ProductGallery::class,'product_id','id');
     }
 
     public function reviews() {
