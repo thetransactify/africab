@@ -127,8 +127,14 @@ Route::get('/shipping-zone', [WishlistController::class, 'Getshipping'])->name('
  Route::get('/delete-shipping/{id}', [WishlistController::class, 'Deleteshipping'])->name('product.gallery');
 // store list 
 Route::get('/shop-list', [WishlistController::class, 'Getshop'])->name('get.Getfasq');
- Route::post('/post-shop', [WishlistController::class, 'Createshop'])->name('get.Createshop');
- Route::get('/delete-shop/{id}', [WishlistController::class, 'Deleteshop'])->name('product.shop');
+Route::post('/post-shop', [WishlistController::class, 'Createshop'])->name('get.Createshop');
+Route::get('/delete-shop/{id}', [WishlistController::class, 'Deleteshop'])->name('product.shop');
+// Product Positioning
+Route::get('/product-positioning', [WishlistController::class, 'GetProductPostion'])->name('get.ProductPositioning');
+Route::post('/post-productpositioning', [WishlistController::class, 'CreateProductPostion'])->name('get.CreateProductPostion');
+Route::get('/product-positioning/{id}', [WishlistController::class, 'Deletepositioning'])->name('product.positioning');
+//product tracker
+Route::get('/popular-product', [WishlistController::class, 'GetPopularProduct'])->name('get.PopularProduct');
 // end admin
 });
 
@@ -186,6 +192,10 @@ Route::post('/checkout/cod', [CartController::class, 'codCheckout'])->name('chec
 
 Route::get('/order-status', [CartController::class, 'orderStatus'])->name('order.success');
 
+Route::get('/cart-save-later/{id}', [CartController::class, 'saveForLater']); 
+Route::get('/move-to-cart/{id}', [CartController::class, 'moveToCart']); 
+Route::get('/save-later-delete/{id}', [CartController::class, 'SaveToCartdestroy'])->name('save.delete');
+
 });
 Route::get('/support-centre', [ClientController::class, 'SupportCentre'])->name('SupportCentre.shows');
 // payment method
@@ -194,8 +204,19 @@ Route::post('/payment', [PaymentController::class, 'createOrderSelcom'])->name('
 Route::get('/payment-page', [PaymentController::class, 'paymentPage'])->name('payment.page');
 Route::get('/payment-cancel/{order}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
 Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
+Route::get('/privacy-policy', [ClientController::class, 'privacyPolicy']);
 
+Route::get('/test-smtp', function () {
+    try {
+        Mail::raw('This is a test email to check SMTP configuration.', function ($message) {
+            $message->to('vivekdeveloper3232@gmail.com')
+                    ->subject('SMTP Test Email');
+        });
 
-
+        return 'Email sent successfully. Check your inbox.';
+    } catch (\Exception $e) {
+        return '❌ Error: ' . $e->getMessage();
+    }
+});
 //end client
 

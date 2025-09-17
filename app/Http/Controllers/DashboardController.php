@@ -58,7 +58,28 @@ class DashboardController extends Controller
         ->take(10)
         ->get();
         $orderlist = Orders::with(['users','products'])->latest()->take(10)->get();
-        //return   $orderlist ;
+        $orderSummary = Orders::select(
+        'user_id',
+        DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(total_amount + COALESCE(shipping_charge, 0)) as total_amount')
+            )
+        ->with('users:id,name')
+        ->where('payment_status', '2') 
+        ->groupBy('user_id')
+        ->orderByDesc('total_orders') 
+        ->take(10)
+        ->get();
+        $orderSpending = Orders::select(
+        'user_id',
+        DB::raw('COUNT(*) as total_orders'),
+        DB::raw('SUM(total_amount + COALESCE(shipping_charge, 0)) as total_amount')
+        )
+        ->with('users:id,name')
+        ->where('payment_status', '2')
+        ->groupBy('user_id')
+        ->orderByDesc('total_amount')
+        ->take(10)
+        ->get();
         $orderlists = []; 
         foreach ($orderlist as $order) {
            $orderlists[] = [
@@ -78,7 +99,7 @@ class DashboardController extends Controller
            ];
         }
 
-        return view(' Admin.dashboard',compact('newOrders','pendingOrders','completedOrders','dailySales','monthlySales','totalSales','todayNewUsers','monthlyNewUsers','totalUsers','todayNewUserslist','orderlists'));
+        return view(' Admin.dashboard',compact('newOrders','pendingOrders','completedOrders','dailySales','monthlySales','totalSales','todayNewUsers','monthlyNewUsers','totalUsers','todayNewUserslist','orderlists','orderSummary','orderSpending'));
     }
     #view dashboard
     #authr: vivek
@@ -134,7 +155,6 @@ class DashboardController extends Controller
         'order_number'   => $orderlists->order_number,
         'order_group_id'   => $orderlists->order_group_id,
         'order_date'     => $orderlists->created_at->format('d-m-Y H:i'),
-        'payment_status' => $orderlists->payment_status == 1 ? 'Pending' : ($order->payment_status == 2 ? 'Paid' : 'Failed'),
         'order_status'   => $orderlists->order_status == 1 ? 'Processing' 
                              : ($orderlists->order_status == 2 ? 'Shipped' 
                              : ($orderlists->order_status == 3 ? 'Delivered' 

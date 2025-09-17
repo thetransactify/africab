@@ -4,22 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
-class Cart extends Model
+class SaveToLater extends Model
 {
+    // 
     //
     use HasFactory;
-    protected $table = 'carts';
+    protected $table = 'saved_products';
 
     protected $fillable = [
-        'user',
-        'user_id',
         'product_id',
-        'price',
-        'color',
+        'user_id',
         'quantity',
+        'color',
+        'price',
         'created_at',
         'updated_at',
     ];
@@ -27,7 +26,5 @@ class Cart extends Model
     public function product(){
     return $this->belongsTo(ProductPrice::class, 'product_id');
     }
-
-
 
 }

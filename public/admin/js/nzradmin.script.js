@@ -3480,6 +3480,63 @@ $(".data-table-events-list").DataTable({
           lengthMenu: "Items Per Page _MENU_"
         },
       });
+            $(".data-table-shop-gallryss").DataTable({
+        sDom: '<"row view-filter"<"col-sm-12"<"float-right"l><"float-left"f><"clearfix">>>t<"row view-pager"<"col-sm-12"<"text-center"ip>>>',
+        pageLength: 10,
+        "columns": [
+          { "data": "srno" },
+          { "data": "name" },
+          { "data": "address" },
+          { "data": "actions" }
+        ],
+        drawCallback: function () {
+          $($(".dataTables_wrapper .pagination li:first-of-type"))
+            .find("a")
+            .addClass("prev");
+          $($(".dataTables_wrapper .pagination li:last-of-type"))
+            .find("a")
+            .addClass("next");
+
+          $(".dataTables_wrapper .pagination").addClass("pagination-sm");
+        },
+        language: {
+          paginate: {
+            previous: "<i class='simple-icon-arrow-left'></i>",
+            next: "<i class='simple-icon-arrow-right'></i>"
+          },
+          search: "_INPUT_",
+          searchPlaceholder: "Search...",
+          lengthMenu: "Items Per Page _MENU_"
+        },
+      });  
+      $(".data-table-shop-gallrypopular").DataTable({
+        sDom: '<"row view-filter"<"col-sm-12"<"float-right"l><"float-left"f><"clearfix">>>t<"row view-pager"<"col-sm-12"<"text-center"ip>>>',
+        pageLength: 10,
+        "columns": [
+          { "data": "srno" },
+          { "data": "name" },
+          { "data": "address" }
+        ],
+        drawCallback: function () {
+          $($(".dataTables_wrapper .pagination li:first-of-type"))
+            .find("a")
+            .addClass("prev");
+          $($(".dataTables_wrapper .pagination li:last-of-type"))
+            .find("a")
+            .addClass("next");
+
+          $(".dataTables_wrapper .pagination").addClass("pagination-sm");
+        },
+        language: {
+          paginate: {
+            previous: "<i class='simple-icon-arrow-left'></i>",
+            next: "<i class='simple-icon-arrow-right'></i>"
+          },
+          search: "_INPUT_",
+          searchPlaceholder: "Search...",
+          lengthMenu: "Items Per Page _MENU_"
+        },
+      });      
       $(".data-table-products-display").DataTable({
         sDom: '<"row view-filter"<"col-sm-12"<"float-right"l><"float-left"f><"clearfix">>>t<"row view-pager"<"col-sm-12"<"text-center"ip>>>',
         pageLength: 10,

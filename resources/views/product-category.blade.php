@@ -81,7 +81,7 @@
 							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
 						</ul>
 					</figure>
-				<h3 class="prd-name"><span>{{$listname['productname']}}</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}">{{$listname['category']}}</a></h3>
+				<h3 class="prd-name"><span>{{$listname['productname']}}({{$listname['product_code']}})</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}">{{$listname['category']}}({{$listname['SubCategories']}})</a></h3>
 			<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$listname['offer_price']}}</span><i>TSh</i>{{$listname['product_cost']}}</h5>
 				</div>	
 			</div>	

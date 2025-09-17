@@ -37,37 +37,21 @@
     <div class="col-12 mb-container">
   <form action="{{ route('checkout.cod') }}" method="post" id="checkoutForm" class="standard-form-rules">
         @csrf
-    <!-- <div class="message-box coupon-added">
-    <p>Coupon Code NEWATAFRICAB Applied! You got a <sup>TSh</sup>75,060.00 discount on order. <a class="expand-btn"
-    href="javascript:void(0);">Click Here To Remove It.</a></p>
-    </div> -->
-
-    <!-- Add Coupon - incase if coupon was not added at Cart -->
-    <!-- <div class="message-box addcoup">
-    <p>Have A Coupon? 
-    <a class="expand-btn"
-    href="#coupon_info">Click Here To Enter Your Code.</a></p>
-    </div> -->
-    <!-- <div id="coupon_info" class="coupon-action-box">
-    <div class="row">
-    <div class="col-md-6 col-12">
-    <form class="standard-form-rules coupon-form" action="post">
-    <p class="mb-2">If you have a coupon code, please apply it below.</p>
-    <input type="text" placeholder="Coupon Code" />
-    <button type=submit>Apply</button>
-    </form>
-    </div>
-    </div>
-    </div> -->
     </div> 
             </div>
 
                  <div class="row my-5">
                     <div class="col-md-6">
                         <div class="address-widget">
-                            <div class="main-title py-2">
+                            <div class="main-title py-2 d-flex justify-content-between align-items-center">
                                 <h4 class="mb-0">Billing <span class="">Details</span></h4>
-                            </div>
+                                <a href="javascript:void(0);" 
+                                         class="btn btn-sm btn-outline-danger" 
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#priceListModal">
+                                        shhiping charge list
+                                      </a>
+                            </div>  
                             <!-- Addreess Selection-->       
                             <div class="address-section">
                                 <div class="address-box"  id="all-addresses">
@@ -95,13 +79,16 @@
                                         @endforeach    
 
                                     </div>
-
+                                   <div class="main-title py-2 d-flex justify-content-between align-items-center">
                                     <label class="checkboxLarge ship-to-address"><input type="checkbox" name="showaddressx" id="showaddress"><b>Ship to a Different address</b></label>
-                                    
-
-                                    <label class="checkboxLarge ship-to-address"><input type="checkbox" id="showShopOption" name="shipping_option" value="cash_on_shop"><b>Pick in store</b>
-                                    </label>
-
+                                  
+                                      <a href="javascript:void(0);" 
+                                         class="btn btn-sm btn-outline-danger" 
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#priceListModal">
+                                        shhiping charge list
+                                      </a>
+                                    </div>  
                                     <div class="show-more-address"  id="show-more-address">
                                         <div class="address-box">
                                             @foreach($addressDetails as $address)
@@ -134,12 +121,15 @@
                                                 </div>
                                                 @endforeach 
                                             </div>
-                                        </div>
-
+                                        </div>        
                                         <!-- Add Address Buttone -->
                                         <button type="button" class="general-button blackbutton my-3" id="Addressbutton" data-bs-toggle="modal" data-bs-target="#addWindow" >
                                             <i class="material-symbols-outlined">add</i>New 
-                                        Address</button>
+                                        Address</button>                                                                    
+
+                                    <label class="checkboxLarge ship-to-address"><input type="checkbox" id="showShopOption" name="shipping_option" value="cash_on_shop"><b>Pick in store</b>
+                                    </label>
+
                                     </div>
                                     <div id="shopDropdownContainer" style="display:none; margin-top:10px;">
                                       <label for="shopSelect">Select Shop:</label>
@@ -152,20 +142,6 @@
                                 </div>
                                 </div>
                             <!-- <div class="space-y-2"> -->
-                            @if(collect($cartDetails)->pluck('color')->flatten()->filter()->isNotEmpty())
-    
-                                <div id="shopDropdownContainer">
-                                 <label for="shopSelect">Select Product Color</label>
-                                  <select name="color" class="form-control" id="color" required>
-                                    <option selected disabled>Select Product Color</option>
-                                    @foreach($cartDetails as $item)
-                                               @foreach((array) $item['color'] as $clr)
-                                    <option value="{{ $clr }}">{{ $clr }}</option>
-                                     @endforeach
-                                    @endforeach
-                                </select>
-                                 </div>
-                            @endif     
                             </div>
 
     
@@ -343,7 +319,7 @@ $(document).ready(function () {
         const isStoreChecked = $('#showShopOption').is(':checked');
 
         if (!isShipChecked && !isStoreChecked) {
-            e.preventDefault(); // prevent form submission
+            e.preventDefault();
 
             $('#shippingErrorMsg')
                 .text("Please select a shipping option or shop.")
@@ -356,7 +332,7 @@ $(document).ready(function () {
             return;
         }
 
-        // Optional: Validate payment-method also
+
         const selectedPayment = $('input[name="payment-method"]:checked');
         if (selectedPayment.length === 0) {
             e.preventDefault();

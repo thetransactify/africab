@@ -17,6 +17,8 @@ use App\Models\offerlist;
 use App\Models\videourl;
 use App\Models\Review;
 use App\Models\RecentViews;
+use App\Models\productsPostion;
+use App\Models\popularProducts;
 use Illuminate\Support\Facades\DB;
 
 
@@ -169,9 +171,42 @@ class HomeController extends Controller
                 ->map(fn($products) => $products->first()) 
                 ->values();
         $bestsallerlist = Orders::with(['products','products.category','products.galleries'])->orderbydesc('id')->get()->unique('product_id')->values();
+        $productsPositioning = productsPostion::with(['Product.galleries'])
+                ->orderByDesc('id')
+                ->get()
+                ->map(function ($item) {
+                    $lastGallery = $item->Product && $item->Product->galleries->count() > 0
+                        ? $item->Product->galleries->last()->file
+                        : null;
+                    return [
+                        'id'       => $item->id,
+                        'name'     => $item->Product->listing_name ?? 'N/A',
+                        'position' => $item->position,
+                        'image'    => $lastGallery ? asset('storage/uploads/product/'.$lastGallery) : null,
+                    ];
+                });
+        $popularproducts = popularProducts::with(['Product.galleries'])
+                ->orderByDesc('id')
+                ->whereHas('Product', function($q) {
+                        $q->where('product_online', 1);
+                    })  
+                ->orderByDesc('count')
+                ->take(10)       
+                ->get()
+                ->map(function ($item) {
+                    $lastGallery = $item->Product && $item->Product->galleries->count() > 0
+                        ? $item->Product->galleries->last()->file
+                        : null;
+                    return [
+                        'id'       => $item->id ?? 'N/A',
+                        'name'     => $item->Product->listing_name ?? 'N/A',
+                        'search'   => $item->count ?? 'N/A',
+                        'offer_price'   => $item->Product->offer_price ?? 'N/A',
+                        'product_cost'   => $item->Product->product_cost ?? 'N/A',
+                        'image'    => $lastGallery ? asset('storage/uploads/product/'.$lastGallery) : null,
+                    ];
+                });
         $data = [];
-        //return  $bestsallerlist;
-
         foreach ($bestsallerlist as $order) {
             $product = $order->products;
             $category = $product?->category ?? null;
@@ -264,12 +299,7 @@ class HomeController extends Controller
             'file' => $file ?? 'default.jpg',
             ];
         }
-        //return $productlist;
-
-
-         //return response()->json($grouped);
-
-        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped','recentviewlist','videourl'));
+        return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped','recentviewlist','videourl','productsPositioning','popularproducts'));
     }
 
     #view CreateAdvertisement

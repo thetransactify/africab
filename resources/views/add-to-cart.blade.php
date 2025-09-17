@@ -55,7 +55,8 @@
 										<div class="row align-items-center">
 											<div class="col-lg-1 col-md-1 col-12">
 												<a href="{{ url('/cart-delete', $value['cart_id']) }}" class="std-icon floatright" onclick="return confirm('Are you sure you want to delete this cart item?')" 
-                                             class="las la-trash-alt btn btn-secondary mx-1"><i class="material-symbols-outlined">delete</i></a>										 	</div>
+                                             class="las la-trash-alt btn btn-secondary mx-1"><i class="material-symbols-outlined">delete</i></a>
+                                            </div>
 												<div class="col-lg-2 col-md-3 col-12 table-img">
 													<img src="{{ asset('storage/uploads/product/' . $value['gallery_file']) }}" alt="">
 												</div>
@@ -78,9 +79,17 @@
 										<div class="col-lg-2 col-sm-3 dt-col">
 											<p class="prd-price"><i>TSh</i>{{$value['total']}}</p>
 										</div>
+										<div class="col-lg-2 col-sm-3 dt-col">
+										 <!-- Save for Later Button -->
+												<a href="{{ url('/cart-save-later', $value['cart_id']) }}" 
+												   class="d-block mt-1 text-muted" 
+												   style="font-size: 12px; text-decoration: underline;">
+													Save for Later
+												</a>
+										</div>		
 									</div>	 											 
 						
-							@endforeach	
+							    @endforeach	
 								@else
                                 No product found.
 								@endif  
@@ -121,12 +130,77 @@
 							<!-- /. cart widget -->
 						</div>
 					</div>
+<div class="row mt-5">
+    <div class="col-12">
+        <h4>Save for Later</h4>
+    </div>
+</div>
 
+<div class="row">
+    <div class="col-lg-8 col-12">
+        <div class="row">
+            <div class="container-fluid div-tables">
+                <div class="row dt-row dt-head align-items-center">
+                    <div class="col-lg-10 col-sm-9 dt-col">
+                        Product
+                    </div>
+                    <div class="col-lg-2 col-sm-3 dt-col">
+                        Product Total
+                    </div>
+                </div>
+
+                @if(count($SaveToDetails) > 0)
+                @foreach($SaveToDetails as $item)	
+                <div class="row dt-row dt-body align-items-center">	
+                    <div class="col-lg-10 col-sm-9 dt-col">
+                        <div class="row align-items-center">
+                            <div class="col-lg-1 col-md-1 col-12">
+                                <a href="{{ url('/save-later-delete', $item['savetoCart_id']) }}" 
+                                   onclick="return confirm('Are you sure you want to remove this item?')" 
+                                   class="std-icon floatright">
+                                   <i class="material-symbols-outlined">delete</i>
+                                </a>
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-12 table-img">
+                                <img src="{{ asset('storage/uploads/product/' . $item['gallery_file']) }}" alt="">
+                            </div>
+                            <div class="col-lg-6 col-md-5 col-12">
+                                <a href="{{ url('product/'.\Illuminate\Support\Str::slug($item['product_name'])) }}" 
+                                   class="prd-caption">
+                                    {{$item['product_name']}}
+                                    <span>{{$item['category_name']}}</span>
+                                </a>
+                                <p class="prd-price">
+                                    <span class="dc-price"><i>TSh</i>{{$item['offer_price']}}</span>
+                                    <i>TSh</i>{{$item['price']}}
+                                </p>
+                            </div>										 	
+                            <div class="col-lg-3 col-md-3 col-12">
+                                <a href="{{ url('/move-to-cart', $item['savetoCart_id']) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    Move to Cart
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-sm-3 dt-col">
+                        <p class="prd-price"><i>TSh</i>{{$item['total']}}</p>
+                    </div>
+                </div>	 											 
+                @endforeach	
+                @else
+                <p>No items saved for later.</p>
+                @endif  
+            </div>
+        </div>
+    </div>
+</div>
 				</div>
 			</div>
 
 
 		</div>
+
 
 <script>
     setTimeout(function() {

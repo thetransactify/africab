@@ -95,7 +95,15 @@
 							<input type="number" step="1" max="" value="0" name="quantity" class="quantity-field" id="quantity">
 							<input type="button" value="+" class="button-plus" data-field="quantity">
 						</div>
-					<p><small>Max Allowed : 1000</small></p>
+				    <p><small>Max Allowed : 1000</small></p>		
+					<p>Select Color</p>
+		            <div class="color-options mb-3">
+		                <select name="color" id="color" class="form-control">
+		                    @foreach($data['product_price']['color'] as $color)
+					            <option value="{{ trim($color) }}">{{ ucfirst(trim($color)) }}</option>
+					        @endforeach
+		                </select>
+		            </div>
 					<ul class="general-button-list">
 					<li><a href="{{ route('wishlist.add', $data['product_price']['id']) }}" class="redbutton"><i class="material-symbols-outlined">favorite</i>Wishlist</a></li>
 					<li><a href="javascript:void(0);" class="blackbutton" id="addToCartBtn"><i class="material-symbols-outlined" >add_shopping_cart</i>Add to Cart</a></li>
@@ -185,87 +193,6 @@
 			
 	</div>	
 	</div>
-<!-- <div class="row">
-			<div class="col-lg-12">
-				<div class="main-title pb-5">
-					<h1>More Options<span class="">Category Name</span></h1>
-				</div>
-			</div>
-		</div>
-<div class="row product-list justify-content-start">
-				<div class="col-lg-3 col-md-4 col-6 each-item">
-				<div class="prd-item">
-					<figure onclick="location.href = 'product-single.html';">
-						<span class="prd-tag new">New</span>
-						<img src="assets/images/products/prd-11.jpg" />
-						<ul class="pab-list">
-							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="product-single.html"><span class="material-symbols-rounded">
-open_in_new
-</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
-						</ul>
-					</figure>
-										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-4 col-6 each-item">
-				<div class="prd-item">
-					<figure onclick="location.href = 'product-single.html';">
-						<span class="prd-tag new">New</span>
-						<img src="assets/images/products/prd-12.jpg" />
-						<ul class="pab-list">
-							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="product-single.html"><span class="material-symbols-rounded">
-open_in_new
-</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
-						</ul>
-					</figure>
-										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
-				</div>
-			</div>	
-			<div class="col-lg-3 col-md-4 col-6 each-item">
-				<div class="prd-item">
-					<figure onclick="location.href = 'product-single.html';">
-						<span class="prd-tag new">New</span>
-						<img src="assets/images/products/prd-13.jpg" />
-						<ul class="pab-list">
-							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="product-single.html"><span class="material-symbols-rounded">
-open_in_new
-</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
-						</ul>
-					</figure>
-										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
-				</div>
-			</div>
-			<div class="col-lg-3 col-md-4 col-6 each-item">
-				<div class="prd-item">
-					<figure onclick="location.href = 'product-single.html';">
-						<span class="prd-tag new">New</span>
-						<img src="assets/images/products/prd-14.jpg" />
-						<ul class="pab-list">
-							<li><a href="my-wishlist.html"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="product-single.html"><span class="material-symbols-rounded">
-open_in_new
-</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
-						</ul>
-					</figure>
-										<h3 class="prd-name"><span>Category Name</span><a href="product-single.html">Product Name</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>245,250.00</span><i>TSh</i>187,650.00</h5>
-				</div>
-			</div>
-											
-		</div>
-	
-	</div>
-</div> -->
 
 <!-- eCom Features-->
 <!-- recent view-->
@@ -356,6 +283,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		const quantity = document.getElementById("quantity").value;
 		const productId = document.getElementById("product_id").value;
 		const priceId = document.getElementById("price_id").value;
+		const color = document.getElementById("color").value;
 
 		if (quantity < 1 || quantity > 1000) {
 			alert("Quantity must be between 1 and 1000");
@@ -371,7 +299,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			body: JSON.stringify({
 				product_id: productId,
 				priceId: priceId,
-				quantity: quantity
+				quantity: quantity,
+				color : color
 			})
 		})
 		.then(res => res.json())

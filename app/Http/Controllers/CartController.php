@@ -8,6 +8,7 @@ use App\Models\address;
 use App\Models\Orders;
 use App\Models\shop;
 use App\Models\ProductPrice;
+use App\Models\SaveToLater;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Exception;
@@ -33,10 +34,15 @@ class CartController extends Controller
 		])->where('user_id', $id)
 		->orderByDesc('id')
 		->get();
-
-		//return $cartList;
+        $SaveTolist = SaveToLater::with([
+            'product',
+            'product.category',
+            'product.galleries'
+        ])->where('user_id', $id)
+        ->orderByDesc('id')
+        ->get();
 		$cartDetails = [];
-
+        $SaveToDetails = [];
 		foreach ($cartList as $item) {
 			$product = $item->product;
 			if ($product) {
@@ -58,14 +64,41 @@ class CartController extends Controller
 					'offer_price'   => $product->offer_price,
 					'total'         => $total,
 					'quantity'      => $item->quantity,
+                    'color'         => $item->color,
 					'gallery_file'  => $latestGallery?->file,
 				];
 			}
 			$subtotal = collect($cartDetails)->sum('total');
-		}	
-                    $subtotal = collect($cartDetails)->sum('total') ?? '';
-		//return $subtotal;
-        return view('add-to-cart',compact('cartDetails','subtotal'));
+		}
+        foreach ($SaveTolist as $item) {
+            $product = $item->product;
+            if ($product) {
+                $category = $product->category;
+                $galleries = $product->galleries;
+                $latestGallery = $galleries->sortByDesc('created_at')->first();
+                $price = (float) $product->product_cost;
+                $quantity = (int) $item->quantity;
+                $total = $price * $quantity;
+
+                $SaveToDetails[] = [
+                    'savetoCart_id'       => crypt::encrypt($item->id),
+                    'product_id'    => $product->id,
+                    'product_name'  => $product->listing_name,
+                    'category_id'   => $category?->id,
+                    'category_name' => $category?->name,
+                    'category_file' => $category?->file,
+                    'price'         => $product->product_cost,
+                    'offer_price'   => $product->offer_price,
+                    'total'         => $total,
+                    'quantity'      => $item->quantity,
+                    'color'         => $item->color,
+                    'gallery_file'  => $latestGallery?->file,
+                ];
+            }
+            $subtotal = collect($cartDetails)->sum('total');
+        }	
+          $subtotal = collect($cartDetails)->sum('total') ?? '';
+        return view('add-to-cart',compact('cartDetails','subtotal','SaveToDetails'));
     }
 
     #delete cart
@@ -87,6 +120,7 @@ class CartController extends Controller
 	$productId = $request->input('product_id'); 
 	$priceIds = $request->input('priceId');
 	$quantity = $request->input('quantity', 1);
+    $color = $request->input('color');
 
 	$userId = Auth::check() ? Auth::id() : null;
 	$cartItem = Cart::where('product_id', $productId)
@@ -102,6 +136,7 @@ class CartController extends Controller
 	        'product_id' => $productId,
 	        'price'      => $priceIds,
 	        'quantity'   => $quantity,
+            'color'      => $color,
 	    ]);
 	}
     return response()->json(['success' => true, 'message' => 'Added to cart']);
@@ -141,7 +176,7 @@ class CartController extends Controller
 					'category_file' => $category?->file,
 					'price'         => $product->product_cost,
 					'offer_price'   => $product->offer_price,
-                    'color'         => explode(',', $product->color_name),
+                    'color'         => explode(',', $item->color),
 					'total'         => $total,
 					'quantity'      => $item->quantity,
 					'gallery_file'  => $latestGallery?->file,
@@ -149,7 +184,6 @@ class CartController extends Controller
 			}
 			$subtotal = collect($cartDetails)->sum('total') ?? 'null';
 		}
-        //return $id;
         $addresslist = address::with('shippinglist')->orderByDesc('id')->where('user_id',$id)->get();
         //return  $addresslist;
         $addressDetails = [];
@@ -298,5 +332,59 @@ class CartController extends Controller
     	$OrderItems = Orders::where('user_id', $user->id)->orderByDesc('id')->first();
     	return view('thankyou',compact('OrderItems'));
     }	
+
+   # save to later
+   # auth vivek 
+    public function saveForLater($cartId){
+        $cartId = crypt::decrypt($cartId);
+    $cartItem = Cart::where('id', $cartId)->first();
+    if (!$cartItem) {
+        return redirect()->back()->with('error', 'Cart item not found!');
+    }
+    SaveToLater::updateOrCreate(
+        [
+            'user_id'    => $cartItem->user_id,
+            'product_id' => $cartItem->product_id,
+        ],
+        [
+            'quantity'     => DB::raw('quantity + '.$cartItem->quantity), 
+            'color'        => $cartItem->color,
+            'price'        => $cartItem->price,
+        ]
+    );
+    $cartItem->delete();
+    return redirect()->back()->with('success', 'Item moved to Save for Later!');
+   }
+
+   #move to later 
+   #auth vivek
+    public function moveToCart($id){
+        $id = crypt::decrypt($id);
+        $savedItem = SaveToLater::findOrFail($id);
+        Cart::create([
+            'user_id' => $savedItem->user_id,
+            'product_id' => $savedItem->product_id,
+            'quantity' => $savedItem->quantity,
+            'price' => $savedItem->price,
+            'total' => $savedItem->total,
+        ]);
+
+        $savedItem->delete();
+
+        return redirect()->back()->with('success', 'Item moved back to Cart!');
+    }
+
+    #delete cart
+    #auth vivek
+    public function SaveToCartdestroy($id){
+    $ids = crypt::decrypt($id);
+    $SaveToLater = SaveToLater::find($ids);
+    if ($SaveToLater) {
+        $SaveToLater->delete();
+        return redirect()->back()->with('success', 'item deleted successfully!');
+
+    }
+    return redirect()->back()->with('success', 'something wrong');
+   }
 
 }	

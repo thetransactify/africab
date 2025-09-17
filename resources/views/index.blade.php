@@ -34,6 +34,28 @@
     </div>
 </div>
 
+<!-- Top 10 proudct -->
+<div class="browse-category">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-lg-3 col-md-4 col-12">
+                <div class="main-title">
+                    <h1>reccomended<span>Products</span></h1>
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-12">
+                <div class="reco-slider">
+                    @foreach($productsPositioning as $categorys)
+                    <div class="item">
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($categorys['name'])) }}"><img src="{{ $categorys['image'] }}" /><span>{{ $categorys['name'] }}</span>
+                    </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @if(!empty($grouped) && count($grouped) > 0)
     <div class="home-advertisement mt-4">
         <div class="container-fluid px-0 px-sm-3">
@@ -93,35 +115,6 @@
     </div>
 @endif
 
-@if(!empty($grouped) && count($grouped) > 0)
-    <div class="home-advertisement mt-4">
-        <div class="container-fluid px-0 px-sm-3">
-        	<div class="col-lg-6 col-md-6 col-12">
-				<div class="main-title">
-				<h1>Offer<span>Lists</span></h1>
-				</div>
-			</div>
-            <div class="row g-3">
-                @foreach($grouped as $ad)
-                    @foreach($ad['products'] as $product)
-                        <div class="col-md-6 col-sm-6 col-12">
-                            <div class="card h-100 shadow-sm border-0 rounded overflow-hidden">
-                                <a href="{{ url('offerlist/' . Crypt::encrypt($product['ids'])) }}" class="d-block">
-                                    <img src="{{ asset('storage/uploads/product/' . $product['images']) }}"
-                                         class="card-img-top img-fluid"
-                                         alt="{{ $product['listing_name'] }}"
-                                         >
-                                </a>
-                            </div>
-                        </div>
-                    @endforeach
-                @endforeach
-            </div>
-        </div>
-    </div>
-@endif
-
-
 @if(!empty($ads) && count($ads) > 0)
 <div class="home-advertisement">
 	<div class="container-fluid">
@@ -161,7 +154,8 @@
 			<ul class="htp-list" role="tablist">
 			<li role="presentation"><a class="active" href="javascript:void(0);" id="new-tab" data-bs-toggle="tab" data-bs-target="#new-tab-pane" type="button" role="tab" aria-controls="new-tab-pane" aria-selected="true"><span>New</span></a></li>
 			<li role="presentation"><a class="" href="javascript:void(0);" id="bestsellers-tab" data-bs-toggle="tab" data-bs-target="#bestsellers-tab-pane" type="button" role="tab" aria-controls="bestsellers-tab-pane" aria-selected="false"><span>Bestsellers</span></a></li>
-			<!-- <li role="presentation"><a class="" href="javascript:void(0);" id="onsale-tab" data-bs-toggle="tab" data-bs-target="#onsale-tab-pane" type="button" role="tab" aria-controls="onsale-tab-pane" aria-selected="false"><span>On Sale</span></a></li> -->
+			<li role="presentation"><a class="" href="javascript:void(0);" id="onsale-tab" data-bs-toggle="tab" data-bs-target="#onsale-tab-pane" type="button" role="tab" aria-controls="onsale-tab-pane" aria-selected="false"><span>Popular</span>
+			</a></li>
 			</ul>
 			</div>
 		</div>
@@ -215,7 +209,7 @@
 							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
 						</ul>
 					</figure>
-					<h3 class="prd-name"><span>{{$bestlist['category_name']}}</span><a href="product-single.html">{{$bestlist['product_name']}}</a></h3>
+					<h3 class="prd-name"><span>{{$bestlist['category_name']}}</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($bestlist['product_name'])) }}">{{$bestlist['product_name']}}</a></h3>
 					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$bestlist['offer_price']}}</span><i>Tsh</i>{{$bestlist['product_cost']}}</h5>
 				</div>
 			</div>
@@ -227,20 +221,19 @@
 		
 		<div class="tab-pane fade" id="onsale-tab-pane" role="tabpanel" aria-labelledby="onsale-tab" tabindex="0">
 			<div class="row product-list justify-content-center">
-		@foreach($productlist as $product)
+		@foreach($popularproducts as $productss)
 			<div class="col-xxl-3 col-xl-4 col-lg-4 col-6">
 				<div class="prd-item">
-					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}';">
-						<span class="prd-tag onsale">On Sale</span>
-						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $product->product->file) }}" />
+					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}';">
+						<span class="prd-tag onsale">Popular</span>
+						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ $productss['image'] }}" />
 						<ul class="pab-list">
-							<li><a href="{{ route('wishlist.add', $product['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="product-single.html"><span class="material-symbols-rounded">open_in_new</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+							<li><a href="{{ route('wishlist.add', $productss['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
+							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
 						</ul>
 					</figure>
-					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="product-single.html">{{$product->product->name}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span><i>TSh</i>{{$product->product_cost}}</h5>
+					<h3 class="prd-name"><a href="{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}">{{$productss['name']}}</a></h3>
+					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$productss['offer_price']}}</span><i>TSh</i>{{$productss['product_cost']}}</h5>
 				</div>
 			</div>
 		 @endforeach	

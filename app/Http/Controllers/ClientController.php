@@ -410,4 +410,9 @@ public function createOrderSelcoms(Request $request)
     }
 
 
+    # admin reviewlist
+    # auth: vivek
+    public function privacyPolicy(){
+      return view('privacy-policy');
+    }
 }

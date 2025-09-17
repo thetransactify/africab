@@ -139,6 +139,11 @@
                                     <i class="simple-icon-picture"></i> <span class="d-inline-block">Upload Video</span>
                                 </a>
                             </li>
+                             <li>
+                                <a href="{{url('tsfy-admin/popular-product')}}">
+                                    <i class="simple-icon-picture"></i> <span class="d-inline-block">Popular Items</span>
+                                </a>
+                            </li>
 
 						<div id="manageProductsSecurity" class="collapse show">
                         <ul class="list-unstyled inner-level-menu">
@@ -221,6 +226,11 @@
                 <li>
                    <a href="{{url('tsfy-admin/advertisement')}}">
                         <i class="simple-icon-star"></i> <span class="d-inline-block">Home Ad Popup</span>
+                   </a>
+                </li> 
+                <li>
+                   <a href="{{url('tsfy-admin/product-positioning')}}">
+                        <i class="simple-icon-star"></i> <span class="d-inline-block">Product Positioning</span>
                    </a>
                 </li> 
                 <li>

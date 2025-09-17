@@ -451,7 +451,34 @@ $('.pp-slider-thumbnail').slick({
 	       	});
 
 // Menu Header
-
+$('.reco-slider').slick({
+  dots: false,
+  arrows: true,
+  infinite: true,
+  speed: 300,
+  autoplay:true,
+  slidesToShow: 4,
+  responsive: [
+    {
+      breakpoint: 1300,
+      settings: {
+        slidesToShow: 3
+      }
+    },  
+    {
+      breakpoint: 768,
+      settings: {
+        slidesToShow: 2
+      }
+    },
+    {
+      breakpoint: 480,
+      settings: {
+        slidesToShow: 1
+      }
+    }
+  ]
+});
 $(document).ready(function() {
   $('.has-submenu').hover(
     function() {
@@ -462,5 +489,7 @@ $(document).ready(function() {
     }
   );
 });
+
+
 
 })(jQuery);

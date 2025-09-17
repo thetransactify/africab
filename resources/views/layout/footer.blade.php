@@ -16,7 +16,7 @@
                 <ul class="footer-menu">
                     <li><a href="javascript:void(0)" class="title">Terms & Policy</a></li>
                     <li><a href="terms-and-conditions.html">Terms & Conditions</a></li>
-                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li><a href="{{url('/privacy-policy')}}">Privacy Policy</a></li>
                     <li><a href="shipping-policy.html">Shipping Policy</a></li>
                     <li><a href="returns-and-refunds.html">Return & Refund Policy</a></li>
                 </ul>
@@ -195,7 +195,37 @@
     </div>
   </div>
 </div>
-
+<div class="modal fade" id="priceListModal" tabindex="-1" aria-labelledby="priceListLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-right"> <!-- modal-lg for wide -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <p2 style="text-align: center;">PLEASE NOTE. minimun order value of TSH 100,000 for free shipping.</p2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>City Name</th>
+              <th>Shipping Charge</th>
+            </tr>
+          </thead>
+          <tbody>
+           @foreach($shipping as $ship)
+              <tr>
+                <td>{{ $ship->name }}</td>
+                <td>Tsh{{ number_format($ship->price, 0, '.', ',') }}</td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>

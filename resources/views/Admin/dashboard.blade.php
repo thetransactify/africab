@@ -168,78 +168,142 @@
                             
                             </div>
                             
-                <div class="row">
-                
-                <div class="col-12 col-md-9 mb-5">
-                            <div class="card">
-                                
-                                <div class="card-body">
-                                    <h5 class="card-title">New Registration</h5>
-                                    <div class="table-responsive">
-                                    <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Contact</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                @forelse($todayNewUserslist as $user)    
-                                    <tr>
-                                        <th scope="row">{{ $user->name }}</th>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ $user->mobile }}</td>
-                                     @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center">No new users this month</td>
-                                    </tr>
-                                @endforelse
-                                </tbody>
-                            </table>
-                                </div>
-                                    </div>
-                            </div></div>
-                            <div class="col-12 col-md-3 mb-5">
-                            
-                            <div class="row sortable">
-                            <div class="col-12 mb-5">
-                            <div class="card">
-                            
-                                <div class="card-body justify-content-between align-items-center">
-                                    <p class="mb-1 font-weight-bold">Daily New Registration</p>
-                                    <h3 class="lead color-theme-1 mb-1 value">{{$todayNewUsers}}</h3>
-                                    
-                                </div>
-                            </div>
-                            </div>
-                            <div class="col-12 mb-5">
-                            <div class="card">
-                            
-                                <div class="card-body justify-content-between align-items-center">
-                                    <p class="mb-1 font-weight-bold">Monthly New Users</p>
-                                    <h3 class="lead color-theme-1 mb-1 value">{{$monthlyNewUsers}}</h3>
-                                    
-                                </div>
-                            </div>
-                            </div>
-                            <div class="col-12 mb-5">
-                            <div class="card">
-                            
-                                <div class="card-body justify-content-between align-items-center">
-                                    <p class="mb-1 font-weight-bold">Total Users</p>
-                                    <h3 class="lead color-theme-1 mb-1 value">{{$totalUsers}}</h3>
-                                    
-                                </div>
-                            </div>
-                            </div>
-                            
-                        </div>
-                            
-                            </div>
-                
-                </div>              
+<div class="row">
+    <div class="col-12 col-md-9 mb-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">New Registration</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($todayNewUserslist as $user)
+                                <tr>
+                                    <th scope="row">{{ $user->name }}</th>
+                                    <td>{{ $user->email }}</td>
+                                    <td>{{ $user->mobile }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">No new users today</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-                
             </div>
+        </div>
+    </div>
+    {{--New block below --}}
+    <div class="col-12 col-md-9 mb-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Top 10 Customers Based On Total Orders</h5>
+                <div class="table-responsive">
+                    <table id="newUsersTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Total orders</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($orderSummary  as $summary)
+                                <tr>
+                                    <th scope="row">{{ $summary->users->name }}</th>
+                                    <td>{{ $summary->total_orders  }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">No Data Found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="col-12 col-md-9 mb-5">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Top 10 Customers Based On Total Spending</h5>
+                <div class="table-responsive">
+                    <table id="newUsersTables" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">Customer Name</th>
+                                <th scope="col">Total spending ammount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($orderSpending  as $value)
+                                <tr>
+                                    <th scope="row">{{ $value->users->name }}</th>
+                                    <td>Tsh {{ number_format($summary->total_amount, 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">No Data Found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-3 mb-5">
+        <div class="row sortable">
+            <div class="col-12 mb-5">
+                <div class="card">
+                    <div class="card-body justify-content-between align-items-center">
+                        <p class="mb-1 font-weight-bold">Daily New Registration</p>
+                        <h3 class="lead color-theme-1 mb-1 value">{{$todayNewUsers}}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-5">
+                <div class="card">
+                    <div class="card-body justify-content-between align-items-center">
+                        <p class="mb-1 font-weight-bold">Monthly New Users</p>
+                        <h3 class="lead color-theme-1 mb-1 value">{{$monthlyNewUsers}}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mb-5">
+                <div class="card">
+                    <div class="card-body justify-content-between align-items-center">
+                        <p class="mb-1 font-weight-bold">Total Users</p>
+                        <h3 class="lead color-theme-1 mb-1 value">{{$totalUsers}}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script>
+$(document).ready(function() {
+    $('#newUsersTable').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [5, 10, 25, 50, 100],
+    });
+});
+$(document).ready(function() {
+    $('#newUsersTables').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [5, 10, 25, 50, 100],
+    });
+});
+</script>
+
 @endsection

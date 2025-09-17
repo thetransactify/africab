@@ -16,6 +16,7 @@ use App\Models\Wishlist;
 use App\Models\offerlist;
 use App\Models\RecentViews;
 use App\Models\videourl;
+use App\Models\popularProducts;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductsImport;
@@ -474,21 +475,16 @@ class CategoryProductController extends Controller
     if (!$category) {
         abort(404, 'Category not found.');
     }
-    // $products = Product::with(['productPrices','category'])
-    //             ->where('category_id', $category->id)
-    //             ->where('status',1)
-    //              ->get();
     $products = Product::with(['productPrices' => function($query) {
                     $query->with(['galleries' => function($q) {
-                        $q->orderByDesc('id')->limit(1); // only latest gallery
-                    }]);
+                        $q->orderByDesc('id')->limit(1);
+                    },'product']);
                 }, 'category'])
                 ->where('category_id', $category->id)
                 ->where('status', 1)
                 ->get();
     $productsList = [];
     $subcategoriesList = [];
-//return $products;
     foreach ($products as $product) {
         if ($product->relationLoaded('productPrices') && $product->productPrices->isNotEmpty()) {
         $onlinePrices = $product->productPrices->where('product_online', 1);
@@ -497,9 +493,11 @@ class CategoryProductController extends Controller
                 $productsList[] = [
                     'id' => $product_price->id ?? 'N/A',
                     'productname' => $product_price->listing_name ?? 'N/A',
+                    'product_code' => $product_price->code ?? 'N/A',
                     'tag' => $product->check_remark ?? 'N/A',
                     'product_cost' => $product_price->product_cost ?? 'N/A',
                     'offer_price' => $product_price->offer_price ?? 'N/A',
+                    'SubCategories'  => $product_price->product->name ?? 'N/A',
                     'category' => $product->category->name ?? 'N/A',
                     'product_image' => $product_price->galleries->isNotEmpty()
     ? asset('storage/uploads/category/' . $product_price->galleries->first()->file)
@@ -510,7 +508,7 @@ class CategoryProductController extends Controller
          }
       }
     }
-
+//return $productsList;
     foreach ($products as $product) {
         if ($product->category_id == $category->id && $product->id != $category->id) {
             $subcategoriesList[] = [
@@ -539,7 +537,6 @@ class CategoryProductController extends Controller
    }
 
    public function GetProduct($slug){
-        // $ProductList = ProductPrice::whereRaw("LOWER(REPLACE(listing_name, ' ', '-')) = ?", [$slug])->first();
        $normalizedSlug = Str::slug($slug);
         $ProductList = ProductPrice::get()->first(function($product) use ($normalizedSlug) {
             return Str::slug(trim($product->listing_name)) === $normalizedSlug;
@@ -573,11 +570,12 @@ class CategoryProductController extends Controller
         $reviewRatings = $productDetails->reviews->pluck('rating')->toArray();
         $reviewuser = $productDetails->reviews->pluck('user_id')->toArray();
         $reviewComment = $productDetails->reviews->pluck('comment')->toArray();
-
+        $colors = explode(',', $productDetails->color_name); 
         $data = [
         'product_price' => [
             'id' => $productDetails->id,
             'listing_name' => $productDetails->listing_name,
+            'color' => $colors,
             'description' => $productDetails->description,
             'packing_weight' => $productDetails->packing_weight,
             'packing_type' => $productDetails->packing_type,
@@ -623,6 +621,11 @@ class CategoryProductController extends Controller
             'file' => $file ?? 'default.jpg',
             ];
         }
+        // product tracker 
+        $tracker =  popularProducts::updateOrCreate(
+                    ['product_id' => $productDetails->id],
+                    ['count' => DB::raw('count + 1')]
+                );
         return view('product_list', compact('data','recentviewlist'));
    }
 
