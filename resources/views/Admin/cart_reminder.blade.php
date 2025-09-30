@@ -11,27 +11,26 @@
                     <div class="col-12">
                     <div class="card mb-4">
                         <div class="card-body">
-                            <h5 class="mb-4 font-weight-bold">Customers Wishlist</h5>
-                            <div class="alert alert-warning mb-5" role="alert">* Select the customer you want to view the wishlist of.</div>
+                            <h5 class="mb-4 font-weight-bold">Customers Cart Reminder</h5>
+                            <div class="alert alert-warning mb-5" role="alert">* Select the customer you want to view the Cart reminder of.</div>
                             <div class="row mb-3">
                             <div class="col-md-6 col-12">
                             <form id="wishlistForm">
                             <div class="form-group mb-4">
                                 <label class="form-group has-float-label mb-4">
-                                <select id="CategoryList" class="form-control select2-single" data-width="100%">
-                                    <option label="&nbsp;">Select Customer</option>
-                                @foreach($Getwishlist as $wishlist)
-                                   <option value="{{ $wishlist->id }}">
-                                        {{ $wishlist->name }}
+                                <select id="ProductList" class="form-control select2-single" data-width="100%">
+                                    <option label="&nbsp;">Select Product</option>
+                                @foreach($Getcart as $cartdeatils)
+                                   <option value="{{ $cartdeatils->product_id }}">
+                                        {{ $cartdeatils->product->listing_name }}
                                     </option>
                                 @endforeach
                                 </select>
-                                    <span>Customer Name</span>
+                                    <span>Product Name</span>
                             </label>
                                 </div>  
                             <div class="form-group text-right">                                                            
-                                <button class="btn btn-secondary" type="submit">List Wishlist</button>
-                                <button id="sendWishlistEmails" class="btn btn-success"><i class="las la-envelope"></i> Send Email to All</button>
+                                <button class="btn btn-secondary" type="submit">List Cart Reminder</button>
                             </div>
                             </form>
                             </div>
@@ -40,14 +39,14 @@
                             <div class="row">
                             <div class="col-12"> 
                             <div class="table-responsive">
-                            <table class="data-table data-table-permission" id="wishlistTable">
+                            <table class="data-table data-table-permission" id="CartReminderTable">
                             <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Added on</th>
-                                        <th>Image</th>
+                                        <th>Customer Name</th>
                                         <th>Product Name</th>
-                                        <th>Category Name</th>
+                                        <th>Action</th>
 
                                     </tr>
                                 </thead>
@@ -69,7 +68,7 @@
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Wshlist Details</h5>
+                                    <h5 class="modal-title">Cart Reminder</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -82,25 +81,17 @@
                                     
                                     <tbody>
                                         <tr>
-                                            <td class="font-weight-bold">Wishlist Added on</td>
-                                            <td>20/04/2020</td>
+                                            <td class="font-weight-bold">Last Added on</td>
+                                             <td id="modal_last_added"></td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Category Name</td>
-                                            <td>Mojitos</td>
+                                            <td class="font-weight-bold">Email Total</td>
+                                            <td id="modal_email_total"></td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Product Name</td>
-                                            <td>Original</td>
+                                            <td class="font-weight-bold">Sms Total</td>
+                                            <td id="modal_sms_total"></td>
                                         </tr>
-                                        <tr>
-                                            <td class="font-weight-bold">Product Label</td>
-                                            <td>Bestseller</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="font-weight-bold">Product Status</td>
-                                            <td>Online</td>
-                                        </tr> 
                                     </tbody>
                                     </table>
                                     </div> 
@@ -117,54 +108,97 @@
     $('#wishlistForm').on('submit', function (e) {
     e.preventDefault();
 
-    let customerId = $('#CategoryList').val();
-    if (!customerId) return;
+    let product_id = $('#ProductList').val();
+    if (!product_id) return;
 
     $.ajax({
-        url: "{{ route('customer.wishlist') }}",
+        url: "{{ route('customer.cartreminder') }}",
         type: "POST",
         data: {
-            customer_id: customerId,
+            product_id: product_id,
             _token: "{{ csrf_token() }}"
         },
         success: function (response) {
-            let tbody = $('#wishlistTable tbody');
+            let tbody = $('#CartReminderTable tbody');
             tbody.empty();
 
-            if (response.wishlists.length > 0) {
-                response.wishlists.forEach(item => {
+            if (response.cartsreminder.length > 0) {
+                response.cartsreminder.forEach(item => {
                     tbody.append(`
                         <tr>
-                            <td>${item.id}</td>
-                            <td>${item.added_on}</td>
-                            <td><img src="${item.image_url}" width="50" height="50" /></td>
-                            <td>${item.product}</td>
-                            <td>${item.category}</td>
+                            <td>${item.sno}</td>
+                            <td>${item.created_at}</td>
+                            <td>${item.name}</td>
+                            <td>${item.product_name}</td>
+                            <td class="d-flex"><button class="btn btn-primary"   onclick="sendSMS(${item.id}, this)"><i class="las la-sms"></i></button>
+                                    <button class="btn btn-success"   onclick="sendEmail(${item.id}, this)"><i class="las la-envelope"></i></button>
+                                <button class="las la-eye btn btn-secondary"  onclick="openModal(${item.id}, '${item.created_at}', ${item.email_count ?? 0}, ${item.sms_count ?? 0})"><i class="bi bi-eye"></i></button>
+
+                                </td>
                         </tr>
                     `);
                 });
             } else {
-                tbody.append('<tr><td colspan="7" class="text-center">No wishlist items found.</td></tr>');
+                tbody.append('<tr><td colspan="7" class="text-center">No Cart Reminder items found.</td></tr>');
             }
         }
     });
 });
-</script>
-<script>
-document.getElementById("sendWishlistEmails").addEventListener("click", function() {
+function openModal(id, created_at, email_total, sms_total) {
+    document.getElementById("modal_last_added").innerText = created_at;
+    document.getElementById("modal_email_total").innerText = email_total;
+    document.getElementById("modal_sms_total").innerText = sms_total;
+
+    $('#productWishlist').modal('show');
+}
+function sendEmail(cartId, btnElem) {
+    if (btnElem) btnElem.disabled = true;
+
     $.ajax({
-        url: "{{ route('wishlist.sendEmails') }}",
+        url: "{{ route('customer.emailreminder') }}",
         type: "POST",
         data: {
+            product_id: cartId, 
             _token: "{{ csrf_token() }}"
         },
         success: function(response) {
-            alert(response.message + " to " + response.count + " users");
+            alert(response.message || "Email sent successfully");
+            location.reload(); 
         },
         error: function(xhr) {
-            alert("Error: " + xhr.responseJSON.message);
+            console.error(xhr.responseText);
+            alert("Error sending email");
+        },
+        complete: function() {
+            if (btnElem) btnElem.disabled = false;
         }
     });
-});
+}
+
+function sendSMS(cartId, btnElem) {
+    if (btnElem) btnElem.disabled = true;
+
+    $.ajax({
+        url: "{{ route('customer.emailreminder') }}",
+        type: "POST",
+        data: {
+            product_id: cartId, 
+            _token: "{{ csrf_token() }}"
+        },
+        success: function(response) {
+            alert(response.message || "Email sent successfully");
+            location.reload(); 
+        },
+        error: function(xhr) {
+            console.error(xhr.responseText);
+            alert("Error sending email");
+        },
+        complete: function() {
+            if (btnElem) btnElem.disabled = false;
+        }
+    });
+}
+
+
 </script>
 @endsection

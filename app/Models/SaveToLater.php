@@ -27,4 +27,9 @@ class SaveToLater extends Model
     return $this->belongsTo(ProductPrice::class, 'product_id');
     }
 
+    public function users()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }

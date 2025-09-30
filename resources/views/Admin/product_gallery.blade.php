@@ -155,6 +155,8 @@ function validateImage(input) {
     if (file) {
         const fileSize = file.size / 1024 / 1024;
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+        const cleanFileName = file.name.replace(/\s+/g, '_');
+
 
         if (!allowedTypes.includes(file.type)) {
             alert('Only JPG, JPEG, PNG, and GIF files are allowed.');

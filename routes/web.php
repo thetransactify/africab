@@ -10,6 +10,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ReminderController;
 
 //start admin 
 Route::get('/tsfy-admin', function () {
@@ -71,6 +72,11 @@ Route::post('/products-permission/{id}/toggle-visibility', [CategoryProductContr
 
 Route::get('/add-product', [CategoryProductController::class, 'GetExcelProduct']);
 Route::post('/add-excel-product', [CategoryProductController::class, 'AddExcelProduct'])->name('GetExcelProduct.product');
+// excelSheet
+Route::get('/google-sheet', [ClientController::class, 'getExcelSheet'])->name('getExcelSheet');
+Route::post('/sync-sheet1', [ClientController::class, 'FirstExcelSheet'])->name('excel.FirstExcelSheet');
+Route::get('/sync-sheet2', [ClientController::class, 'SecondExcelSheet'])->name('excel.SecondExcelSheet');
+
 // offer list start
 Route::get('/manage-offers', [CategoryProductController::class, 'ProdcutOffer'])->name('get.ProdcutOffer');
 Route::post('/add-productoffers', [CategoryProductController::class, 'CreateProductListoffers']);
@@ -94,6 +100,20 @@ Route::get('/moderated-review', [ClientController::class, 'ModeratedReview'])->n
 Route::get('/customer-manage', [CategoryProductController::class, 'Getcustomer'])->name('get.GetCustomer');
 Route::get('/customer-summary', [CategoryProductController::class, 'Getsummary'])->name('get.Getsummary');
 Route::get('/customer-wishlist', [CategoryProductController::class, 'Getwishlist'])->name('get.Getwishlist');
+// cart reminder 
+Route::get('/cart-reminder', [ReminderController::class, 'Getcartreminder'])->name('get.Getcartreminder');
+Route::post('/customer/cartreminder', [ReminderController::class, 'fetchcartreminder'])->name('customer.cartreminder');
+Route::post('/cart-reminder/email', [ReminderController::class, 'sendEmail'])->name('customer.emailreminder');
+Route::post('/cart-remindersms/sms', [ReminderController::class, 'sendSms'])->name('customer.sendSms');
+Route::post('/wishlist/send-emails', [ReminderController::class, 'sendEmails'])
+    ->name('wishlist.sendEmails');
+
+// save to cart
+Route::get('/save-to-cart', [ReminderController::class, 'GetSaveToCart'])->name('get.GetSaveToCart');
+Route::post('/savetocart/send-emails', [ReminderController::class, 'sendEmailSavecart'])
+    ->name('savetocart.sendEmailSavecart');
+
+
 Route::post('/customers/{id}/toggle-status', [CategoryProductController::class, 'toggleStatus']);
 Route::post('/customer-orders', [CategoryProductController::class, 'fetchOrders'])->name('customer.orders');
 Route::post('/customer/wishlists', [CategoryProductController::class, 'fetchWishlist'])->name('customer.wishlist');
@@ -101,7 +121,6 @@ Route::post('/customer/wishlists', [CategoryProductController::class, 'fetchWish
 Route::get('/upload-video', [CategoryProductController::class, 'GetUploadvideo'])->name('get.GetUploadvideo');
 Route::post('/post-video', [CategoryProductController::class, 'CreateUploadvideo'])->name('get.CreateUploadvideo');
 Route::get('/delete-url/{id}', [CategoryProductController::class, 'Deleteurl'])->name('url.delete');
-
 //Admin Homepage
 Route::get('/homepage', [HomeController::class, 'GetHomepage'])->name('get.GetHomepage');
 Route::post('/post-homepage', [HomeController::class, 'CreateHomepage'])->name('get.CreateHomepage');
@@ -206,16 +225,16 @@ Route::get('/payment-cancel/{order}', [PaymentController::class, 'cancelPayment'
 Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
 Route::get('/privacy-policy', [ClientController::class, 'privacyPolicy']);
 
+
 Route::get('/test-smtp', function () {
     try {
         Mail::raw('This is a test email to check SMTP configuration.', function ($message) {
             $message->to('vivekdeveloper3232@gmail.com')
                     ->subject('SMTP Test Email');
         });
-
         return 'Email sent successfully. Check your inbox.';
     } catch (\Exception $e) {
-        return '❌ Error: ' . $e->getMessage();
+        return 'Error: ' . $e->getMessage();
     }
 });
 //end client

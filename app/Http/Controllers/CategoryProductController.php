@@ -20,7 +20,9 @@ use App\Models\popularProducts;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductsImport;
-
+use App\Mail\ProductInStockMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -252,7 +254,7 @@ class CategoryProductController extends Controller
             'cost' => 'required|string',
             'offer_price' => 'required|string'
         ]);
-
+        $oldStatus = $ProductPrice->product_online ?? null;
         $ProductPrice->product_id = $request->productList;
         $ProductPrice->category_id = $request->CategoryList;
         $ProductPrice->listing_name = $request->price_list;
@@ -266,7 +268,35 @@ class CategoryProductController extends Controller
         $ProductPrice->product_online = $request->input('Online', 2);
         $ProductPrice->status = $request->input('Sell',2);
         $ProductPrice->save();
+        if ($oldStatus == 2 && $ProductPrice->product_online == 1) {
+            $this->notifyCustomers($ProductPrice);
+        }
         return redirect()->route('get.productlists')->with('success', 'Product Price updated successfully!');
+   }
+
+   #email in stock
+   protected function notifyCustomers($product){
+    $wishlistUsers = $product->wishlist()->with('users')->get()->pluck('users');
+    $listUsers = $product->lists()->with('users')->get()->pluck('users');
+    $allUsers = $wishlistUsers->merge($listUsers)->unique('id');
+
+    // 👉 Log info for debugging
+    Log::info('NotifyCustomers called', [
+        'product_id' => $product->id,
+        'product_name' => $product->listing_name ?? null,
+        'total_users' => $allUsers->count(),
+        'users' => $allUsers->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name ?? null,
+                'email' => $user->email ?? null,
+            ];
+        }),
+    ]);
+
+    foreach ($allUsers as $user) {
+        Mail::to($user->email)->send(new ProductInStockMail($product, $user));
+     }
    }
 
 
@@ -909,7 +939,5 @@ return $html;
         }
 
     }
-
-
 
 }

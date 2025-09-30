@@ -21,10 +21,8 @@ class CategoryController extends Controller
     #Category List
     #authr: vivek
     public function Viewcategory(){
-        $categories = Category::orderBy('id', 'desc')->where('status','1')->paginate(10);
-        if ($categories->isEmpty()) {
-            return view(' Admin.view_category',compact('categories'));
-        }
+        $categories = Category::orderBy('id', 'desc')->where('status','1')->get();
+        
     	return view(' Admin.view_category',compact('categories'));
     }
 

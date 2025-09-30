@@ -70,7 +70,6 @@
                                         <td>{{ $category->name }}</td>
                                         <td>{{ $category->id }}</td>
                                         <td class="text-center"> <a href="{{ url('tsfy-admin/edit-category/' . Crypt::encrypt($category->id)) }}" class="las la-edit btn btn-secondary mx-1"></a>
-                                            <!-- <a href="javascript:void(0)" class="las la-trash-alt btn btn-secondary mx-1"></a></td> -->
                                             <a href="{{ url('tsfy-admin/delete-categorys', Crypt::encrypt($category->id)) }}" 
                                              onclick="return confirm('Are you sure you want to delete this category?')" 
                                              class="las la-trash-alt btn btn-secondary mx-1">

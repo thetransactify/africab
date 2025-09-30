@@ -52,6 +52,15 @@ class ProductPrice extends Model
     return $this->belongsTo(ProductPrice::class, 'id');
     }
 
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class,'product_id');
+    }
+
+    public function lists()
+    {
+        return $this->hasMany(SaveToLater::class,'product_id');
+    }
     
 
 }

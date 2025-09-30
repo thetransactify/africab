@@ -10,6 +10,7 @@ $(window).on("resize", function () {
 
     // Set .right's width to the window width minus 480 pixels
     $(".category-slider .item a").height( $(".category-slider .item a").width());
+    $(".reco-slider .item a").height( $(".reco-slider .item a").width());
     $(".fo-item").height( $(".fo-item").width());
     // $(".testimonial-item").height( $(".home-news").height());
     $(".content-area").css( 'padding-bottom',contentpad);

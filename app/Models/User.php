@@ -58,4 +58,8 @@ class User extends Authenticatable
     return $this->hasMany(Wishlist::class);
     }
 
+    public function saveToLater(){
+    return $this->hasMany(SaveToLater::class);
+    }
+
 }

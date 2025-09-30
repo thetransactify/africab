@@ -111,12 +111,6 @@
 										<td><p class="prd-price"><i>TSh</i>{{$subtotal}}</p>
 										</td>
 									</tr>
-									<!-- <tr>
-										<th>Discount</th>
-										<td><p class="prd-price">(-) <i>TSh</i>150,120.00</p>
-											<p class="discount-label">(NEWATAFRICAB Applied)<a href="javascript:void();"><span class="fas fa-minus-circle red-color"></span></a></p>
-										</td>
-									</tr> -->
 									<tr class="total-amt">
 										<th>Total</th>
 										<td><p class="prd-price"><i>TSh</i>{{$subtotal}}</p>

@@ -11,11 +11,16 @@ use App\Models\Orders;
 use App\Models\Wishlist;
 use App\Models\address;
 use App\Models\faqs;
+use App\Models\ProductPrice;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Google_Client;
+use Google_Service_Sheets;
+use GuzzleHttp\Client as GuzzleClient;
+
 
 
 
@@ -415,4 +420,122 @@ public function createOrderSelcoms(Request $request)
     public function privacyPolicy(){
       return view('privacy-policy');
     }
+
+    #admin ExcelSheet
+    #auth: vivek
+    public function getExcelSheet(){
+      return view(' Admin.ExcelSync');
+    }
+
+    #admin ExcelSheet 1st
+    #auth: vivek
+    public function FirstExcelSheet(){
+        try {
+            $credentialsPath = storage_path('app/google/projecttesting-473205-eaaed6001bfc.json');
+
+             $client = new \Google_Client();
+            $client->setAuthConfig($credentialsPath);
+            $client->addScope(\Google_Service_Sheets::SPREADSHEETS_READONLY);
+
+            $httpClient = new \GuzzleHttp\Client(['verify' => false]);
+            $client->setHttpClient($httpClient);
+
+            $service = new \Google_Service_Sheets($client);
+            $spreadsheetId = env('GOOGLE_SHEET_ID');
+            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+            $sheetNames = [];
+            foreach ($spreadsheet->getSheets() as $sheet) {
+                $sheetNames[] = $sheet->getProperties()->getTitle();
+            }
+            foreach ($sheetNames as $sheetName) {
+                $range = $sheetName;
+                $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+                $values = $response->getValues();
+                if (empty($values)) continue;
+                $headers = $values[0];
+                $codeIndex  = array_search('CODE', $headers);
+                $priceIndex = array_search('PRICE', $headers);
+
+                if ($codeIndex === false || $priceIndex === false) continue;
+
+                foreach ($values as $index => $row) {
+                    if ($index === 0) continue;
+                    $code  = $row[$codeIndex] ?? null;
+                    $price = $row[$priceIndex] ?? null;
+
+                    if ($code && $price) {
+                        ProductPrice::where('code', $code)
+                            ->where(function($q){
+                                $q->whereNull('product_cost')
+                                  ->orWhere('product_cost', '');
+                            })
+                            ->update(['product_cost' => $price]);
+                    }
+                }
+            }
+
+          
+          return redirect()->back()->with('success', "Sync completed successfully.");
+
+        } catch (\Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
+
+        #admin ExcelSheet 1st
+    #auth: vivek
+    public function SecondExcelSheet(){
+        try {
+            $credentialsPath = storage_path('app/google/projecttesting-473205-eaaed6001bfc.json');
+
+             $client = new \Google_Client();
+            $client->setAuthConfig($credentialsPath);
+            $client->addScope(\Google_Service_Sheets::SPREADSHEETS_READONLY);
+
+            $httpClient = new \GuzzleHttp\Client(['verify' => false]);
+            $client->setHttpClient($httpClient);
+
+            $service = new \Google_Service_Sheets($client);
+            $spreadsheetId = env('GOOGLE_SHEET_ID1');
+            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+            $sheetNames = [];
+            foreach ($spreadsheet->getSheets() as $sheet) {
+                $sheetNames[] = $sheet->getProperties()->getTitle();
+            }
+            foreach ($sheetNames as $sheetName) {
+                $range = $sheetName;
+                $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+                $values = $response->getValues();
+                if (empty($values)) continue;
+                $headers = $values[0];
+                $codeIndex  = array_search('CODE', $headers);
+                $priceIndex = array_search('PRICE', $headers);
+
+                if ($codeIndex === false || $priceIndex === false) continue;
+
+                foreach ($values as $index => $row) {
+                    if ($index === 0) continue;
+                    $code  = $row[$codeIndex] ?? null;
+                    $price = $row[$priceIndex] ?? null;
+
+                    if ($code && $price) {
+                        ProductPrice::where('code', $code)
+                            ->where(function($q){
+                                $q->whereNull('product_cost')
+                                  ->orWhere('product_cost', '');
+                            })
+                            ->update(['product_cost' => $price]);
+                    }
+                }
+            }
+
+          return redirect()->back()->with('success', "Sync completed successfully.");
+
+        } catch (\Exception $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
+
+
+
 }

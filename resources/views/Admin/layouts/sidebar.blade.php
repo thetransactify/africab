@@ -134,6 +134,11 @@
                                     <i class="simple-icon-picture"></i> <span class="d-inline-block">Bulk upload</span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{url('tsfy-admin/google-sheet')}}">
+                                    <i class="simple-icon-wallet"></i> <span class="d-inline-block">Price Sync</span>
+                                </a>
+                            </li>
                              <li>
                                 <a href="{{url('tsfy-admin/upload-video')}}">
                                     <i class="simple-icon-picture"></i> <span class="d-inline-block">Upload Video</span>
@@ -172,6 +177,16 @@
                 <li>
                     <a href="{{url('tsfy-admin/customer-wishlist')}}">
                         <i class="simple-icon-heart"></i> <span class="d-inline-block">Customer Wishlist</span>
+                    </a>
+                </li>
+                 <li>
+                    <a href="{{url('tsfy-admin/cart-reminder')}}">
+                        <i class="simple-icon-wallet"></i> <span class="d-inline-block">Cart Reminder</span>
+                    </a>
+                </li>
+                 <li>
+                    <a href="{{url('tsfy-admin/save-to-cart')}}">
+                        <i class="simple-icon-handbag"></i> <span class="d-inline-block">Save To Cart</span>
                     </a>
                 </li>
                 

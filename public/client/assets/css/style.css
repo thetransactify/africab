@@ -8100,3 +8100,101 @@ ul.footer-social li {
   border-radius: 5px;
     overflow: hidden;
 }
+
+.reco-slider .item a {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: center;
+    justify-content: space-around;
+    padding: 1rem;
+    color: #000;
+    font-weight: 800;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-transform: uppercase;
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(102, 102, 102, 0);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(102,102,102,0);
+    box-shadow: 0px 0px 5px 0px rgba(102, 102, 102, 0);
+}
+
+.reco-slider .item a:hover {
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(102,102,102,1);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(102,102,102,1);
+    box-shadow: 0px 0px 5px 0px rgba(102,102,102,1);
+}
+
+.reco-slider .item a img {
+    position: relative;
+    max-width: 70px;
+    margin: auto;
+    filter: grayscale(1);
+    transition: grayscale 0.2s;
+}
+
+.reco-slider .item a > span {
+    position: relative;
+    width: 100%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #e8050a;
+}
+
+.reco-slider .item a:hover > span {
+    color: #000;
+}
+.reco-slider .item {
+    padding: 10px;
+}
+.reco-slider .slick-prev, .reco-slider .slick-next {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 5px;
+    border: 2px solid #e8050a;
+    background-color: #e8050a;
+}
+
+.reco-slider .slick-prev:hover, .reco-slider .slick-next:hover {
+    border: 2px solid #e8050a;
+    background-color: #fff;
+}
+.reco-slider .slick-prev {
+    left: -35px;
+}
+.reco-slider .slick-next {
+    right: -40px;
+}
+.reco-slider .slick-prev:before, .reco-slider .slick-next:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-family: 'Material Symbols Outlined';
+    transform: translate(-50%, -50%);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    z-index: 2;
+    transition: all 0.5s 
+ease-out 0s;
+}
+
+.reco-slider .slick-prev:before, .reco-slider .slick-next:before {
+    font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 48;
+}
+
+.reco-slider .slick-prev:before {
+    content: "\e5cb";
+}
+
+.reco-slider .slick-next:before {
+    content: "\e5cc";
+}
+
+.reco-slider .slick-prev:hover:before, .reco-slider .slick-next:hover:before {
+    color: #e8050a;
+}

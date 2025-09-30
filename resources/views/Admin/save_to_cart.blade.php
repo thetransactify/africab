@@ -11,48 +11,39 @@
                     <div class="col-12">
                     <div class="card mb-4">
                         <div class="card-body">
-                            <h5 class="mb-4 font-weight-bold">Customers Wishlist</h5>
-                            <div class="alert alert-warning mb-5" role="alert">* Select the customer you want to view the wishlist of.</div>
+                            <h5 class="mb-4 font-weight-bold">Customers Save to cart</h5>
                             <div class="row mb-3">
                             <div class="col-md-6 col-12">
-                            <form id="wishlistForm">
-                            <div class="form-group mb-4">
-                                <label class="form-group has-float-label mb-4">
-                                <select id="CategoryList" class="form-control select2-single" data-width="100%">
-                                    <option label="&nbsp;">Select Customer</option>
-                                @foreach($Getwishlist as $wishlist)
-                                   <option value="{{ $wishlist->id }}">
-                                        {{ $wishlist->name }}
-                                    </option>
-                                @endforeach
-                                </select>
-                                    <span>Customer Name</span>
-                            </label>
-                                </div>  
-                            <div class="form-group text-right">                                                            
-                                <button class="btn btn-secondary" type="submit">List Wishlist</button>
-                                <button id="sendWishlistEmails" class="btn btn-success"><i class="las la-envelope"></i> Send Email to All</button>
-                            </div>
-                            </form>
+                                 <button id="sendWishlistEmails" class="btn btn-success"><i class="las la-envelope"></i> Send Email to All</button>
                             </div>
                            </div>
                              <div class="separator mb-5"></div>
                             <div class="row">
                             <div class="col-12"> 
                             <div class="table-responsive">
-                            <table class="data-table data-table-permission" id="wishlistTable">
+                            <table class="data-table data-table-permissions" id="wishlistTable">
                             <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Added on</th>
-                                        <th>Image</th>
+                                        <th>Customer Name</th>
                                         <th>Product Name</th>
-                                        <th>Category Name</th>
 
                                     </tr>
                                 </thead>
                                 <tbody>
-                                     
+                                 @forelse($GetSaveToCart as $index => $savetocart)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $savetocart->created_at->format('d-m-Y') }}</td>
+                                        <td>{{ $savetocart->users->name ?? 'N/A' }}</td>
+                                        <td>{{ $savetocart->product->listing_name ?? 'N/A' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center">No save to later Records Found</td>
+                                    </tr>
+                                @endforelse     
                                 </tbody>
                             </table>
                             </div>
@@ -113,47 +104,10 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script type="text/javascript">
-    $('#wishlistForm').on('submit', function (e) {
-    e.preventDefault();
-
-    let customerId = $('#CategoryList').val();
-    if (!customerId) return;
-
-    $.ajax({
-        url: "{{ route('customer.wishlist') }}",
-        type: "POST",
-        data: {
-            customer_id: customerId,
-            _token: "{{ csrf_token() }}"
-        },
-        success: function (response) {
-            let tbody = $('#wishlistTable tbody');
-            tbody.empty();
-
-            if (response.wishlists.length > 0) {
-                response.wishlists.forEach(item => {
-                    tbody.append(`
-                        <tr>
-                            <td>${item.id}</td>
-                            <td>${item.added_on}</td>
-                            <td><img src="${item.image_url}" width="50" height="50" /></td>
-                            <td>${item.product}</td>
-                            <td>${item.category}</td>
-                        </tr>
-                    `);
-                });
-            } else {
-                tbody.append('<tr><td colspan="7" class="text-center">No wishlist items found.</td></tr>');
-            }
-        }
-    });
-});
-</script>
 <script>
 document.getElementById("sendWishlistEmails").addEventListener("click", function() {
     $.ajax({
-        url: "{{ route('wishlist.sendEmails') }}",
+        url: "{{ route('savetocart.sendEmailSavecart') }}",
         type: "POST",
         data: {
             _token: "{{ csrf_token() }}"
@@ -167,4 +121,6 @@ document.getElementById("sendWishlistEmails").addEventListener("click", function
     });
 });
 </script>
+
+
 @endsection

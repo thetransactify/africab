@@ -55,22 +55,22 @@
 	<div class="row justify-content-start sub-cat-list">
 		<div class="col-12">
 			<ul class="cat-subs">
-					 <li class="label"><span>Available Varieties :</span></li>
-					 <li><a href="#" class="active">All</a></li>
-					 @if(!empty($subcategoriesList))
-					 @foreach($subcategoriesList as $list)
-	                 <li><a href="#">{{$list['name']}}</a></li>
-	                 @endforeach
-	                 @else
-	                 <li class="no-sub"><span>Not Available</span></li>
-	                 @endif
-	            </ul>
+				<li class="label"><span>Available Varieties :</span></li>
+				<li><a href="#" class="active" data-subcategory="all">All</a></li>
+				@if(!empty($subcategoriesList))
+				@foreach($subcategoriesList as $list)
+				<li><a href="#" data-subcategory="{{ $list['name'] }}">{{$list['name']}}</a></li>
+				@endforeach
+				@else
+				<li class="no-sub"><span>Not Available</span></li>
+				@endif
+			</ul>
 		</div>
 	</div>
 	
 	<div class="row product-list justify-content-start">
 		@foreach($productsList as $listname)
-			<div class="col-lg-3 col-md-4 col-6 each-item">
+			<div class="col-lg-3 col-md-4 col-6 each-item" data-subcategory="{{ $listname['SubCategories'] }}">
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname'])) }}';">
 						<span class="prd-tag new">New</span>
@@ -145,5 +145,32 @@
 
 </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
+<script type="text/javascript">
+$(document).ready(function() {
+    $(".cat-subs a").click(function(e){
+        e.preventDefault();
+
+        // remove 'active' class from all
+        $(".cat-subs a").removeClass("active");
+
+        // add 'active' to clicked
+        $(this).addClass("active");
+
+        var subcat = $(this).data("subcategory");
+
+        $(".product-list .each-item").each(function(){
+            if(subcat == "all") {
+                $(this).show();
+            } else if($(this).data("subcategory") == subcat) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+});
+</script>
 @endsection
