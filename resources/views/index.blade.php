@@ -60,9 +60,6 @@
     <div class="home-advertisement mt-4">
         <div class="container-fluid px-0 px-sm-3">
             <div class="col-lg-6 col-md-6 col-12">
-                <div class="main-title">
-                    <h1>Offer<span>Lists</span></h1>
-                </div>
             </div>
             
             <div class="row align-items-center">

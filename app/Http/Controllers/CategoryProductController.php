@@ -652,10 +652,11 @@ class CategoryProductController extends Controller
             ];
         }
         // product tracker 
-        $tracker =  popularProducts::updateOrCreate(
-                    ['product_id' => $productDetails->id],
-                    ['count' => DB::raw('count + 1')]
-                );
+        $tracker = DB::table('products_tracker')->updateOrInsert(
+            ['product_id' => $productDetails->id],
+            ['count' => DB::raw('count + 1'), 'updated_at' => now(), 'created_at' => now()]
+        );
+
         return view('product_list', compact('data','recentviewlist'));
    }
 
