@@ -273,7 +273,7 @@ Route::get('/payment-method-selcom', function () {
         "redirect_url" => base64_encode("https://yourdomain.com/success"),
     ];
 
-    // ===== Step 3: Signed fields (order must match payload) =====
+    // ===== Step 3: Signed fields ( must match payload) =====
     $signedFields = "vendor,order_id,buyer_email,buyer_name,buyer_phone,amount,currency,payment_methods,billing.firstname,billing.lastname,billing.address_1,billing.address_2,billing.city,billing.state_or_region,billing.country,billing.phone,buyer_remarks,merchant_remarks,no_of_items,cancel_url,webhook,redirect_url";
 
     // ===== Step 4: Timestamp (ISO 8601 format) =====
