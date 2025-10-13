@@ -328,7 +328,7 @@ public function createOrderSelcoms(Request $request)
         $apiKey = base64_encode($this->apiKeyRaw);
         $timestamp = now()->format('Y-m-d\TH:i:sP');
         $fields = [
-            'vendor'             => $vendor,
+            'vendor'             => 'TILL60972122',
             'order_id'           => 'ORD' . time(),
             'buyer_email'        => 'john@example.com',
             'buyer_name'         => 'John Doe',

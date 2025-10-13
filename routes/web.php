@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Carbon\Carbon;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CategoryProductController;
@@ -238,4 +239,78 @@ Route::get('/test-smtp', function () {
     }
 });
 //end client
+Route::get('/payment-method-selcom', function () {
+  // === Step 1: Apne credentials yahan define karo ===
+    $apiKey = 'AFRICAB-00000A2C9F';
+    $apiSecret = '0001BE12-0011AC1C-000383DB-00052C80';
+    $vendorId = 'TILL60972122';
+       // ===== Step 2: Payload =====
+    $payload = [
+        "vendor" => $vendorId,
+        "order_id" => "ORD" . time(),
+        "buyer_email" => "john@example.com",
+        "buyer_name" => "John Doe",
+        "buyer_phone" => "255710000000",
+        "amount" => 1000,
+        "currency" => "TZS",
+        "payment_methods" => "ALL",
+
+        "billing.firstname" => "John",
+        "billing.lastname" => "Doe",
+        "billing.address_1" => "123 Street",
+        "billing.address_2" => "",
+        "billing.city" => "Dar es Salaam",
+        "billing.state_or_region" => "DSM",
+        "billing.country" => "TZ",
+        "billing.phone" => "255710000000",
+
+        "buyer_remarks" => "Testing order",
+        "merchant_remarks" => "Laravel Test Order",
+        "no_of_items" => 1,
+
+        "cancel_url" => base64_encode("https://yourdomain.com/cancel"),
+        "webhook" => base64_encode("https://yourdomain.com/webhook"),
+        "redirect_url" => base64_encode("https://yourdomain.com/success"),
+    ];
+
+    // ===== Step 3: Signed fields (order must match payload) =====
+    $signedFields = "vendor,order_id,buyer_email,buyer_name,buyer_phone,amount,currency,payment_methods,billing.firstname,billing.lastname,billing.address_1,billing.address_2,billing.city,billing.state_or_region,billing.country,billing.phone,buyer_remarks,merchant_remarks,no_of_items,cancel_url,webhook,redirect_url";
+
+    // ===== Step 4: Timestamp (ISO 8601 format) =====
+    $timestamp = now('+03:00')->format('Y-m-d\TH:i:sP');
+
+    // ===== Step 5: Build signature string =====
+    $fields = explode(',', $signedFields);
+    $signString = "timestamp=" . $timestamp;
+    foreach ($fields as $field) {
+        $signString .= "&" . $field . "=" . ($payload[$field] ?? '');
+    }
+
+    // ===== Step 6: Generate HMAC SHA256 digest =====
+    $digest = base64_encode(hash_hmac('sha256', $signString, $apiSecret, true));
+
+    // ===== Step 7: Build headers =====
+    $headers = [
+        "Authorization" => "SELCOM " . base64_encode($apiKey),
+        "Digest-Method" => "HS256",
+        "Digest" => $digest,
+        "Timestamp" => $timestamp,
+        "Signed-Fields" => $signedFields,
+        "Content-Type" => "application/json",
+        "Accept" => "application/json",
+    ];
+
+    // ===== Step 8: Send request to Selcom =====
+    $url = "https://apigw.selcommobile.com/v1/checkout/create-order";
+
+    $response = Http::withHeaders($headers)->post($url, $payload);
+
+    // ===== Step 9: Return formatted response =====
+    return response()->json([
+        "status" => $response->status(),
+        "selcom_response" => $response->json(),
+        "headers_sent" => $headers,
+        "payload_sent" => $payload,
+    ]);
+});
 
