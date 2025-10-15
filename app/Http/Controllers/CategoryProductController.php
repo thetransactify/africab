@@ -354,15 +354,18 @@ class CategoryProductController extends Controller
     #soft delete ProductPrice list
     #authr: vivek
    public function Deletegallery($id){
-        try {
-            $decryptedId = Crypt::decrypt($id);
-            $Productgallery = ProductGallery::findOrFail($decryptedId);
-            $Productgallery->status = 2;
-            $Productgallery->save();
-            return redirect()->back()->with('success', 'Gallery Product deleted successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Something went wrong.');
+    try {
+        $decryptedId = Crypt::decrypt($id);
+        $Productgallery = ProductGallery::findOrFail($decryptedId);
+        if ($Productgallery->file && Storage::disk('public')->exists('uploads/product/' . $Productgallery->file)) {
+            Storage::disk('public')->delete('uploads/product/' . $Productgallery->file);
         }
+        $Productgallery->delete();
+
+        return redirect()->back()->with('success', 'Gallery Product deleted successfully!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
+    }
 
     }
 
@@ -530,15 +533,14 @@ class CategoryProductController extends Controller
                     'SubCategories'  => $product_price->product->name ?? 'N/A',
                     'category' => $product->category->name ?? 'N/A',
                     'product_image' => $product_price->galleries->isNotEmpty()
-    ? asset('storage/uploads/category/' . $product_price->galleries->first()->file)
-    : asset('storage/no-image.png'),
+                    ? asset('storage/uploads/product/' . $product_price->galleries->first()->file)
+                    : asset('storage/no-image.png'),
                     'category_image' => asset('storage/uploads/category/' . $category->file), 
                 ];
             }
          }
       }
     }
-//return $productsList;
     foreach ($products as $product) {
         if ($product->category_id == $category->id && $product->id != $category->id) {
             $subcategoriesList[] = [
@@ -562,7 +564,6 @@ class CategoryProductController extends Controller
             'file' => $file ?? 'default.jpg',
             ];
         }
-  //return $productsList;
     return view('product-category', compact('productsList', 'subcategoriesList','category','recentviewlist'));
    }
 
@@ -584,7 +585,10 @@ class CategoryProductController extends Controller
         'category' => function($query) {
             $query->select('id', 'name','file');
         },
-        'galleries',
+        'galleries' => function ($query) {
+           $query->where('status', 1);
+        }
+        ,
         'reviews' => function($query) {
         $query->orderByDesc('id');
         }
@@ -654,7 +658,7 @@ class CategoryProductController extends Controller
         // product tracker 
         $tracker = DB::table('products_tracker')->updateOrInsert(
             ['product_id' => $productDetails->id],
-            ['count' => DB::raw('count + 1'), 'updated_at' => now(), 'created_at' => now()]
+            ['count' => DB::raw('count + 1')]
         );
 
         return view('product_list', compact('data','recentviewlist'));

@@ -118,10 +118,11 @@
 			<div class="ac-tab-container">
 			<div id="ac-tab" class="ac-tab">
 							<h2 class="ac-title active">Product Details</h2>
+							@if(!empty($data['product_price']['packing_weight']))
 							<div class="ac-content active">
-							<!-- <p><b>Barcode No. :</b> 12253463424 </p> -->
 							<p><b>Product Weight :</b>{{$data['product_price']['packing_weight']}} </p>
-								</div>
+							</div>
+							@endif
 							<h2 class="ac-title">Product Description</h2>
 							<div class="ac-content">
 							<div class="richtext-content">
@@ -248,6 +249,7 @@
 		</div>
 		</div>
 
+</div>
 </div>
 
 </div>

@@ -19,6 +19,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use Google_Client;
 use Google_Service_Sheets;
+use Illuminate\Support\Facades\Cache;
 use GuzzleHttp\Client as GuzzleClient;
 
 
@@ -429,112 +430,230 @@ public function createOrderSelcoms(Request $request)
 
     #admin ExcelSheet 1st
     #auth: vivek
-    public function FirstExcelSheet(){
-        try {
-            $credentialsPath = storage_path('app/google/projecttesting-473205-eaaed6001bfc.json');
+    public function FirstExcelSheet()
+    {
+      try {
+        set_time_limit(0);
+        ini_set('memory_limit','1024M');
+        $credentialsPath = storage_path('app/google/africab-price-list-1f03e1e093ad.json');
+        $client = new \Google_Client();
 
-             $client = new \Google_Client();
-            $client->setAuthConfig($credentialsPath);
-            $client->addScope(\Google_Service_Sheets::SPREADSHEETS_READONLY);
+        $client->setAuthConfig($credentialsPath);
+        $client->addScope(\Google_Service_Sheets::SPREADSHEETS_READONLY);
+        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
 
-            $httpClient = new \GuzzleHttp\Client(['verify' => false]);
-            $client->setHttpClient($httpClient);
+        $service = new \Google_Service_Sheets($client);
+        $spreadsheetId = env('GOOGLE_SHEET_ID');
 
-            $service = new \Google_Service_Sheets($client);
-            $spreadsheetId = env('GOOGLE_SHEET_ID');
-            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
-            $sheetNames = [];
-            foreach ($spreadsheet->getSheets() as $sheet) {
-                $sheetNames[] = $sheet->getProperties()->getTitle();
+    // Get sheet names
+        $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+        $sheetNames = [];
+        foreach ($spreadsheet->getSheets() as $sheet) {
+          $sheetNames[] = $sheet->getProperties()->getTitle();
+        }
+
+        Log::info("[Sheet Sync Start] " . now());
+        $updatedProducts = [];
+        $progress = Cache::get('sheet_sync_progress', [
+          'sheet_index' => 0,
+          'row_index' => 0
+        ]);
+
+        for ($s = $progress['sheet_index']; $s < count($sheetNames); $s++) {
+          $sheetName = $sheetNames[$s];
+          $range = $sheetName;
+          $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+          $values = $response->getValues();
+
+          if (empty($values)) {
+            continue;
+          }
+
+        // Detect header row
+          $headerRowIndex = null;
+          $codeIndex = $priceIndex = null;
+
+          foreach ($values as $rowIndex => $row) {
+            foreach ($row as $colIndex => $colValue) {
+              $colClean = strtoupper(trim($colValue ?? ''));
+                $colClean = preg_replace('/[^A-Z0-9]/', '', $colClean); 
+
+                if (in_array($colClean, ['CODE','PRODUCTCODE','ITEMCODE'])) $codeIndex = $colIndex;
+                if (in_array($colClean, ['PRICE','PRICELIST','LISTPRICE','DISTRIBUTORPRICE','MRP','SELLINGPRICE'])) $priceIndex = $colIndex;
+              }
+              if ($codeIndex !== null && $priceIndex !== null) {
+                $headerRowIndex = $rowIndex;
+                break;
+              }
             }
-            foreach ($sheetNames as $sheetName) {
-                $range = $sheetName;
-                $response = $service->spreadsheets_values->get($spreadsheetId, $range);
-                $values = $response->getValues();
-                if (empty($values)) continue;
-                $headers = $values[0];
-                $codeIndex  = array_search('CODE', $headers);
-                $priceIndex = array_search('PRICE', $headers);
 
-                if ($codeIndex === false || $priceIndex === false) continue;
+            if ($headerRowIndex === null) {
+              continue;
+            }
 
-                foreach ($values as $index => $row) {
-                    if ($index === 0) continue;
-                    $code  = $row[$codeIndex] ?? null;
-                    $price = $row[$priceIndex] ?? null;
+            $startRow = ($s === $progress['sheet_index']) ? $progress['row_index'] : $headerRowIndex + 1;
 
-                    if ($code && $price) {
-                        ProductPrice::where('code', $code)
-                            ->where(function($q){
-                                $q->whereNull('product_cost')
-                                  ->orWhere('product_cost', '');
-                            })
-                            ->update(['product_cost' => $price]);
-                    }
+        // Process in chunks
+            $chunkSize = 50;
+            for ($i = $startRow; $i < count($values); $i += $chunkSize) {
+              $chunk = array_slice($values, $i, $chunkSize);
+              $updates = [];
+
+              foreach ($chunk as $row) {
+                $codeRaw  = $row[$codeIndex] ?? null;
+                $priceRaw = $row[$priceIndex] ?? null;
+
+                if ($codeRaw && $priceRaw) {
+                  $code = strtoupper(trim($codeRaw));
+                  $code = preg_replace('/\s+/', ' ', $code);
+                  $price = preg_replace('/[^\d.]/', '', $priceRaw);
+                  if (!empty($price)) $updates[$code] = $price;
                 }
-            }
+              }
+              foreach ($updates as $code => $price) {
+                $affected = ProductPrice::where('code', (string)$code)
+                ->update(['product_cost' => $price]);
 
-          
-          return redirect()->back()->with('success', "Sync completed successfully.");
+                if ($affected > 0) {
+                  $updatedProducts[] = [
+                    'sheet' => $sheetName,
+                    'code' => $code,
+                    'price' => $price
+                  ];
+                } else {
+                }
+              }
+              Cache::put('sheet_sync_progress', [
+                'sheet_index' => $s,
+                'row_index' => $i + $chunkSize
+              ], 3600);
+            }
+            Cache::put('sheet_sync_progress', [
+              'sheet_index' => $s + 1,
+              'row_index' => 0
+            ], 3600);
+          }
+
+          Cache::forget('sheet_sync_progress');
+          return redirect()->back()->with('success', "Sync completed. Updated " . count($updatedProducts) . " products.");
 
         } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
+          Log::error("Sheet Sync Error: " . $e->getMessage());
+          return "Error: " . $e->getMessage();
         }
-    }
-
-        #admin ExcelSheet 1st
+      }
+    #admin ExcelSheet 1st
     #auth: vivek
     public function SecondExcelSheet(){
-        try {
-            $credentialsPath = storage_path('app/google/projecttesting-473205-eaaed6001bfc.json');
+         try {
+        set_time_limit(0);
+        ini_set('memory_limit','1024M');
+        $credentialsPath = storage_path('app/google/africab-price-list-1f03e1e093ad.json');
+        $client = new \Google_Client();
 
-             $client = new \Google_Client();
-            $client->setAuthConfig($credentialsPath);
-            $client->addScope(\Google_Service_Sheets::SPREADSHEETS_READONLY);
+        $client->setAuthConfig($credentialsPath);
+        $client->addScope(\Google_Service_Sheets::SPREADSHEETS_READONLY);
+        $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
 
-            $httpClient = new \GuzzleHttp\Client(['verify' => false]);
-            $client->setHttpClient($httpClient);
+        $service = new \Google_Service_Sheets($client);
+        $spreadsheetId = env('GOOGLE_SHEET_ID1');
 
-            $service = new \Google_Service_Sheets($client);
-            $spreadsheetId = env('GOOGLE_SHEET_ID1');
-            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
-            $sheetNames = [];
-            foreach ($spreadsheet->getSheets() as $sheet) {
-                $sheetNames[] = $sheet->getProperties()->getTitle();
+        $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+        $sheetNames = [];
+        foreach ($spreadsheet->getSheets() as $sheet) {
+          $sheetNames[] = $sheet->getProperties()->getTitle();
+        }
+
+        Log::info("[Sheet Sync Start] " . now());
+        $updatedProducts = [];
+        $progress = Cache::get('sheet_sync_progress', [
+          'sheet_index' => 0,
+          'row_index' => 0
+        ]);
+
+        for ($s = $progress['sheet_index']; $s < count($sheetNames); $s++) {
+          $sheetName = $sheetNames[$s];
+          $range = $sheetName;
+          $response = $service->spreadsheets_values->get($spreadsheetId, $range);
+          $values = $response->getValues();
+
+          if (empty($values)) {
+            continue;
+          }
+
+        // Detect header row
+          $headerRowIndex = null;
+          $codeIndex = $priceIndex = null;
+
+          foreach ($values as $rowIndex => $row) {
+            foreach ($row as $colIndex => $colValue) {
+              $colClean = strtoupper(trim($colValue ?? ''));
+                $colClean = preg_replace('/[^A-Z0-9]/', '', $colClean); 
+
+                if (in_array($colClean, ['CODE','PRODUCTCODE','ITEMCODE'])) $codeIndex = $colIndex;
+                if (in_array($colClean, ['PRICE','PRICELIST','LISTPRICE','DISTRIBUTORPRICE','MRP','SELLINGPRICE'])) $priceIndex = $colIndex;
+              }
+              if ($codeIndex !== null && $priceIndex !== null) {
+                $headerRowIndex = $rowIndex;
+                break;
+              }
             }
-            foreach ($sheetNames as $sheetName) {
-                $range = $sheetName;
-                $response = $service->spreadsheets_values->get($spreadsheetId, $range);
-                $values = $response->getValues();
-                if (empty($values)) continue;
-                $headers = $values[0];
-                $codeIndex  = array_search('CODE', $headers);
-                $priceIndex = array_search('PRICE', $headers);
 
-                if ($codeIndex === false || $priceIndex === false) continue;
+            if ($headerRowIndex === null) {
+              continue;
+            }
 
-                foreach ($values as $index => $row) {
-                    if ($index === 0) continue;
-                    $code  = $row[$codeIndex] ?? null;
-                    $price = $row[$priceIndex] ?? null;
+            $startRow = ($s === $progress['sheet_index']) ? $progress['row_index'] : $headerRowIndex + 1;
 
-                    if ($code && $price) {
-                        ProductPrice::where('code', $code)
-                            ->where(function($q){
-                                $q->whereNull('product_cost')
-                                  ->orWhere('product_cost', '');
-                            })
-                            ->update(['product_cost' => $price]);
-                    }
+        // Process in chunks
+            $chunkSize = 50;
+            for ($i = $startRow; $i < count($values); $i += $chunkSize) {
+              $chunk = array_slice($values, $i, $chunkSize);
+              $updates = [];
+
+              foreach ($chunk as $row) {
+                $codeRaw  = $row[$codeIndex] ?? null;
+                $priceRaw = $row[$priceIndex] ?? null;
+
+                if ($codeRaw && $priceRaw) {
+                  $code = strtoupper(trim($codeRaw));
+                  $code = preg_replace('/\s+/', ' ', $code);
+                  $price = preg_replace('/[^\d.]/', '', $priceRaw);
+                  if (!empty($price)) $updates[$code] = $price;
                 }
-            }
+              }
+              foreach ($updates as $code => $price) {
+                $affected = ProductPrice::where('code', (string)$code)
+                ->update(['product_cost' => $price]);
 
-          return redirect()->back()->with('success', "Sync completed successfully.");
+                if ($affected > 0) {
+                  $updatedProducts[] = [
+                    'sheet' => $sheetName,
+                    'code' => $code,
+                    'price' => $price
+                  ];
+                } else {
+                }
+              }
+              Cache::put('sheet_sync_progress', [
+                'sheet_index' => $s,
+                'row_index' => $i + $chunkSize
+              ], 3600);
+            }
+            Cache::put('sheet_sync_progress', [
+              'sheet_index' => $s + 1,
+              'row_index' => 0
+            ], 3600);
+          }
+
+          Cache::forget('sheet_sync_progress');
+          return redirect()->back()->with('success', "Sync completed. Updated " . count($updatedProducts) . " products.");
 
         } catch (\Exception $e) {
-            return "Error: " . $e->getMessage();
+          Log::error("Sheet Sync Error: " . $e->getMessage());
+          return "Error: " . $e->getMessage();
         }
-    }
+      }
 
 
 

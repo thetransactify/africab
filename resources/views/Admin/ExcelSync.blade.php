@@ -33,7 +33,7 @@
                             <form action="{{ route('excel.FirstExcelSheet') }}" method="Post">
                                 @csrf
                                 <button class="btn btn-primary" type="submit">
-                                    Sync Sheet 1
+                                    Main price list
                                 </button>
                             </form>
 
@@ -41,7 +41,7 @@
                             <form action="{{ route('excel.SecondExcelSheet') }}" method="get">
                                 @csrf
                                 <button class="btn btn-success" type="submit">
-                                    Sync Sheet 2
+                                    Light Pricelist
                                 </button>
                             </form>
                         </div>
