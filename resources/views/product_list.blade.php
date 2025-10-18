@@ -2,7 +2,7 @@
 @section('title', 'Product')
 @section('content')
 <div class="content-area">
-
+ 
 <!-- Banner Area -->
 <div class="page-headers">
 	<div class="container-fluid">
@@ -92,7 +92,7 @@
 					<p>Desired Quantity</p>
 						<div class="qty-input">
 							<input type="button" value="-" class="button-minus" data-field="quantity">
-							<input type="number" step="1" max="" value="0" name="quantity" class="quantity-field" id="quantity">
+							<input type="number" step="1" max="" value="1" name="quantity" class="quantity-field" id="quantity">
 							<input type="button" value="+" class="button-plus" data-field="quantity">
 						</div>
 				    <p><small>Max Allowed : 1000</small></p>		
@@ -193,6 +193,7 @@
 				</div>		
 			
 	</div>	
+	</div>
 	</div>
 
 <!-- eCom Features-->

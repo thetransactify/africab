@@ -21,7 +21,7 @@ class CategoryController extends Controller
     #Category List
     #authr: vivek
     public function Viewcategory(){
-        $categories = Category::orderBy('id', 'desc')->where('status','1')->get();
+        $categories = Category::orderBy('id', 'desc')->get();
         
     	return view(' Admin.view_category',compact('categories'));
     }
@@ -37,6 +37,17 @@ class CategoryController extends Controller
             return redirect()->back()->with('error', 'Invalid or expired link.');
         }
     }
+
+    #Category toggle
+    #authr: vivek
+    public function changeCategoryStatus($id, $status){
+    $category = Category::findOrFail(Crypt::decrypt($id));
+    $category->status = $status;
+    $category->save();
+
+    return redirect()->back()->with('success', 'Category status updated successfully.');
+    }
+
 
     #Add Category
     #authr: vivek

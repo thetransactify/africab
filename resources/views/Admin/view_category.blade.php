@@ -74,8 +74,20 @@
                                              onclick="return confirm('Are you sure you want to delete this category?')" 
                                              class="las la-trash-alt btn btn-secondary mx-1">
                                          </a>
+                                        @if($category->status == 1)
+                                                <a href="{{ url('tsfy-admin/category-status', ['id' => Crypt::encrypt($category->id), 'status' => 0]) }}" 
+                                                   class="btn btn-success mx-1"
+                                                   onclick="return confirm('Do you want to set this category Offline?')">
+                                                   <i class="las la-toggle-on"></i> Online
+                                                </a>
+                                        @else
+                                                <a href="{{ url('tsfy-admin/category-status', ['id' => Crypt::encrypt($category->id), 'status' => 1]) }}" 
+                                                   class="btn btn-secondary mx-1"
+                                                   onclick="return confirm('Do you want to set this category Online?')">
+                                                   <i class="las la-toggle-off"></i> Offline
+                                                </a>
+                                        @endif
                                      </td>
-
                                  </tr>
                                  @endforeach
                              </tbody>

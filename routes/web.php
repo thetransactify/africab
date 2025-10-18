@@ -58,6 +58,8 @@ Route::post('/post-product', [CategoryProductController::class, 'CreateProduct']
 Route::get('edit-SubCategories/{id}', [CategoryProductController::class, 'EditProduct'])->name('product.edit');
 Route::post('/update-product/{id}', [CategoryProductController::class, 'UpdateProduct'])->name('product.update');
 Route::get('/delete-category/{id}', [CategoryProductController::class, 'DeleteProduct'])->name('product.delete');
+Route::get('/category-status/{id}/{status}', [CategoryController::class, 'changeCategoryStatus']);
+
 Route::get('/product-price', [CategoryProductController::class, 'ProdcutPriceList'])->name('get.productlists');
 Route::get('/get-products/{category_id}', [CategoryProductController::class, 'getProducts'])->name('get.products');
 Route::get('/get-subcategiores/{category_id}', [CategoryProductController::class, 'subcategiores'])->name('get.productssd');
