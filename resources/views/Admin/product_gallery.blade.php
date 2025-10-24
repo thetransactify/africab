@@ -1,6 +1,12 @@
 @extends('Admin.layouts.app')
 @section('title', 'Product Gallery')
 @section('content')
+<div id="fullscreen-loader" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8); z-index:9999; backdrop-filter: blur(2px); align-items:center; justify-content:center;">
+  <div class="text-center">
+      <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
+      <p class="mt-2 text-dark font-weight-bold">Loading, please wait...</p>
+  </div>
+</div>
             <div class="row">
                 <div class="col-12">
                     <h1>Product Settings</h1>
@@ -16,7 +22,6 @@
                     </div>
 
                     <script>
-                        // Auto close alert after 5 seconds
                         setTimeout(function () {
                             $('.alert').alert('close');
                         }, 5000);
@@ -70,80 +75,92 @@
             </div>
 
 <!-- Add Price List -->
-   
-<div class="modal fade modal-right" id="addprdimg" tabindex="-1" role="dialog"
-            aria-labelledby="exampleModalRight" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title font-weight-bold">Add Product Image</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-        
-        <form action="{{url('tsfy-admin/post-gallery')}}" method="POST" enctype="multipart/form-data">
-                         @csrf
-                                   <div class="form-group mb-4">
-            <label class="form-group has-float-label mb-4">                       
-            <select id="CategoryList" name="CategoryList" class="form-control select2-single" data-width="100%">
-				<option label="&nbsp;">Select Category</option>
-				@foreach($categories as $category)
-			        <option value="{{ $category->id }}">{{ $category->name }}</option>
-			    @endforeach
 
-			</select>
-			<span>Category</span>
-        </label>
-            </div>
-        <div class="form-group mb-4">
-        	<label class="form-group has-float-label mb-4">
-            <select id="productList" name="productList" class="form-control select2-single" data-width="100%">
-				<option label="&nbsp;">Select Product</option>
-			</select>
-			<span>Product</span>
-        </label>
+<div class="modal fade modal-right" id="addprdimg" tabindex="-1" role="dialog"
+aria-labelledby="exampleModalRight" aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title font-weight-bold">Add Product Image</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            
+            <form action="{{url('tsfy-admin/post-gallery')}}" method="POST" enctype="multipart/form-data">
+               @csrf
+               <div class="form-group mb-4">
+                <label class="form-group has-float-label mb-4">                       
+                    <select id="CategoryList" name="CategoryList" class="form-control select2-single" data-width="100%">
+                        <option label="&nbsp;">Select Category</option>
+                        @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+
+                    </select>
+                    <span>Category</span>
+                </label>
             </div>
             <div class="form-group mb-4">
-				<label class="form-group has-float-label mb-1">
-					<input data-role="tagsinput" name="image_label" type="text"> <span>Image Label</span>
-				</label> 
-		    </div>
-			<div class="form-group mb-4">
-				<label class="form-group has-float-label mb-1">
-				<input class="form-control" name="Category_file" type="file" onchange="validateImage(this)" accept=".jpg,.png,.jpeg,.png,.gif"><span>Image Upload</span></label>
-				<label class="tooltip-text mb-4">(Only upload 600x600 size images.)</label>
-			</div>
-									
-		    <div  class="form-group text-right">                                                            
-            	<button class="btn btn-secondary" type="submit">List Item</button>
-            </div>
-        </form>
-                    </div>
-                    
-                </div>
-            </div>
+               <label class="form-group has-float-label mb-4">
+                <select id="productList" name="productList" class="form-control select2-single" data-width="100%">
+                    <option label="&nbsp;">Select Product</option>
+                </select>
+                <span>Product</span>
+            </label>
         </div>
+        <div class="form-group mb-4">
+            <label class="form-group has-float-label mb-1">
+               <input data-role="tagsinput" name="image_label" type="text"> <span>Image Label</span>
+           </label> 
+       </div>
+       <div class="form-group mb-4">
+        <label class="form-group has-float-label mb-1">
+            <input class="form-control" name="Category_file" type="file" onchange="validateImage(this)" accept=".jpg,.png,.jpeg,.png,.gif"><span>Image Upload</span></label>
+            <label class="tooltip-text mb-4">(Only upload 600x600 size images.)</label>
+        </div>
+        
+        <div  class="form-group text-right">                                                            
+           <button class="btn btn-secondary" type="submit">List Item</button>
+       </div>
+   </form>
+</div>
+
+</div>
+</div>
+</div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function () {	
+$(document).ready(function () { 
     $('#CategoryList').on('change', function () {
         var categoryId = $(this).val();
+        var $loader = $('#fullscreen-loader');
+        var $productList = $('#productList');
+
         if (categoryId) {
+            $loader.fadeIn(200);
+
             $.ajax({
                 url: "get-products/" + categoryId,
                 type: 'GET',
                 success: function (data) {
-                    $('#productList').empty().append('<option label="&nbsp;">Select Product</option>');
+                    $productList.empty().append('<option value="">Select Product</option>');
                     $.each(data, function (key, value) {
-                        $('#productList').append('<option value="' + value.id + '">' + value.listing_name + '</option>');
+                        $productList.append('<option value="' + value.id + '">' + value.listing_name + ' ('+ value.code + ')</option>');
                     });
+                },
+                error: function () {
+                    alert('Failed to load products. Please try again.');
+                },
+                complete: function () {
+                    $loader.fadeOut(300);
                 }
             });
         } else {
-            $('#productList').empty().append('<option label="&nbsp;">Select Product</option>');
+            $productList.empty().append('<option value="">Select Product</option>');
         }
     });
 });

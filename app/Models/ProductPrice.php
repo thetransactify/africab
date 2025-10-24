@@ -14,6 +14,9 @@ class ProductPrice extends Model
     protected $fillable = [
         'product_id',
         'category_id',
+        'meta_title',
+        'meta_description',
+        'keyword',
         'listing_name',
         'description',
         'packing_weight',

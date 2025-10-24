@@ -13,9 +13,7 @@
 					            <span aria-hidden="true">&times;</span>
 					        </button>
 					    </div>
-
 					    <script>
-					        // Auto close alert after 5 seconds
 					        setTimeout(function () {
 					            $('.alert').alert('close');
 					        }, 5000);

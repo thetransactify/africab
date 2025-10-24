@@ -307,16 +307,9 @@ class ClientController extends Controller
 
   #offer list
   #auth vivek
-
    public function OffersDatils(){
-    
        return view('offers');
    }
-
-
-
-
-
     private $vendor      = "config('services.selcom.vendor_id')";
     private $apiKeyRaw   = "config('services.selcom.api_key')";
     private $apiSecret   = "config('services.selcom.api_secret')";

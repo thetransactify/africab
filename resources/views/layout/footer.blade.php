@@ -40,7 +40,7 @@
 
 			</div>
 			<div class="col-12">
-                <p class="copyright-p">&copy; 2023 Africab. All Rights Reserved.</p>
+                <p class="copyright-p">&copy; 2025 Africab. All Rights Reserved.</p>
 							
 
 			</div>
@@ -93,20 +93,20 @@
             <a class="close-icon side-modal-close"href="javascript:void(0);"><i class="material-symbols-outlined standard-icon">close</i></a>           
             <div class="sc-container">
                 <!-- Each Row is product -->
-            @foreach($wishlist ?? [] as $item)
+            @foreach($wishlist ?? [] as $item) 
                 <div class="row g-0 each-product">
                     <div class="col-5">
-                        <a class="prd-img" href="product-single.html"><img src="{{ asset('storage/uploads/product/' . $item->file) }}" /></a>
+                        <a class="prd-img" href="{{ url('product/'.\Illuminate\Support\Str::slug($item->listing_name) . '-' . $item->code) }}"><img src="{{ asset('storage/uploads/product/' . $item->file) }}" /></a>
                     </div>
                     <div class="col-7">
-                        <a href="product-single.html" class="prd-caption">
+                        <a href="{{ url('product/'.\Illuminate\Support\Str::slug($item->listing_name) . '-' . $item->code) }}" class="prd-caption">
                             <span class="prd-name">{{$item->listing_name}}</span>
                             <ul class="prd-price">
-                                <li><span class="dc-price"><i>TSh</i>{{$item->product_cost}}</span><i>TSh</i>{{$item->offer_price}}</li>
+                                <li><span ><i>TSh</i>{{$item->product_cost}}</span><span class="dc-price"><i>TSh</i>{{$item->offer_price}}</span></li>
 
                             </ul>
                         </a>
-                        <a href="{{ route('wishlist.delete', ['id' => $item->id]) }}" class="std-icon floatright"><i class="material-symbols-outlined" data-id="{{ $item->id }}" onclick="return confirm('Are you sure you want to delete this item?');">delete</i></a>
+                        <a href="{{ route('cart.delete', ['id' => encrypt($item->id)]) }}" class="std-icon floatright"><i class="material-symbols-outlined" data-id="{{ $item->id }}" onclick="return confirm('Are you sure you want to delete this item?');">delete</i></a>
                     </div>              
                 </div>       
             @endforeach

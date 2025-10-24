@@ -50,7 +50,7 @@
 								</div>
                                 @if(count($cartDetails) > 0)
                                 @foreach($cartDetails as $value)	
-								<div class="row dt-row dt-body align-items-center">	
+								<div class="row dt-row dt-body align-items-center" data-cart-id="{{ $value['cart_id'] }}">	
 									<div class="col-lg-10 col-sm-9 dt-col">
 										<div class="row align-items-center">
 											<div class="col-lg-1 col-md-1 col-12">
@@ -68,7 +68,7 @@
 													<div class="sta-form-group">
 														<div class="qty-input">
 															<input type="button" value="-" class="button-minus" data-field="quantity">
-															<input type="number" step="1" max="" value="{{$value['quantity']}}" name="quantity" class="quantity-field">
+															<input type="number" step="1" max="" value="{{$value['quantity']}}" name="quantity" data-price="{{$value['total']}}" class="quantity-field">
 															<input type="button" value="+" class="button-plus" data-field="quantity">
 														</div>
 													</div>
@@ -77,7 +77,7 @@
 											</div>
 										</div>
 										<div class="col-lg-2 col-sm-3 dt-col">
-											<p class="prd-price"><i>TSh</i>{{$value['total']}}</p>
+											<p class="prd-price"><i>TSh</i><span class="total-price">{{$value['total']}}</span></p>
 										</div>
 										<div class="col-lg-2 col-sm-3 dt-col">
 										 <!-- Save for Later Button -->
@@ -204,28 +204,86 @@
         }
     }, 5000);
 </script>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-	const minValue = 1;
-	const maxValue = 1000;
+document.querySelectorAll('.qty-input').forEach(function(qtyBox) {
+  const minusBtn = qtyBox.querySelector('.button-minus');
+  const plusBtn = qtyBox.querySelector('.button-plus');
+  const input = qtyBox.querySelector('.quantity-field');
+  const price = parseFloat(input.getAttribute('data-price')) || 0;
+  const totalElement = qtyBox.closest('.dt-row').querySelector('.total-price');
+  const cartId = qtyBox.closest('.dt-row').getAttribute('data-cart-id'); // Add this attribute in your HTML row
 
-	document.querySelectorAll(".button-minus, .button-plus").forEach(function (button) {
-		button.addEventListener("click", function () {
-			const input = this.parentNode.querySelector(".quantity-field");
-			let currentValue = parseInt(input.value) || minValue;
+  function updateRowTotal() {
+    const quantity = parseInt(input.value) || 1;
+    const total = price * quantity;
 
-			if (this.classList.contains("button-minus")) {
-				if (currentValue > minValue) {
-					input.value = currentValue - 1;
-				}
-			} else if (this.classList.contains("button-plus")) {
-				if (currentValue < maxValue) {
-					input.value = currentValue + 1;
-				}
-			}
-		});
-	});
+    if (!isNaN(total)) {
+      totalElement.textContent = total.toFixed(2);
+    }
+
+    // Update subtotal
+    updateCartTotal();
+
+    // Save updated quantity in DB
+    updateQuantityInDB(cartId, quantity);
+  }
+
+  plusBtn.addEventListener('click', function() {
+    input.value = parseInt(input.value || 0) + 1;
+    updateRowTotal();
+  });
+
+  minusBtn.addEventListener('click', function() {
+    if (input.value > 1) {
+      input.value = parseInt(input.value) - 1;
+      updateRowTotal();
+    }
+  });
+
+  input.addEventListener('input', updateRowTotal);
 });
+
+function updateCartTotal() {
+  let subtotal = 0;
+  document.querySelectorAll('.total-price').forEach(function(el) {
+    subtotal += parseFloat(el.textContent) || 0;
+  });
+
+  document.querySelectorAll('.cart-total .prd-price').forEach(function(p) {
+    const priceText = p.querySelector('i');
+    if (priceText && priceText.nextSibling) {
+      priceText.nextSibling.textContent = subtotal.toFixed(2);
+    } else {
+      p.innerHTML = '<i>TSh</i>' + subtotal.toFixed(2);
+    }
+  });
+}
+
+function updateQuantityInDB(cartId, quantity) {
+  if (!cartId) return;
+
+  fetch("{{ url('/save-cart') }}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": "{{ csrf_token() }}"
+    },
+    body: JSON.stringify({
+      cart_id: cartId,
+      quantity: quantity
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) {
+      console.error("DB update failed:", data.message);
+    }
+  })
+  .catch(err => console.error("Error updating quantity:", err));
+}
+
 </script>
+
 
 @endsection

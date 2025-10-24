@@ -6,14 +6,14 @@
 <div class="row justify-content-center align-items-center">
 <div class="col-md-5 col-sm-5 col-0">
 <ul class="menu">
-<li class="has-submenu"><a href="javascript:void(0);">Shop For Products</a>
+<li class="has-submenu red-text"><a href="javascript:void(0);" style="color: red !important;">Shop For Products</a>
     <ul class="sub-menu">
     @foreach($Categories as $category)
         <li><a href="{{ url('product-category/' .\Illuminate\Support\Str::slug($category->name)) }}" class=""><img src="{{ asset('storage/uploads/category/'. $category->file) }}" /><span>{{$category->name}}</span></a></li>
     @endforeach
     </ul>
     </li>
-    <li class=""><a href="{{url('/reviews')}}">Reviews</a></li>
+    <li class=""><a href="{{url('/reviews')}}" style="color: red !important;">Reviews</a></li>
 <!--     <li class=""><a href="{{url('/offers')}}">Offers</a></li> -->
     <li class="desktop-hidden"><a href="{{url('/register')}}">Register Account</a></li>
     <li class="desktop-hidden"><a href="{{url('/login')}}">Account Login</a></li>
@@ -27,7 +27,7 @@
         <li><a href="{{url('/my-account')}}">Return & Refund Policy</a></li>
         <li><a href="{{url('/support-centre')}}">Support Centre</a></li>
     </ul>
-    <li class=""><a href="https://www.africab.co.tz" target="_blank">Visit Corp Website</a></li>
+    <li class=""><a href="https://www.africab.co.tz" target="_blank" style="color: red !important;">Visit Corp Website</a></li>
     </li>
     
 </ul>

@@ -165,6 +165,14 @@ class CategoryProductController extends Controller
         // $category = Category::orderbydesc('id')->get();
         return view('Admin.product_price',compact('categories','productlist'));
     }
+
+    #Price List 
+    #authr: vivek
+    public function ProdcutList(){
+            $productlist = ProductPrice::orderbydesc('id')->get();
+            $categories = Category::all();
+        return view('Admin.create_productlist',compact('categories','productlist'));
+    }
     
     #product List 
     #authr: vivek
@@ -192,7 +200,7 @@ class CategoryProductController extends Controller
     #Add ProdcutList
     #authr: vivek
     public function CreateProductList(Request $request){
-        //return $request->all();
+       // return $request->all();
         $request->validate([
             'CategoryList' => 'required',
             'productList' => 'required',
@@ -205,6 +213,9 @@ class CategoryProductController extends Controller
          $ProductList = new ProductPrice();
             $ProductList->product_id = $request->input('productList');
             $ProductList->category_id = $request->input('CategoryList');
+            $ProductList->meta_title = $request->input('meta_title');
+            $ProductList->meta_description = $request->input('meta_description');
+            $ProductList->keyword = $request->input('Keyword');
             $ProductList->listing_name = $request->input('name');
             $ProductList->description = $request->input('description');
             $ProductList->packing_weight = $request->input('Weight');
@@ -214,7 +225,6 @@ class CategoryProductController extends Controller
             $ProductList->code = $request->input('Code');
             $ProductList->color_name =  implode(',', $request->input('colors'));
             $ProductList->offer_price = $request->input('offer_price');
-            $ProductList->status = $request->input('sellSingle',2);
             $ProductList->save();   
         return redirect()->back()->with('success', 'Product List added successfully!');
     }
@@ -257,6 +267,9 @@ class CategoryProductController extends Controller
         $oldStatus = $ProductPrice->product_online ?? null;
         $ProductPrice->product_id = $request->productList;
         $ProductPrice->category_id = $request->CategoryList;
+        $ProductPrice->meta_title = $request->meta_title;
+        $ProductPrice->meta_description = $request->meta_description;
+        $ProductPrice->keyword = $request->Keyword;
         $ProductPrice->listing_name = $request->price_list;
         $ProductPrice->description = $request->description;
         $ProductPrice->packing_weight = $request->weight;
@@ -266,7 +279,6 @@ class CategoryProductController extends Controller
         $ProductPrice->code = $request->Code;
         $ProductPrice->color_name =  implode(',', $request->colors);
         $ProductPrice->product_online = $request->input('Online', 2);
-        $ProductPrice->status = $request->input('Sell',2);
         $ProductPrice->save();
         if ($oldStatus == 2 && $ProductPrice->product_online == 1) {
             $this->notifyCustomers($ProductPrice);
@@ -320,9 +332,7 @@ class CategoryProductController extends Controller
     public function ProdcutGallery(){
             $productlist = ProductPrice::orderbydesc('id')->get();
             $ProdcutGallery = ProductGallery::with(['category','ProductPrice'])->orderbydesc('id')->where('status','1')->get();
-            //return $ProdcutGallery;
             $categories = Category::all();
-        // $category = Category::orderbydesc('id')->get();
         return view('Admin.product_gallery',compact('categories','productlist','ProdcutGallery'));
     }
 
@@ -530,6 +540,7 @@ class CategoryProductController extends Controller
                     'tag' => $product->check_remark ?? 'N/A',
                     'product_cost' => $product_price->product_cost ?? 'N/A',
                     'offer_price' => $product_price->offer_price ?? 'N/A',
+                    'code' => $product_price->code ?? 'N/A',
                     'SubCategories'  => $product_price->product->name ?? 'N/A',
                     'category' => $product->category->name ?? 'N/A',
                     'product_image' => $product_price->galleries->isNotEmpty()
@@ -561,6 +572,7 @@ class CategoryProductController extends Controller
               $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
+            'code' => $product->code ?? '',
             'file' => $file ?? 'default.jpg',
             ];
         }
@@ -569,10 +581,14 @@ class CategoryProductController extends Controller
 
    public function GetProduct($slug){
        $normalizedSlug = Str::slug($slug);
-        $ProductList = ProductPrice::get()->first(function($product) use ($normalizedSlug) {
-            return Str::slug(trim($product->listing_name)) === $normalizedSlug;
-        });          
-
+       $parts = explode('-', $normalizedSlug);
+       $productCode = strtoupper(array_pop($parts));
+      // return $productCode;
+        // $ProductList = ProductPrice::get()->first(function($product) use ($normalizedSlug) {
+        //     return Str::slug(trim($product->listing_name)) === $normalizedSlug;
+        // });     
+        $ProductList = ProductPrice::where('code', $productCode)->first();
+     
 
         if (!$ProductList) {
         abort(404, 'Product not found.');
@@ -611,6 +627,9 @@ class CategoryProductController extends Controller
             'listing_name' => $productDetails->listing_name,
             'color' => $colors,
             'description' => $productDetails->description,
+            'meta_title' => $productDetails->product->meta_title ?? null,
+            'meta_description' => $productDetails->product->meta_description ?? null,
+            'keyword' => $productDetails->product->keyword ?? null,
             'packing_weight' => $productDetails->packing_weight,
             'packing_type' => $productDetails->packing_type,
             'product_cost' => $productDetails->product_cost,
@@ -652,6 +671,7 @@ class CategoryProductController extends Controller
               $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
+            'code' => $product->code ?? '',
             'file' => $file ?? 'default.jpg',
             ];
         }
@@ -671,8 +691,8 @@ class CategoryProductController extends Controller
     $products = DB::table('product as p')
         ->leftJoin('category as c', 'p.category_id', '=', 'c.id')
         ->leftJoin('product_details as pd', 'p.id', '=', 'pd.product_id')
-        ->leftJoin('product_gallery as g', 'p.id', '=', 'g.product_id') // product image
-
+        ->leftJoin('product_gallery as g', 'p.id', '=', 'g.product_id') 
+        ->where('c.status', '=', 1)
         ->where(function ($query) use ($search) {
             $query->where('p.name', 'LIKE', "%{$search}%")
                   ->orWhere('c.name', 'LIKE', "%{$search}%")
@@ -687,8 +707,8 @@ class CategoryProductController extends Controller
             'c.name as category_name',
             'c.file as category_image',
             'g.file as product_image'
-
         )
+       
         ->groupBy('p.id','pd.code', 'p.name', 'pd.listing_name', 'c.name','category_image','product_image')
         ->limit(10)
         ->get();
@@ -909,6 +929,7 @@ return $html;
               $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
+            'code' => $product->code ?? '',
             'file' => $file ?? 'default.jpg',
             ];
         }

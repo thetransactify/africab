@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
     View::creator('layout.footer', function ($view) {
     if (Auth::check()) {
         $user = Auth::user();
-        $wishlist = DB::table('wishlists as w')
+        $wishlist = DB::table('carts as w')
         ->join('product_details as pp', 'w.product_id', '=', 'pp.id')
         ->leftJoin(DB::raw('
             (
@@ -59,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
                     GROUP BY product_id
                 ) latest_pg ON pg1.id = latest_pg.max_id
             ) as pg
-        '), 'w.product_id', '=', 'pg.product_id') // latest image per product
+        '), 'w.product_id', '=', 'pg.product_id')
         ->where('w.user_id', $user->id)
         ->select(
             'w.*',

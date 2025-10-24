@@ -296,6 +296,7 @@ class HomeController extends Controller
               $file = optional($product->galleries->first())->file ?? '-';
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
+            'code' => $product->code ?? '',
             'file' => $file ?? 'default.jpg',
             ];
         }

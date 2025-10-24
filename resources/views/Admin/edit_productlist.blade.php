@@ -45,6 +45,22 @@
                                 <span>Subcategories</span>
                             </label>
                                 </div>
+                                 <div class="form-group mb-4">
+                                    <label class="form-group has-float-label mb-1">
+                                        <input data-role="tagsinput" name="meta_title" type="text" value="{{$productList->meta_title}}"> <span>Meta Page Title</span>
+                                    </label> 
+                                </div>
+                                 <div class="form-group mb-4">
+                                    <label class="form-group has-float-label mb-1">
+                                        <input data-role="tagsinput" name="meta_description" type="text" value="{{$productList->meta_description}}"> <span>Meta Page Description</span>
+                                    </label> 
+                                </div>
+                                 <div class="form-group mb-4">
+                                    <label class="form-group has-float-label mb-1">
+                                        <input data-role="tagsinput" name="Keyword" type="text" value="{{$productList->keyword}}"> <span>Keyword</span>
+                                    </label> 
+                                </div>                                                                
+
                                 <div class="form-group mb-4">
                                     <label class="form-group has-float-label mb-1">
                                         <input data-role="tagsinput" name="price_list" type="text" value="{{$productList->listing_name}}"> <span>Product Name</span>
@@ -93,21 +109,6 @@
                                         <input data-role="tagsinput" name="offer_price" value="{{$productList->offer_price}}" type="text"> <span>Offer price</span>
                                     </label> 
                                 </div>
-                                <!-- <div class="form-group mb-4">
-                                    <label class="form-group has-float-label mb-1">
-                                        <input data-role="tagsinput" type="text" value="8906000482032"> <span>Barcode (GTIN)</span>
-                                    </label> 
-                                </div>
-                                <div class="form-group mb-4">
-                                    <label class="form-group has-float-label mb-1">
-                                        <input data-role="tagsinput" type="text" value="2003"> <span>SKU Code</span>
-                                    </label> 
-                                </div>
-                                <div class="form-group mb-4">
-                                    <label class="form-group has-float-label mb-1">
-                                        <input data-role="tagsinput" type="text" value="20089912"> <span>HSN Code</span>
-                                    </label> 
-                                </div> -->
                                 <div class="row mb-3">
                                 <div class="col-md-4 col-6">
                                     <label class="form-label font-weight-bold" id="switch3-label">Product Online</label>
@@ -116,14 +117,6 @@
                                           <label class="custom-switch-btn" for="switch3"></label>
                                          <!--  <input type="hidden" name="Online" value="0"> -->
                                     </div>
-                                </div>
-                                <div class="col-md-4 col-6">
-                                    <label class="form-label font-weight-bold">Sell as Single</small></label>
-                                    <div class="custom-switch custom-switch-primary mb-2">
-                                         <input class="custom-switch-input" id="switch7" name="Sell" type="checkbox" value="1" {{(isset($productList) && $productList->status == 1) ? 'checked' : '' }}>
-                                         <label class="custom-switch-btn" for="switch7"></label>
-                                        <!--  <input type="hidden" name="Sell" value="0"> -->
-                                     </div>
                                 </div>                             
                                 </div>                      
                                 <div  class="form-group text-right">                                                            

@@ -142,6 +142,25 @@ class CartController extends Controller
     return response()->json(['success' => true, 'message' => 'Added to cart']);
    }
 
+   #save to cart
+   #auth vivek
+  public function SaveCart(Request $request) {
+     try {
+        $cartId = Crypt::decrypt($request->cart_id);
+        $cart = Cart::find($cartId);
+        if ($cart) {
+            $cart->update([
+                'quantity' => $request->quantity
+            ]);
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Cart not found']);
+        }
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Invalid cart ID']);
+    }
+   }
+
    # checkout 
    # auth  vivek 
    # cart list view

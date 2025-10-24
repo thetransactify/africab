@@ -143,9 +143,6 @@
                                 </div>
                             <!-- <div class="space-y-2"> -->
                             </div>
-
-    
-
                                @if(count($cartDetails) > 0)
                                <div class="col-md-5 offset-md-1">
                                 <!-- Bill Summary -->

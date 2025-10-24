@@ -61,6 +61,7 @@ Route::get('/delete-category/{id}', [CategoryProductController::class, 'DeletePr
 Route::get('/category-status/{id}/{status}', [CategoryController::class, 'changeCategoryStatus']);
 
 Route::get('/product-price', [CategoryProductController::class, 'ProdcutPriceList'])->name('get.productlists');
+Route::get('/product-list', [CategoryProductController::class, 'ProdcutList'])->name('get.productpricelists');
 Route::get('/get-products/{category_id}', [CategoryProductController::class, 'getProducts'])->name('get.products');
 Route::get('/get-subcategiores/{category_id}', [CategoryProductController::class, 'subcategiores'])->name('get.productssd');
 Route::get('/get-productslist/{category_id}', [CategoryProductController::class, 'getProductlist'])->name('get.productlist');
@@ -206,6 +207,7 @@ Route::post('/add-reviews', [ClientController::class, 'AddReviews'])->name('addR
 
 Route::get('/cart', [CartController::class, 'GetCart'])->name('cart.get');
 Route::post('/add-cart', [CartController::class, 'CreateCart'])->name('cart.create');
+Route::post('/save-cart', [CartController::class, 'SaveCart'])->name('cart.save');
 Route::get('/cart-delete/{id}', [CartController::class, 'destroy'])->name('cart.delete');
 Route::get('/checkout', [CartController::class, 'GetCheckout'])->name('checkout.get');
 Route::post('/address/store', [CartController::class, 'store'])->name('address.store');
@@ -242,7 +244,6 @@ Route::get('/test-smtp', function () {
 });
 //end client
 Route::get('/payment-method-selcom', function () {
-  // === Step 1: Apne credentials yahan define karo ===
     $apiKey = 'AFRICAB-00000A2C9F';
     $apiSecret = '0001BE12-0011AC1C-000383DB-00052C80';
     $vendorId = 'TILL60972122';

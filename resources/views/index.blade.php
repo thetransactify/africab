@@ -388,7 +388,7 @@ open_in_new
                 <div class="category-slider">
                     @foreach($recentviewlist as $recentlist)
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])  . '-' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
                     </a>
                     </div>
                     @endforeach

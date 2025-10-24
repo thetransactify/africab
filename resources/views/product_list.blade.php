@@ -1,5 +1,7 @@
 @extends('layout.app')
-@section('title', 'Product')
+@section('title', $data['product_price']['meta_title'])
+@section('meta_description', $data['product_price']['meta_description'])
+@section('meta_keywords', $data['product_price']['keyword'])
 @section('content')
 <div class="content-area">
  
@@ -29,171 +31,168 @@
 <!-- Products List -->
 <div class="product-single-area">	
 	<div class="container">
-	<div class="row justify-content-center align-items-start">
-	<div class="col-12">
-	<div class="product-title">
-				<ul class="prd-sub-link">
-					 <li><span class="new">New</span></li>
-	            </ul>
-				<h1 class="prd-name">{{$data['product_price']['listing_name']}}</h1>
-				@php
-				    $reviewRatings = $data['product_price']['reviewRatings'] ?? [];
-			        $numericRatings = array_map('intval', $reviewRatings);
-					 $averageRating = count($numericRatings) > 0 
-					        ? round(array_sum($numericRatings) / count($numericRatings)) 
-					        : 0;
-			        $reviewCount = count($data['product_price']['comment'] ?? []);
-			    @endphp
-				<ul class="star-rating">
-					 @for($i = 1; $i <= 5; $i++)
-					        <li><i class="las la-star {{ $i <= $averageRating  ? 'starred' : '' }}"></i></li>
-					  @endfor
-					<li><a href="#desc-reviews">({{ $reviewCount }} {{ Str::plural('customer review', $reviewCount) }})</a></li>
-				</ul>
-				<ul class="prd-sub-link">
-	                <!--  <li><i class="fas fa-times red-color"></i> out of stock</li> -->
-	                 <li><i class="fas fa-check green-color"></i> in stock</li>
-	            </ul>
-            </div>
-	</div>
-	<div class="col-xxl-auto col-xl-auto col-lg-auto col-md-auto col-12">
-	<div class="pp-slider">
-
-		@foreach($data['product_price']['galleries'] as $gallery)
-		<div><a class="pv-icon" href="{{ asset('storage/uploads/product/' . $gallery) }}" data-lightbox="prd-view" data-title="Product Name"><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></a></div>
-		@endforeach
-	</div>
-	<div class="pp-slider-thumbnail">
-		<div></div>
-		@foreach($data['product_price']['galleries'] as $gallery)
-		<div><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></div>
-		@endforeach
-	</div>
-	</div>
-	
-	
-	<div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-12">
-
-            <!-- Product Cost -->
-            
-            <div class="prd-price">
-	            <h1 class="">
-	            <span class="dc-price"><i>TSh</i>{{$data['product_price']['offer_price']}}</span><i>TSh</i>{{$data['product_price']['product_cost']}}</h1>
-			</div>
-			
-			<!-- Add to Wishlist / Add to Cart -->
-			
-			<form class="standard-form-rules add-to-cart" id="addToCartForm">
-					<input type="hidden" name="product_id" value="{{$data['product_price']['id']}}" id="product_id">
-					<input type="hidden" name="price_id" value="{{$data['product_price']['product_cost']}}" id="price_id">
-
-					<div class="row">
-					<div class="col-xl-8 col-lg-10 col-md-10 col-12">
-					<p>Desired Quantity</p>
-						<div class="qty-input">
-							<input type="button" value="-" class="button-minus" data-field="quantity">
-							<input type="number" step="1" max="" value="1" name="quantity" class="quantity-field" id="quantity">
-							<input type="button" value="+" class="button-plus" data-field="quantity">
-						</div>
-				    <p><small>Max Allowed : 1000</small></p>		
-					<p>Select Color</p>
-		            <div class="color-options mb-3">
-		                <select name="color" id="color" class="form-control">
-		                    @foreach($data['product_price']['color'] as $color)
-					            <option value="{{ trim($color) }}">{{ ucfirst(trim($color)) }}</option>
-					        @endforeach
-		                </select>
-		            </div>
-					<ul class="general-button-list">
-					<li><a href="{{ route('wishlist.add', $data['product_price']['id']) }}" class="redbutton"><i class="material-symbols-outlined">favorite</i>Wishlist</a></li>
-					<li><a href="javascript:void(0);" class="blackbutton" id="addToCartBtn"><i class="material-symbols-outlined" >add_shopping_cart</i>Add to Cart</a></li>
+		<div class="row justify-content-center align-items-start">
+			<div class="col-12">
+				<div class="product-title">
+					<ul class="prd-sub-link">
+						<li><span class="new">New</span></li>
 					</ul>
-					</div>
+					<h1 class="prd-name">{{$data['product_price']['listing_name']}}</h1>
+					@php
+					$reviewRatings = $data['product_price']['reviewRatings'] ?? [];
+					$numericRatings = array_map('intval', $reviewRatings);
+					$averageRating = count($numericRatings) > 0 
+					? round(array_sum($numericRatings) / count($numericRatings)) 
+					: 0;
+					$reviewCount = count($data['product_price']['comment'] ?? []);
+					@endphp
+					<ul class="star-rating">
+						@for($i = 1; $i <= 5; $i++)
+						<li><i class="las la-star {{ $i <= $averageRating  ? 'starred' : '' }}"></i></li>
+						@endfor
+						<li><a href="#desc-reviews">({{ $reviewCount }} {{ Str::plural('customer review', $reviewCount) }})</a></li>
+					</ul>
+					<ul class="prd-sub-link">
+						<!--  <li><i class="fas fa-times red-color"></i> out of stock</li> -->
+						<li><i class="fas fa-check green-color"></i> in stock</li>
+					</ul>
+				</div>
+			</div>
+			<div class="col-xxl-auto col-xl-auto col-lg-auto col-md-auto col-12">
+				<div class="pp-slider">
+
+					@foreach($data['product_price']['galleries'] as $gallery)
+					<div><a class="pv-icon" href="{{ asset('storage/uploads/product/' . $gallery) }}" data-lightbox="prd-view" data-title="{{$data['product_price']['listing_name']}}"><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></a></div>
+					@endforeach
+				</div>
+				<div class="pp-slider-thumbnail">
+					<div></div>
+					@foreach($data['product_price']['galleries'] as $gallery)
+					<div><img src="{{ asset('storage/uploads/product/' . $gallery) }}" /></div>
+					@endforeach
+				</div>
+			</div>
+
+			<div class="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-12">
+				<!-- Product Cost -->	
+				<div class="prd-price">
+					<h1 class="">
+						<span class="dc-price"><i>TSh</i>{{$data['product_price']['offer_price']}}</span><i>TSh</i>{{$data['product_price']['product_cost']}}</h1>
 					</div>
 
-			
-			</form>
-			
-			<!-- Add to Wishlist / Add to Cart -->
-			<div class="ac-tab-container">
-			<div id="ac-tab" class="ac-tab">
+					<!-- Add to Wishlist / Add to Cart -->
+
+					<form class="standard-form-rules add-to-cart" id="addToCartForm">
+						<input type="hidden" name="product_id" value="{{$data['product_price']['id']}}" id="product_id">
+						<input type="hidden" name="price_id" value="{{$data['product_price']['product_cost']}}" id="price_id">
+
+						<div class="row">
+							<div class="col-xl-8 col-lg-10 col-md-10 col-12">
+								<p>Desired Quantity</p>
+								<div class="qty-input">
+									<input type="button" value="-" class="button-minus" data-field="quantity">
+									<input type="number" step="1" max="" value="1" name="quantity" class="quantity-field" id="quantity">
+									<input type="button" value="+" class="button-plus" data-field="quantity">
+								</div>
+								<p><small>Max Allowed : 1000</small></p>		
+								<p>Select Color</p>
+								<div class="color-options mb-3">
+									<select name="color" id="color" class="form-control">
+										@foreach($data['product_price']['color'] as $color)
+										<option value="{{ trim($color) }}">{{ ucfirst(trim($color)) }}</option>
+										@endforeach
+									</select>
+								</div>
+								<ul class="general-button-list">
+									<li><a href="{{ route('wishlist.add', $data['product_price']['id']) }}" class="redbutton"><i class="material-symbols-outlined">favorite</i>Wishlist</a></li>
+									<li><a href="javascript:void(0);" class="blackbutton" id="addToCartBtn"><i class="material-symbols-outlined" >add_shopping_cart</i>Add to Cart</a></li>
+								</ul>
+							</div>
+						</div>
+
+
+					</form>
+
+					<!-- Add to Wishlist / Add to Cart -->
+					<div class="ac-tab-container">
+						<div id="ac-tab" class="ac-tab">
 							<h2 class="ac-title active">Product Details</h2>
 							@if(!empty($data['product_price']['packing_weight']))
 							<div class="ac-content active">
-							<p><b>Product Weight :</b>{{$data['product_price']['packing_weight']}} </p>
+								<p><b>Product Weight :</b>{{$data['product_price']['packing_weight']}} </p>
 							</div>
 							@endif
 							<h2 class="ac-title">Product Description</h2>
 							<div class="ac-content">
-							<div class="richtext-content">
-                                    <p>{{$data['product_price']['description']}}</p>
-                                    </ul>   
-                                </div>
+								<div class="richtext-content">
+									<p>{{$data['product_price']['description']}}</p>
+								</ul>   
 							</div>
-							<h2 class="ac-title">Reviews ({{ $reviewCount }})</h2>
-							<div class="ac-content">
-								@foreach($data['product_price']['comment'] as $index => $comment)
-								<div class="each-review">
-									<div class="content">
+						</div>
+						<h2 class="ac-title">Reviews ({{ $reviewCount }})</h2>
+						<div class="ac-content">
+							@foreach($data['product_price']['comment'] as $index => $comment)
+							<div class="each-review">
+								<div class="content">
 									<p class="mb-0">{{ $comment }}</p>
-									</div>
-									<ul class="star-rating">
-										@php
-							                $rating = isset($data['product_price']['reviewRatings'][$index]) 
-							                    ? (int)$data['product_price']['reviewRatings'][$index] 
-							                    : 0;
-							            @endphp
-
-							            @for($i = 1; $i <= 5; $i++)
-							                <li>
-							                    <i class="las la-star {{ $i <= $rating ? 'starred' : '' }}"></i>
-							                </li>
-							            @endfor
-									</ul>
 								</div>
-								@endforeach
+								<ul class="star-rating">
+									@php
+									$rating = isset($data['product_price']['reviewRatings'][$index]) 
+									? (int)$data['product_price']['reviewRatings'][$index] 
+									: 0;
+									@endphp
+
+									@for($i = 1; $i <= 5; $i++)
+									<li>
+										<i class="las la-star {{ $i <= $rating ? 'starred' : '' }}"></i>
+									</li>
+									@endfor
+								</ul>
 							</div>
-							<h2 class="ac-title">Add Review</h2>
-							<div class="ac-content">
+							@endforeach
+						</div>
+						<h2 class="ac-title">Add Review</h2>
+						<div class="ac-content">
 
 							<form class="standard-form-rules" action="{{route('addReviews.shows')}}" method="Post">
-                                                         @csrf
+								@csrf
 								@if(isset(auth()->user()->id))
-									<p> Add Review.</p>
-                                                                @else
-                                                                    <p>Please <a href="{{route('get.ClientLogin')}}">Login</a> to Add Review.</p>
-                                                                @endif
+								<p> Add Review.</p>
+								@else
+								<p>Please <a href="{{route('get.ClientLogin')}}">Login</a> to Add Review.</p>
+								@endif
 
-									<p>Greetings, <b class="darkgrey-color">Customer Name</b>, please post your review using the form. Please note all reviews are moderated to check for spamming.</p>
+								<p>Greetings, <b class="darkgrey-color">Customer Name</b>, please post your review using the form. Please note all reviews are moderated to check for spamming.</p>
 
-									<div class="sta-form-group">
+								<div class="sta-form-group">
 									<fieldset class="rating-stars">
-									    <input type="checkbox" id="5-star" name="rating" value="5" /><label for="5-star" title="Excellent Quality"></label>
-									    <input type="checkbox" id="4-star" name="rating" value="4" /><label for="4-star" title="Very Good Quality"></label>
-									    <input type="checkbox" id="3-star" name="rating" value="3" /><label for="3-star" title="Good Quality"></label>
-									    <input type="checkbox" id="2-star" name="rating" value="2" /><label for="2-star" title="Average Quality"></label>
-									    <input type="checkbox" id="1-star" name="rating" value="1" /><label for="1-star" title="Poor Quality"></label>
+										<input type="checkbox" id="5-star" name="rating" value="5" /><label for="5-star" title="Excellent Quality"></label>
+										<input type="checkbox" id="4-star" name="rating" value="4" /><label for="4-star" title="Very Good Quality"></label>
+										<input type="checkbox" id="3-star" name="rating" value="3" /><label for="3-star" title="Good Quality"></label>
+										<input type="checkbox" id="2-star" name="rating" value="2" /><label for="2-star" title="Average Quality"></label>
+										<input type="checkbox" id="1-star" name="rating" value="1" /><label for="1-star" title="Poor Quality"></label>
 									</fieldset>
-									</div>
-									<div class="sta-form-group">
-									    <label for="review">Add Review</label>
-                                                                             <textarea name="review" id="review" cols="30" rows="6" class="sta-form-control"></textarea>
-									</div>
-									<input type="hidden" name="product_price_id" value="{{$data['product_price']['id']}}">
+								</div>
+								<div class="sta-form-group">
+									<label for="review">Add Review</label>
+									<textarea name="review" id="review" cols="30" rows="6" class="sta-form-control"></textarea>
+								</div>
+								<input type="hidden" name="product_price_id" value="{{$data['product_price']['id']}}">
 
-									<input type="hidden" name="user_id" value="{{ auth()->user()->id ?? '' }}">
-									<div class="sta-form-group">
-                                                                       <button type="submit" class="general-button blackbutton"><i class="material-symbols-outlined">save</i>Submit Review</button>
-                                    </div>
-									</form>
-							
-							</div>
+								<input type="hidden" name="user_id" value="{{ auth()->user()->id ?? '' }}">
+								<div class="sta-form-group">
+									<button type="submit" class="general-button blackbutton"><i class="material-symbols-outlined">save</i>Submit Review</button>
+								</div>
+							</form>
 							
 						</div>
+
+					</div>
 				</div>		
-			
-	</div>	
-	</div>
+
+			</div>	
+		</div>
 	</div>
 
 <!-- eCom Features-->
@@ -211,7 +210,7 @@
                 <div class="category-slider">
                     @foreach($recentviewlist as $recentlist)
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name']) . '-' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
                     </a>
                     </div>
                     @endforeach
@@ -310,7 +309,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		.then(data => {
 			if (data.success) {
 				alert("Product added to cart!");
-				// You can also update cart UI here dynamically
+		      window.location.href = "{{ route('cart.get') }}"; 
+
 			} else {
 				alert(data.message || "Something went wrong.");
 			}
