@@ -83,7 +83,7 @@
 
                                 <div class="form-group mb-4">
                                     <label class="form-group has-float-label mb-1">
-                                    <textarea class="form-control" rows="7" name="description" required>{{$productList->description}}</textarea>
+                                    <textarea class="form-control" rows="7" name="description">{{$productList->description}}</textarea>
                                     <span>Description</span></label>
                                 </div>
 
@@ -115,7 +115,6 @@
                                     <div class="custom-switch custom-switch-primary-inverse mb-2">
                                           <input class="custom-switch-input" name="Online" id="switch3" type="checkbox" value="1"  {{(isset($productList) && $productList->product_online == 1) ? 'checked' : '' }}>
                                           <label class="custom-switch-btn" for="switch3"></label>
-                                         <!--  <input type="hidden" name="Online" value="0"> -->
                                     </div>
                                 </div>                             
                                 </div>                      

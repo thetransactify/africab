@@ -200,6 +200,7 @@ class HomeController extends Controller
                     return [
                         'id'       => $item->id ?? 'N/A',
                         'name'     => $item->Product->listing_name ?? 'N/A',
+                        'code'     => $item->Product->code ?? 'N/A',
                         'search'   => $item->count ?? 'N/A',
                         'offer_price'   => $item->Product->offer_price ?? 'N/A',
                         'product_cost'   => $item->Product->product_cost ?? 'N/A',
@@ -293,6 +294,9 @@ class HomeController extends Controller
         $recentviewlist =[];
         foreach ($recentviews as $lists) {
              $product = $lists->productprice;
+                 if (!$product || $product->product_online == 2) {
+                    continue;
+                }
               $file = optional($product->galleries->first())->file ?? '-';
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',

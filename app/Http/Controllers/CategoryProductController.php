@@ -257,12 +257,7 @@ class CategoryProductController extends Controller
         $request->validate([
             'CategoryList' => 'required|max:255',
             'productList' => 'required|string',
-            'price_list' => 'required|string',
-            'description' => 'required|string',
-            'weight' => 'required|string',
-            'type' => 'required|string',
-            'cost' => 'required|string',
-            'offer_price' => 'required|string'
+            'price_list' => 'required|string'
         ]);
         $oldStatus = $ProductPrice->product_online ?? null;
         $ProductPrice->product_id = $request->productList;
@@ -533,12 +528,16 @@ class CategoryProductController extends Controller
         $onlinePrices = $product->productPrices->where('product_online', 1);
            if ($onlinePrices->isNotEmpty()) {
             foreach ($product->productPrices as $product_price) {
+                if ($product_price->product_online == 2) {
+                    continue;
+                }
                 $productsList[] = [
                     'id' => $product_price->id ?? 'N/A',
                     'productname' => $product_price->listing_name ?? 'N/A',
                     'product_code' => $product_price->code ?? 'N/A',
                     'tag' => $product->check_remark ?? 'N/A',
                     'product_cost' => $product_price->product_cost ?? 'N/A',
+                    'product_online' => $product_price->product_online ?? 'N/A',
                     'offer_price' => $product_price->offer_price ?? 'N/A',
                     'code' => $product_price->code ?? 'N/A',
                     'SubCategories'  => $product_price->product->name ?? 'N/A',
@@ -569,6 +568,9 @@ class CategoryProductController extends Controller
         $recentviewlist =[];
         foreach ($recentviews as $lists) {
              $product = $lists->productprice;
+                if (!$product || $product->product_online == 2) {
+                    continue;
+                }
               $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
@@ -576,10 +578,11 @@ class CategoryProductController extends Controller
             'file' => $file ?? 'default.jpg',
             ];
         }
+        //return $productsList;
     return view('product-category', compact('productsList', 'subcategoriesList','category','recentviewlist'));
    }
 
-   public function GetProduct($slug){
+   public function GetProduct($slug,$code){
        $normalizedSlug = Str::slug($slug);
        $parts = explode('-', $normalizedSlug);
        $productCode = strtoupper(array_pop($parts));
@@ -587,7 +590,7 @@ class CategoryProductController extends Controller
         // $ProductList = ProductPrice::get()->first(function($product) use ($normalizedSlug) {
         //     return Str::slug(trim($product->listing_name)) === $normalizedSlug;
         // });     
-        $ProductList = ProductPrice::where('code', $productCode)->first();
+        $ProductList = ProductPrice::where('code', $code)->first();
      
 
         if (!$ProductList) {
@@ -668,6 +671,9 @@ class CategoryProductController extends Controller
         $recentviewlist =[];
         foreach ($recentviews as $lists) {
              $product = $lists->productprice;
+                if (!$product || $product->product_online == 2) {
+                    continue;
+                }
               $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
@@ -693,6 +699,7 @@ class CategoryProductController extends Controller
         ->leftJoin('product_details as pd', 'p.id', '=', 'pd.product_id')
         ->leftJoin('product_gallery as g', 'p.id', '=', 'g.product_id') 
         ->where('c.status', '=', 1)
+        ->where('pd.product_online', '=', 1)
         ->where(function ($query) use ($search) {
             $query->where('p.name', 'LIKE', "%{$search}%")
                   ->orWhere('c.name', 'LIKE', "%{$search}%")
@@ -723,7 +730,7 @@ if ($products->count()) {
         $categorySlug = Str::slug($product->category_name);
         $productSlug = Str::slug($product->listing_name);
 
-        $productUrl = url('product/'  . $productSlug);
+        $productUrl = url('product/'  . $productSlug  . '/' . $product->code);
         $categoryUrl = url('product-category/' . $categorySlug);
 
         $html .= '<div class="search-item d-flex align-items-start gap-3 border-bottom py-3">';
@@ -732,7 +739,7 @@ if ($products->count()) {
 
         // 👉 Product Name Link
         $html .= '<a href="' . $productUrl . '" class="fw-bold d-block" style="font-size: 16px; color: #000;">'
-              . ($product->listing_name) . '</a>';
+              . e($product->listing_name) . ' (' . e($product->code) .'</a>';
 
         // 👉 Category Name Link
         $html .= '<a href="' . $categoryUrl . '" class="text-muted" style="font-size: 13px;">';
@@ -926,6 +933,9 @@ return $html;
         $recentviewlist =[];
         foreach ($recentviews as $lists) {
              $product = $lists->productprice;
+                 if (!$product || $product->product_online == 2) {
+                        continue;
+                    }
               $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',

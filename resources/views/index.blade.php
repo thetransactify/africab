@@ -221,7 +221,7 @@
 		@foreach($popularproducts as $productss)
 			<div class="col-xxl-3 col-xl-4 col-lg-4 col-6">
 				<div class="prd-item">
-					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}';">
+					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])  . '/' . $productss['code']) }}';">
 						<span class="prd-tag onsale">Popular</span>
 						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ $productss['image'] }}" />
 						<ul class="pab-list">
@@ -388,7 +388,7 @@ open_in_new
                 <div class="category-slider">
                     @foreach($recentviewlist as $recentlist)
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])  . '-' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])  . '/' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
                     </a>
                     </div>
                     @endforeach

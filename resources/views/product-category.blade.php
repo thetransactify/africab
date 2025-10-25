@@ -72,16 +72,16 @@
 		@foreach($productsList as $listname)
 			<div class="col-lg-3 col-md-4 col-6 each-item" data-subcategory="{{ $listname['SubCategories'] }}">
 				<div class="prd-item">
-					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '-' . $listname['code']) }}';">
+					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '/' . $listname['code']) }}';">
 						<span class="prd-tag new">New</span>
 						<img src="{{$listname['product_image']}}" />
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $listname['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '-' . $listname['code']) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
+							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '/' . $listname['code']) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
 							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
 						</ul>
 					</figure>
-				<h3 class="prd-name"><span>{{$listname['productname']}}({{$listname['product_code']}})</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '-' . $listname['code']) }}">{{$listname['category']}}({{$listname['SubCategories']}})</a></h3>
+				<h3 class="prd-name"><span>{{$listname['productname']}}({{$listname['product_code']}})</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '/' . $listname['code']) }}">{{$listname['category']}}({{$listname['SubCategories']}})</a></h3>
 			<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$listname['offer_price']}}</span><i>TSh</i>{{$listname['product_cost']}}</h5>
 				</div>	
 			</div>	
@@ -105,7 +105,7 @@
                 <div class="category-slider">
                     @foreach($recentviewlist as $recentlist)
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name']) . '-' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name']) . '/' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
                     </a>
                     </div>
                     @endforeach

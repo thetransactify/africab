@@ -173,7 +173,7 @@ Route::get('/index', [HomeController::class, 'GetClientHomepagessss'])->name('ge
 Route::get('/testing', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
 Route::get('/test', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
 Route::get('/product-category/{slug}', [CategoryProductController::class, 'Clientshow'])->name('product-category.show');
-Route::get('/product/{slug}', [CategoryProductController::class, 'GetProduct'])->name('product.shows');
+Route::get('/product/{slug}/{code}', [CategoryProductController::class, 'GetProduct'])->name('product.shows');
 Route::get('/offerlist/{label}', [CategoryProductController::class, 'showOffer'])->name('offerlist.show');
 
 Route::get('/reviews', [ClientController::class, 'ClientReviews'])->name('ClientReviews.shows');
