@@ -38,8 +38,7 @@ class PaymentController extends Controller
     // private $apiSecret   = "config('services.selcom.api_secret')";
     // private $url         = "config('services.selcom.url')";
     // private $baseUrl     = "https://apigw.selcommobile.com/v1/checkout/create-order";
-    private $caCertPath  = "C:\\Users\\vivek kumar yadav\\Downloads\\cacert.pem"; // local path to cacert.pem
-
+    private $caCertPath  = "C:\\Users\\vivek kumar yadav\\Downloads\\cacert.pem";
 public function createOrderSelcomking(Request $request)
     {
         $apiKey = base64_encode($this->apiKeyRaw);
@@ -139,8 +138,7 @@ public function createOrderSelcomking(Request $request)
         ]);
     }
 
-    public function createOrderselcom(Request $request)
-{
+    public function createOrderselcom(Request $request){
     $id          = Crypt::decrypt($request->user_id);
     $billing_id  = $request->billing_address;
     $shippingCharge = $request->shipping_charge;
@@ -248,7 +246,6 @@ public function createOrderSelcomking(Request $request)
         'Accept'         => 'application/json',
     ];
 
-    // $client = new \GuzzleHttp\Client();
      $client = new Client(['verify' => $this->caCertPath]);
 
 
@@ -256,7 +253,7 @@ public function createOrderSelcomking(Request $request)
         $response = $client->post('https://apigw.selcommobile.com/v1/checkout/create-order', [
             'headers' => $headers,
             'json'    => $fields,
-            'allow_redirects' => false // helpful for debugging
+            'allow_redirects' => false 
         ]);
 
         $body = json_decode($response->getBody(), true);
@@ -273,7 +270,6 @@ public function createOrderSelcomking(Request $request)
         $paymentUrl   = base64_decode($encodedUrl);
         $orderGroupId = 'ORD' . strtoupper(uniqid());
 
-        // Insert orders in DB
         DB::beginTransaction();
         try {
             foreach ($cartItems as $index => $item) {

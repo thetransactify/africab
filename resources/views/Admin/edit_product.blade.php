@@ -35,24 +35,12 @@
                             <label class="form-group has-float-label mb-4">
                                 <input data-role="tagsinput" name="product_name" type="text" value="{{$categories->name}}"> <span>Subcategory Name</span>
                             </label>
-                            <!-- <label class="form-group has-float-label mb-1">
-                                <input class="form-control" type="file"  name="Category_file" accept=".jpg,.png,.jpeg,.png,.gif"  onchange="validateImage(this)"><span>Image Upload</span></label>
-                                <label class="tooltip-text mb-4">(Only upload 600x600 size images.)</label>
-                                <input type="text" name="Category_file_old" value="{{$categories->file}}" hidden> -->
                                 <div class="form-group mb-4">
                                     <label class="form-group has-float-label mb-1">
-                                        <textarea class="form-control" name="description" rows="7" required>{{$categories->description}}</textarea>
+                                        <textarea class="form-control" name="description" rows="7">{{$categories->description}}</textarea>
                                         <span>Description</span></label>
                                         <label class="tooltip-text mb-4">(Use Redactor or any WYSIWYG html editor)</label>
                                     </div>
-                                    <!-- <label class="form-group has-float-label mb-4">
-                                        <input data-role="tagsinput" type="text" name="meta_page" value="{{$categories->page_title}}">
-                                        <span>Meta Page Title</span>
-                                    </label>
-                                    <label class="form-group has-float-label mb-4">
-                                        <textarea class="form-control" rows="4" name="page_description" required>{{$categories->page_description}}</textarea> 
-                                        <span>Meta Page Description</span>
-                                    </label> -->
                                     @php
                                         $check_remark = $categories->check_remark ?? 1;
                                         //Default 1 if not set
