@@ -122,7 +122,7 @@ class ClientController extends Controller
               1 => 'Processing',
               2 => 'Shipping',
               3 => 'Delivered',
-              default => 'Unknown'
+              default => 'Cancelled'
           };
             $latestorder[]=[
               'order_number' => $orderlist->order_number,
@@ -141,7 +141,7 @@ class ClientController extends Controller
               1 => 'Processing',
               2 => 'Shipping',
               3 => 'Delivered',
-              default => 'Unknown'
+              default => 'Cancelled'
             };
             $Orderhistory[]=[
               'order_number' => $orderdeatils->order_number,

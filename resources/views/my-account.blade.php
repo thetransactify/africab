@@ -52,7 +52,13 @@
 					<h5>Order Status:<span>{{$latestorder[0]['order_status'] ?? ''}}</span></h5>
 					</div>
 					<div class="col-md-4 col-12">
-					<h5>Payment Type:<span>{{$latestorder[0]['payment_method'] ?? ''}}</span></h5>
+					<h5>Payment Type:<span>@if(($latestorder[0]['payment_method'] ?? '') == '1')
+														    Online Payment
+														@elseif(($latestorder[0]['payment_method'] ?? '') == '2')
+														    Cash on Delivery
+														@else
+														    Unknown
+														@endif</span></h5>
 					</div>
 					<!-- <div class="col-md-4 col-12">
 					<h5>Txn ID:<span></span></h5>

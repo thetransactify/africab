@@ -376,39 +376,23 @@ $('#confirmOrderBtn').click(function (e) {
 
 <script type="text/javascript">
     document.getElementById("checkoutForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+        e.preventDefault();
 
-    let selectedPayment = document.querySelector('input[name="payment-method"]:checked');
+        let selectedPayment = document.querySelector('input[name="payment-method"]:checked');
 
-    if (!selectedPayment) {
-        alert("Please select a payment method.");
-        return;
-    }
+        if (!selectedPayment) {
+            alert("Please select a payment method.");
+            return;
+        }
 
-    if (selectedPayment.value === "payu") {
-        let formData = new FormData(this);
-
-        fetch("{{ route('selcom.create.order') }}", {
-            method: "POST",
-            headers: {
-                "X-CSRF-TOKEN": "{{ csrf_token() }}"
-            },
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success" && data.redirect_url) {
-            window.location.href = data.redirect_url;
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(err => console.error(err));
-    } 
-    else {
-        this.submit();
-    }
-});
-
+        if (selectedPayment.value === "payu") {
+            this.action = "{{ route('selcom.create.order') }}";
+            this.submit();
+        } else {
+            // For cash on delivery
+            this.action = "{{ route('checkout.cod') }}";
+            this.submit();
+        }
+    });
 </script>
 @endsection

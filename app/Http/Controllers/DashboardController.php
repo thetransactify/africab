@@ -92,7 +92,7 @@ class DashboardController extends Controller
             'product_name'  => $order->products->listing_name ?? '-',
             'quantity'      => $order->quantity,
             'amount'        => $order->total_amount + ($order->shipping_charge ?? 0),
-            'order_status'  =>  [1 => 'Processing', 2 => 'Shipped', 3 => 'Delivered'][$order->order_status] ?? 'Unknown',
+            'order_status'  =>  [1 => 'Processing', 2 => 'Shipped', 3 => 'Delivered'][$order->order_status] ?? 'Cancelled',
             'payment_status'=> [1 => 'Pending', 2 => 'Paid', 3 => 'Failed'][$order->payment_status] ?? 'Unknown',
             'method'        => [1 => 'Online', 2 => 'Cash on Delivery'][$order->method] ?? 'Unknown',
             'created_at'    => $order->created_at->format('d-m-Y H:i'),
@@ -158,7 +158,7 @@ class DashboardController extends Controller
         'order_status'   => $orderlists->order_status == 1 ? 'Processing' 
                              : ($orderlists->order_status == 2 ? 'Shipped' 
                              : ($orderlists->order_status == 3 ? 'Delivered' 
-                             : 'Unknown')),
+                             : 'Cancelled')),
         'method'         => $orderlists->method == 1 ? 'Online' : 'Cash on Delivery',
         'total_amount'   => $orderlists->total_amount + $orderlists->shipping_charge ?? '0',
         ];

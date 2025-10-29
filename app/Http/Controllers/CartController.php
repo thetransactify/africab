@@ -306,7 +306,6 @@ class CartController extends Controller
         $user = Auth::user();
        
         $cartItems = Cart::with('product')->where('user_id', $user->id)->get();
-        //return   $cartItems;
          $shippingCharge = $request->shipping_charge;
 
         if ($cartItems->isEmpty()) {

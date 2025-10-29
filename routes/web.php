@@ -17,11 +17,7 @@ use App\Http\Controllers\ReminderController;
 Route::get('/tsfy-admin', function () {
     return view('Admin.index'); // loads resources/views/admin/index.blade.php
 });
-//Route::prefix('admin')->group(function () {
-    // Route::get('/africabe-shop/admin/', function () {
-    //     return view(' Admin.index');  // Correct path
-    // })->name('admin.index');
-//});
+
 
 // login
 Route::prefix('/tsfy-admin')->group(function () {
@@ -219,13 +215,12 @@ Route::get('/order-status', [CartController::class, 'orderStatus'])->name('order
 Route::get('/cart-save-later/{id}', [CartController::class, 'saveForLater']); 
 Route::get('/move-to-cart/{id}', [CartController::class, 'moveToCart']); 
 Route::get('/save-later-delete/{id}', [CartController::class, 'SaveToCartdestroy'])->name('save.delete');
-
 });
 Route::get('/support-centre', [ClientController::class, 'SupportCentre'])->name('SupportCentre.shows');
 // payment method
 Route::get('/selcom-test', [ClientController::class, 'createOrderSelcoms']);
 Route::post('/payment', [PaymentController::class, 'createOrderSelcom'])->name('selcom.create.order');
-Route::get('/payment-page', [PaymentController::class, 'paymentPage'])->name('payment.page');
+Route::get('/payment-page/{order}', [PaymentController::class, 'paymentPage'])->name('payment.page');
 Route::get('/payment-cancel/{order}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
 Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
 Route::get('/privacy-policy', [ClientController::class, 'privacyPolicy']);
