@@ -25,12 +25,6 @@ Route::get('/login', [LoginController::class, 'Showlogin'])->name('login');
 Route::post('/logins', [LoginController::class, 'LoginCreadintial']);
 Route::get('/logout', [LoginController::class, 'logout']);
 Route::get('/forget-password', [LoginController::class, 'ForgetPassword']);
-// Route::post('/forgot-passwords', [LoginController::class, 'sendResetLinkEmail'])->name('password.email');
-// Route::get('/reset-password/{token}', [LoginController::class, 'showResetForm'])->name('password.reset');
-// Route::post('/reset-password', [LoginController::class, 'reset'])->name('password.update');
-
-
-
 
 Route::middleware(['auth', 'role:2'])->group(function () {
 //Dashboard
@@ -178,7 +172,7 @@ Route::get('/offers', [ClientController::class, 'OffersDatils'])->name('offers.s
 Route::get('/login', [LoginController::class, 'ClientLogin'])->name('get.ClientLogin');
 Route::post('/clientlogins', [LoginController::class, 'ClientLoginCreadintial']);
 Route::get('/logouts', [LoginController::class, 'clientlogout']);
-Route::get('/change-password', [LoginController::class, 'ChangePassword']);
+Route::get('/user/change-password', [LoginController::class, 'ChangePassword']);
 
 Route::post('/forgot-passwords-client', [LoginController::class, 'sendResetLinkEmailClient'])->name('client.password.email');
 Route::get('/reset-password-client/{token}', [LoginController::class, 'showResetFormClient'])->name('password.reset');
@@ -191,6 +185,8 @@ Route::get('/search-products', [CategoryProductController::class, 'search'])->na
 Route::middleware(['auth','role:1'])->group(function () {
 Route::get('/my-account', [ClientController::class, 'MyAccount'])->name('MyAccount.shows');
 Route::get('/order-history', [ClientController::class, 'Orderhistory'])->name('Orderhistory.shows');
+Route::get('/order-details/{id}', [ClientController::class, 'getOrderDetails'])->name('order.details');
+
 Route::get('/my-wishlist', [ClientController::class, 'MyWishlist'])->name('MyWishlist.shows');
 Route::get('/manage-address', [ClientController::class, 'ManageAddress'])->name('ManageAddress.shows');
 Route::get('/edit-profile', [ClientController::class, 'EditProfile'])->name('edit-profile.shows');
@@ -224,19 +220,10 @@ Route::get('/payment-page/{order}', [PaymentController::class, 'paymentPage'])->
 Route::get('/payment-cancel/{order}', [PaymentController::class, 'cancelPayment'])->name('payment.cancel');
 Route::post('/payment-callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
 Route::get('/privacy-policy', [ClientController::class, 'privacyPolicy']);
+Route::get('/terms-conditions', [ClientController::class, 'TermsConditions']);
+Route::get('/shipping-policy', [ClientController::class, 'ShippingPolicy']);
+Route::get('/refund-policy', [ClientController::class, 'RefundPolicy']);
 
-
-Route::get('/test-smtp', function () {
-    try {
-        Mail::raw('This is a test email to check SMTP configuration.', function ($message) {
-            $message->to('vivekdeveloper3232@gmail.com')
-                    ->subject('SMTP Test Email');
-        });
-        return 'Email sent successfully. Check your inbox.';
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-});
 //end client
 Route::get('/payment-method-selcom', function () {
     $apiKey = 'AFRICAB-00000A2C9F';
@@ -300,9 +287,7 @@ Route::get('/payment-method-selcom', function () {
 
     // ===== Step 8: Send request to Selcom =====
     $url = "https://apigw.selcommobile.com/v1/checkout/create-order";
-
     $response = Http::withHeaders($headers)->post($url, $payload);
-
     // ===== Step 9: Return formatted response =====
     return response()->json([
         "status" => $response->status(),

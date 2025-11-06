@@ -21,13 +21,13 @@
     <li class="desktop-hidden"><a href="{{url('/support-centre')}}">Support Centre</a></li>
     <li class="has-submenu desktop-hidden"><a href="javascript:void(0)" class="title">Terms & Policy</a>
     <ul class="sub-menu">      
-        <li><a href="cart.html">Terms & Conditions</a></li>
-        <li><a href="{{url('/my-wishlist')}}">Privacy Policy</a></li>
-        <li><a href="{{url('/register')}}">Shipping Policy</a></li>
-        <li><a href="{{url('/my-account')}}">Return & Refund Policy</a></li>
+        <li><a href="{{url('/terms-conditions')}}">Terms & Conditions</a></li>
+        <li><a href="{{url('/privacy-policy')}}">Privacy Policy</a></li>
+        <li><a href="{{url('/shipping-policy')}}">Shipping Policy</a></li>
+        <li><a href="{{url('/refund-policy')}}">Return & Refund Policy</a></li>
         <li><a href="{{url('/support-centre')}}">Support Centre</a></li>
     </ul>
-    <li class=""><a href="https://www.africab.co.tz" target="_blank" style="color: red !important;">Visit Corp Website</a></li>
+    <li class=""><a href="https://africabgroup.com/" target="_blank" style="color: red !important;">Visit Africab Group Website</a></li>
     </li>
     
 </ul>

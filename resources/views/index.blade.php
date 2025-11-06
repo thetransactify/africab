@@ -35,6 +35,7 @@
 </div>
 
 <!-- Top 10 proudct -->
+@if(!empty($productsPositioning) && count($productsPositioning) > 0)
 <div class="browse-category">
     <div class="container-fluid">
         <div class="row align-items-center">
@@ -56,6 +57,7 @@
         </div>
     </div>
 </div>
+@endif
 @if(!empty($grouped) && count($grouped) > 0)
     <div class="home-advertisement mt-4">
         <div class="container-fluid px-0 px-sm-3">
@@ -171,7 +173,7 @@
 						<span class="prd-tag new">New</span>
 
                         @if($product->galleries && count($product->galleries) > 0)
-						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $product->galleries[0]->file) }}" />
+						<img src="{{ asset('storage/uploads/product/' . $product->galleries[0]->file) }}" />
 						@endif
 
 						<ul class="pab-list">
@@ -181,7 +183,10 @@
 						</ul>
 					</figure>
 					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}">{{$product->product->name}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span><i>TSh</i>{{$product->product_cost}}</h5>
+					<h5 class="prd-price">
+						@if(!empty($product->offer_price))
+						<span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span>
+					@endif<i>TSh</i>{{$product->product_cost}}</h5>
 				</div>
 			</div>
 		@endforeach	 		
@@ -199,7 +204,7 @@
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}'">
 						<span class="prd-tag bestsell">Bestsellers</span>
-						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ asset('storage/uploads/product/' . $bestlist['product_file']) }}" />
+						<img src="{{ asset('storage/uploads/product/' . $bestlist['product_file']) }}" />
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $bestlist['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
@@ -207,7 +212,10 @@
 						</ul>
 					</figure>
 					<h3 class="prd-name"><span>{{$bestlist['category_name']}}</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($bestlist['product_name'])) }}">{{$bestlist['product_name']}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$bestlist['offer_price']}}</span><i>Tsh</i>{{$bestlist['product_cost']}}</h5>
+					<h5 class="prd-price">
+						@if(isset($bestlist['offer_price']) && $bestlist['offer_price'] !== null && $bestlist['offer_price'] !== '' && !empty($bestlist['offer_price']))
+                         <span class="dc-price"><i>TSh</i>{{$bestlist['offer_price']}}</span>
+						@endif<i>Tsh</i>{{$bestlist['product_cost']}}</h5>
 				</div>
 			</div>
 	@endforeach		  
@@ -223,14 +231,14 @@
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])  . '/' . $productss['code']) }}';">
 						<span class="prd-tag onsale">Popular</span>
-						<img style="width: 350px; height: 350px; object-fit: cover;" src="{{ $productss['image'] }}" />
+						<img src="{{ $productss['image'] }}" />
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $productss['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
 						</ul>
 					</figure>
 					<h3 class="prd-name"><a href="{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}">{{$productss['name']}}</a></h3>
-					<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$productss['offer_price']}}</span><i>TSh</i>{{$productss['product_cost']}}</h5>
+					<h5 class="prd-price">@if(!empty($productss['offer_price']))<span class="dc-price"><i>TSh</i>{{$productss['offer_price']}}</span>@endif<i>TSh</i>{{$productss['product_cost']}}</h5>
 				</div>
 			</div>
 		 @endforeach	

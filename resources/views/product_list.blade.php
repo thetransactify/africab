@@ -27,6 +27,11 @@
         {{ session('success') }}
     </div>
 @endif
+@if (session('error'))
+    <div id="error-message" class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
 
 <!-- Products List -->
 <div class="product-single-area">	
@@ -258,6 +263,14 @@
 <script>
     setTimeout(function() {
         let msg = document.getElementById('success-message');
+        if (msg) {
+            msg.style.display = 'none';
+        }
+    }, 5000);
+</script>
+<script>
+    setTimeout(function() {
+        let msg = document.getElementById('error-message');
         if (msg) {
             msg.style.display = 'none';
         }

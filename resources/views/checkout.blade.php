@@ -1,6 +1,56 @@
 @extends('layout.app')
 @section('title', 'Checkout')
 @section('content')
+<style>
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.98);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 99999; /* Very high z-index */
+    font-family: Arial, sans-serif;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #3498db;
+    border-right: 5px solid #3498db;
+    width: 80px;
+    height: 80px;
+    animation: spin 1.5s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+    margin: 0;
+    text-align: center;
+}
+
+.loading-overlay .sub-text {
+    font-size: 14px;
+    color: #666;
+    margin-top: 8px;
+}
+
+body.loading-active {
+    overflow: hidden;
+}
+</style>
     <div class="content-area">
     <!-- Banner Area -->
     <div class="page-headers smaller">
@@ -45,12 +95,7 @@
                         <div class="address-widget">
                             <div class="main-title py-2 d-flex justify-content-between align-items-center">
                                 <h4 class="mb-0">Billing <span class="">Details</span></h4>
-                                <a href="javascript:void(0);" 
-                                         class="btn btn-sm btn-outline-danger" 
-                                         data-bs-toggle="modal" 
-                                         data-bs-target="#priceListModal">
-                                        shhiping charge list
-                                      </a>
+
                             </div>  
                             <!-- Addreess Selection-->       
                             <div class="address-section">
@@ -79,17 +124,26 @@
                                         @endforeach    
 
                                     </div>
-                                   <div class="main-title py-2 d-flex justify-content-between align-items-center">
-                                    <label class="checkboxLarge ship-to-address"><input type="checkbox" name="showaddressx" id="showaddress"><b>Ship to a Different address</b></label>
+<div class="row pb-5">
+    <div class="col-auto">
+                                        <button type="button" class="general-button blackbutton my-3" id="Addressbutton" data-bs-toggle="modal" data-bs-target="#addWindow" >
+                                            <i class="material-symbols-outlined">add</i>New 
+                                        Address</button> 
+    </div>
+     <div class="col-auto">
+
+                                        <button type="button" class="general-button blackbutton my-3" id="priceListModalbutton" data-bs-toggle="modal" data-bs-target="#priceListModal" >
+                                            <i class="material-symbols-outlined">delivery_truck_speed</i>Delivery Zones & Charges</button> 
+</div>
+</div>
+                            <div class="main-title py-2 d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">Delivery <span class="">Details</span></h4>
+
+                            </div> 
                                   
-                                      <a href="javascript:void(0);" 
-                                         class="btn btn-sm btn-outline-danger" 
-                                         data-bs-toggle="modal" 
-                                         data-bs-target="#priceListModal">
-                                        shhiping charge list
-                                      </a>
-                                    </div>  
-                                    <div class="show-more-address"  id="show-more-address">
+                                    <label class="checkboxLarge ship-to-address pt-2"><input type="checkbox" name="showaddressx" id="showaddress"><b>Ship To Address</b></label>
+                              
+                                    <div class="show-more-address "  id="show-more-address">
                                         <div class="address-box">
                                             @foreach($addressDetails as $address)
                                             @php
@@ -121,25 +175,33 @@
                                                 </div>
                                                 @endforeach 
                                             </div>
-                                        </div>        
-                                        <!-- Add Address Buttone -->
+<div class="row pb-2">
+    <div class="col-auto">
                                         <button type="button" class="general-button blackbutton my-3" id="Addressbutton" data-bs-toggle="modal" data-bs-target="#addWindow" >
                                             <i class="material-symbols-outlined">add</i>New 
-                                        Address</button>                                                                    
+                                        Address</button> 
+    </div>
+     <div class="col-auto">
 
-                                    <label class="checkboxLarge ship-to-address"><input type="checkbox" id="showShopOption" name="shipping_option" value="cash_on_shop"><b>Pick in store</b>
+                                        <button type="button" class="general-button blackbutton my-3" id="priceListModalbutton" data-bs-toggle="modal" data-bs-target="#priceListModal" >
+                                            <i class="material-symbols-outlined">delivery_truck_speed</i>Delivery Zones & Charges</button> 
+</div>
+</div>
+                                        </div>     
+                                    <label class="checkboxLarge ship-to-address pt-1"><input type="checkbox" id="showShopOption" name="shipping_option" value="cash_on_shop"><b>Pick Up from a Nearby Store</b>
                                     </label>
-
-                                    </div>
                                     <div id="shopDropdownContainer" style="display:none; margin-top:10px;">
-                                      <label for="shopSelect">Select Shop:</label>
-                                      <select id="shopSelect" class="form-control" name="selected_shop">
+                                      <div class="select-wrapper">
+                                      <select id="shopSelect" class="selectStoreDD" name="selected_shop">
                                         <option selected disabled>-- Choose a shop --</option>
                                         @foreach ($shopdeatils as $val)
                                          <option value="{{$val['id']}}">{{$val['name']}}-{{$val['address']}}</option>
                                         @endforeach
                                     </select>
+                                       <i class="material-symbols-outlined">change_history</i>
+                                    </div>
                                 </div>
+                                    </div>
                                 </div>
                             <!-- <div class="space-y-2"> -->
                             </div>
@@ -204,7 +266,6 @@
         <div class="payment-group mb--10">
             <div class="custom-radio">
                 <input type="radio" value="cash" name="payment-method" id="cash" required>
-
                 <label class="payment-label" for="cash">
                     Cash on Delivery
                 </label>
@@ -213,11 +274,11 @@
                 <p>Pay with cash upon delivery.</p>
             </div>
         </div>
-        <p class="mb-3 text-small"><strong>The above bill is inclusive of VAT.</strong></p>
+        <p class="mt-5 mb-3 fw-bold">The above bill is inclusive of VAT.</p>
        <input type="hidden" name="shipping_charge">
         <button type="submit" id="confirmOrderBtn" class="general-button redbutton">Confirm Order</button>
-        <div id="paymentErrorMsg" class="general-button" style="color: red; margin-top: 10px; display: none;"></div>
-        <div id="shippingErrorMsg" class="general-button" style="color:red; margin-top:10px; display:none;"></div>
+        <div id="paymentErrorMsg" class="fw-bold error-msg" style=" display: none;"></div>
+        <div id="shippingErrorMsg" class="fw-bold error-msg" style="display:none;"></div>
     </form>
 </div>
 
@@ -231,7 +292,11 @@
 
 </div>
 </div> 
-
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Processing Your Order</p>
+    <p class="sub-text">Please wait while we redirect you...</p>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
@@ -240,7 +305,7 @@
 
     if ($('#showShopOption').is(':checked')) {
       $('#shopDropdownContainer').show();
-       $('#Addressbutton').hide();
+       //$('#Addressbutton').hide();
        $('#show-more-address').hide();
     } else {
       $('#shopDropdownContainer').hide();
@@ -384,8 +449,15 @@ $('#confirmOrderBtn').click(function (e) {
             alert("Please select a payment method.");
             return;
         }
-
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        loadingOverlay.style.display = 'flex';
+        
+        document.body.classList.add('loading-active');
+        
+        const submitBtn = document.getElementById("confirmOrderBtn");
+        submitBtn.disabled = true;
         if (selectedPayment.value === "payu") {
+            // Direct form submit - CORS issue avoid karega
             this.action = "{{ route('selcom.create.order') }}";
             this.submit();
         } else {

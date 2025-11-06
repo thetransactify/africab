@@ -1,52 +1,52 @@
 <footer class="footer-area">
-	<div class="container">
-		<div class="row">
-			<div class="col-xl-3 col-lg-3 col-12">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-3 col-lg-3 col-12">
                 <ul class="footer-menu">
                     <li><a href="javascript:void(0)" class="title">Customer Section</a></li>
                     <li><a href="{{route('cart.get')}}">My Cart</a></li>
-                    <li><a href="{{url('/my-wishlist')}}}">My Wishlist</a></li>
+                    <li><a href="{{url('/my-wishlist')}}">My Wishlist</a></li>
                     <li><a href="{{url('/register')}}">Register Account</a></li>
-			        <li><a href="{{route('get.ClientLogin')}}">Account Login</a></li>
+                    <li><a href="{{route('get.ClientLogin')}}">Account Login</a></li>
                     <li><a href="{{route('MyAccount.shows')}}">My Account</a></li>
                     <li><a href="{{url('/support-centre')}}">Support Centre</a></li>
                 </ul>
-			</div>
-			<div class="col-xl-3 col-lg-3 col-12">
+            </div>
+            <div class="col-xl-3 col-lg-3 col-12">
                 <ul class="footer-menu">
                     <li><a href="javascript:void(0)" class="title">Terms & Policy</a></li>
-                    <li><a href="terms-and-conditions.html">Terms & Conditions</a></li>
+                    <li><a href="{{url('/terms-conditions')}}">Terms & Conditions</a></li>
                     <li><a href="{{url('/privacy-policy')}}">Privacy Policy</a></li>
-                    <li><a href="shipping-policy.html">Shipping Policy</a></li>
-                    <li><a href="returns-and-refunds.html">Return & Refund Policy</a></li>
+                    <li><a href="{{url('/shipping-policy')}}">Shipping Policy</a></li>
+                    <li><a href="{{url('/refund-policy')}}">Return & Refund Policy</a></li>
                 </ul>
-			</div>
-			<div class="col-xl-3 col-lg-3 col-12">
+            </div>
+            <div class="col-xl-3 col-lg-3 col-12">
                 <ul class="footer-menu">
                     <li><a href="javascript:void(0)" class="title">About Africab</a></li>
-                    <li class=""><a href="https://www.africab.co.tz" target="_blank">Visit Corp Website</a></li>
-                    <li><a href="reviews.html">Testimonials</a></li>
+                    <li class=""><a href="https://africabgroup.com/" target="_blank">Visit Africab Group Website</a></li>
+                    <li><a href="{{url('/reviews')}}">Testimonials</a></li>
                 </ul>
-			</div>
-			<div class="col-xl-3 col-lg-3 col-12">
+            </div>
+            <div class="col-xl-3 col-lg-3 col-12">
                 <p class="footer-social-text">Visit. Like. Comment. Share.</p>
                 <ul class="footer-social">
-					<li><a href="https://www.twitter.com/" target="_blank" title="Visit us on Twitter"><i class="fab fa-twitter"></i></a></li>
-					<li><a href="https://www.instagram.com/" target="_blank" title="Visit us on Instagram"><i class="fab fa-instagram"></i></a></li>
-					<li><a href="https://www.youtube.com/" target="_blank" title="Visit us on Youtube"><i class="fab fa-youtube"></i></a></li>			
-					<li><a href="https://www.pinterest.com/" target="_blank" title="Visit us on Pinterest"><i class="fab fa-linkedin-in"></i></a></li>						
-				</ul>
-							
+                    <li><a href="https://www.twitter.com/" target="_blank" title="Visit us on Twitter"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="https://www.instagram.com/" target="_blank" title="Visit us on Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://www.youtube.com/" target="_blank" title="Visit us on Youtube"><i class="fab fa-youtube"></i></a></li>          
+                    <li><a href="https://www.pinterest.com/" target="_blank" title="Visit us on Pinterest"><i class="fab fa-linkedin-in"></i></a></li>                      
+                </ul>
+                            
 
-			</div>
-			<div class="col-12">
+            </div>
+            <div class="col-12">
                 <p class="copyright-p">&copy; 2025 Africab. All Rights Reserved.</p>
-							
+                            
 
-			</div>
-		</div>
+            </div>
+        </div>
 
-	</div>
+    </div>
 </footer>
 </div>
 
@@ -196,18 +196,20 @@
   </div>
 </div>
 <div class="modal fade" id="priceListModal" tabindex="-1" aria-labelledby="priceListLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-right"> <!-- modal-lg for wide -->
+  <div class="modal-dialog modal-lg modal-dialog-right modal-dialog-scrollable
+ "> <!-- modal-lg for wide -->
     <div class="modal-content">
       <div class="modal-header">
-        <p2 style="text-align: center;">PLEASE NOTE. minimun order value of TSH 100,000 for free shipping.</p2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <a class="close-icon" href="javascript:void(0);" data-bs-dismiss="modal"><i class="la la-times"></i></a>
+      <h4><i class="material-symbols-outlined">delivery_truck_speed</i>Delivery <span>Zones & Charges</span></h4>
       </div>
       <div class="modal-body">
+        <p class="fw-bold">PLEASE NOTE. minimun order value of TSH 100,000 for free shipping.</p>
         <table class="table table-bordered table-hover">
           <thead>
             <tr>
-              <th>City Name</th>
-              <th>Shipping Charge</th>
+              <th>Delivery Zones</th>
+              <th>Shipping Charges</th>
             </tr>
           </thead>
           <tbody>
@@ -219,9 +221,6 @@
             @endforeach
           </tbody>
         </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

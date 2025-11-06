@@ -172,7 +172,7 @@ class ClientController extends Controller
               1 => 'Processing',
               2 => 'Shipping',
               3 => 'Delivered',
-              default => 'Unknown'
+              default => 'Cancelled'
             };
             $Orderhistory[]=[
               'id'           => $orderdeatils->id,
@@ -183,6 +183,7 @@ class ClientController extends Controller
               'payment_method' => $orderdeatils->method
             ]; 
           } 
+          return $Orderhistory;
         return view('order-history',compact('Orderhistory'));
     }
 
@@ -199,6 +200,7 @@ class ClientController extends Controller
                     'wishlists.id as ids',
                     'cat.name',
                     'pd.listing_name',
+                    'pd.code',
                     'pd.product_cost',
                     'pd.offer_price',
                     'pg.file'
@@ -212,6 +214,7 @@ class ClientController extends Controller
                     'id' => $val->id,
                     'cat_name' => $val->name,
                     'product_name' => $val->listing_name,
+                    'code' => $val->code,
                     'cost' => $val->product_cost,
                     'offer' => $val->offer_price,
                     'file' => $val->file,
@@ -415,6 +418,22 @@ public function createOrderSelcoms(Request $request)
       return view('privacy-policy');
     }
 
+    # admin TermsConditions
+    # auth: vivek
+    public function TermsConditions(){
+      return view('terms-condition');
+    }
+    # admin ShippingPolicy
+    # auth: vivek
+    public function ShippingPolicy(){
+      return view('shipping-policy');
+    }
+
+    # admin RefundPolicy
+    # auth: vivek
+    public function RefundPolicy(){
+      return view('refund-policy');
+    }
     #admin ExcelSheet
     #auth: vivek
     public function getExcelSheet(){
@@ -649,5 +668,103 @@ public function createOrderSelcoms(Request $request)
       }
 
 
+ # customer deatils
+ # auth : vivek yadav
+public function getOrderDetails($id)
+{
+    try {
+        // Get the main order
+        $order = Orders::where('id', $id)->first();
+        
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ], 404);
+        }
+        $allOrdersInGroup = Orders::with(['products'])
+                            ->where('order_group_id', $order->order_group_id)
+                            ->get();
+        $subtotal = 0;
+        $totalShippingCharge = 0;
+        $finalTotal = 0;
+        $products = [];
+        
+        foreach ($allOrdersInGroup as $orderItem) {
+            $subtotal += $orderItem->total_amount;
+            if ($orderItem->method == 1) {
+                $totalShippingCharge += $orderItem->shipping_charge;
+            }
+            
+            if ($orderItem->products) {
+                $products[] = [
+                    'product_id' => $orderItem->product_id,
+                    'product_name' => $orderItem->products->listing_name ?? 'Unknown Product',
+                    'quantity' => $orderItem->quantity,
+                    'price' => $orderItem->price,
+                    'total_amount' => $orderItem->total_amount,
+                    'shipping_charge' => $orderItem->shipping_charge
+                ];
+            }
+        }
+        
+        if ($order->method == 1) { 
+            $finalTotal = $subtotal + $totalShippingCharge;
+        } else {
+            $finalTotal = $subtotal; 
+        }
+        
+        $orderStatusText = '';
+        if ($order->order_status == 1) {
+            $orderStatusText = 'Processing';
+        } else if ($order->order_status == 2) {
+            $orderStatusText = 'Shipped';
+        } else if ($order->order_status == 3) {
+            $orderStatusText = 'Delivered';
+        } else {
+            $orderStatusText = 'Cancelled';
+        }
+        
+        $paymentStatusText = '';
+        if ($order->payment_status == 1) {
+            $paymentStatusText = 'Pending';
+        } else if ($order->payment_status == 2) {
+            $paymentStatusText = 'Paid';
+        } else if ($order->payment_status == 3) {
+            $paymentStatusText = 'Failed';
+        }
+        
+        $paymentMethodText = $order->method == 1 ? 'Online' : 'Cash on Delivery';
+        
+        $formattedOrder = [
+            'id' => $order->id,
+            'order_number' => $order->order_number,
+            'order_date' => $order->created_at,
+            'order_status' => $order->order_status,
+            'order_status_text' => $orderStatusText,
+            'payment_status' => $order->payment_status,
+            'payment_status_text' => $paymentStatusText,
+            'payment_method' => $order->method,
+            'payment_method_text' => $paymentMethodText,
+            'transaction_id' => $order->order_group_id,
+            'tracking_number' => $order->order_group_id,
+            'subtotal' => $subtotal,
+            'shipping_charge' => $totalShippingCharge,
+            'total_amount' => $finalTotal,
+            'products' => $products
+        ];
+        
+        return response()->json([
+            'success' => true,
+            'order' => $formattedOrder
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error fetching order details: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
 }

@@ -26,8 +26,7 @@ class WishlistController extends Controller
         'user_id' => auth()->id(),
         'product_id' => $productId
     ]);
-
-    return back()->with('success', 'Product added to wishlist!');
+    return back()->with('success', 'Added to wishlist! View it in “My Wishlist”');
    }
 
    #add wishlist 

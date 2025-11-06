@@ -60,13 +60,11 @@
 
 							<button type="submit" class="redbutton mt-3 mb-0">
 						    <i class="material-symbols-outlined">login</i>Login to Account</button></li>
-									<li><button type="button" class="blackbutton mt-3 mb-0" onclick="location.href='{{ url('/change-password') }}';">
+									<li><button type="button" class="blackbutton mt-3 mb-0" onclick="location.href='{{ url('/user/change-password') }}';">
 						<i class="material-symbols-outlined">help</i>Reset Password</button></li>
 									</ul></div>
 
                             </form>
-							
-
 				</div>
 			</div>
 		</div>

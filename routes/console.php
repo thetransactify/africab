@@ -8,4 +8,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::command('cart:send-reminders')->everyTwoMinutes();
+Schedule::command('cart:send-reminders')->dailyAt('10:00')
+							            ->withoutOverlapping()
+							            ->runInBackground();

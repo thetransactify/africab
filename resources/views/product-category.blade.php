@@ -20,7 +20,11 @@
 		</div>
 	</div>
 </div>
-
+@if (session('success'))
+    <div id="success-message" class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 
 <!-- Products List -->
 <div class="product-list-area">	
@@ -172,5 +176,13 @@ $(document).ready(function() {
         });
     });
 });
+</script>
+<script>
+    setTimeout(function() {
+        let msg = document.getElementById('success-message');
+        if (msg) {
+            msg.style.display = 'none';
+        }
+    }, 5000);
 </script>
 @endsection

@@ -20,7 +20,11 @@
 	</div>
 </div>
 </div>
-
+@if (session('success'))
+    <div id="success-message" class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 <!-- Acounts Page -->
 
 <div class="account-pages">
@@ -57,7 +61,7 @@
 								<img src="{{ asset('storage/uploads/product/' . $val['file']) }}" />
 							</div>
 							<div class="col-lg-5 col-sm-5 dt-col">
-								<a href="#" class="prd-caption">
+								<a href="{{ url('product/'.\Illuminate\Support\Str::slug($val['product_name']) . '/' . $val['code']) }}" class="prd-caption">
 									<span class="prd-name">{{$val['product_name']}}</span>
 									<span>{{$val['cat_name']}}</span>
 								</a>
@@ -66,7 +70,7 @@
 							</div>
 							<div class="col-lg-5 col-sm-5 dt-col">
 								<ul class="general-button-list small-v no-text blackbutton my-0">
-									<li class=""><a href="javascript:void(0);"><i class="material-symbols-outlined">add_shopping_cart</i>Add to Cart</a></li>
+									<li class=""><a href="{{ url('product/'.\Illuminate\Support\Str::slug($val['product_name']) . '/' . $val['code']) }}" ><i class="material-symbols-outlined">add_shopping_cart</i>Add to Cart</a></li>
 									<li class=""><a href="{{ route('wishlist.delete', ['id' => $val['ids']]) }}" onclick="return confirm('Are you sure you want to delete this item?');"><i class="material-symbols-outlined">delete</i>Delete</a></li>
 								</ul>
 							</div>	
@@ -85,4 +89,12 @@
 
 
 </div>
+<script>
+    setTimeout(function() {
+        let msg = document.getElementById('success-message');
+        if (msg) {
+            msg.style.display = 'none';
+        }
+    }, 5000);
+</script>
 @endsection
