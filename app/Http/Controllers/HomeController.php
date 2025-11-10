@@ -166,10 +166,15 @@ class HomeController extends Controller
         $ads = advertisement::orderbydesc('id')->get();
         $Categories = Category::where('status',1)->get();
         $videourl = videourl::first();
-        $productlist = ProductPrice::with(['category','galleries'])->orderbydesc('id')->get()
-       ->groupBy(fn($product) => $product->category->id) 
-                ->map(fn($products) => $products->first()) 
-                ->values();
+        $productlist = ProductPrice::with(['category','product','galleries'])
+                ->where('product_online', 1)
+                ->orderByDesc('id')
+                ->get()
+                ->unique('id')
+                ->values()
+                ->unique('code')
+                ->values()
+                ->take(20);
         $bestsallerlist = Orders::with(['products','products.category','products.galleries'])->orderbydesc('id')->get()->unique('product_id')->values();
         $productsPositioning = productsPostion::with(['Product.galleries'])
                 ->orderByDesc('id')
@@ -185,7 +190,7 @@ class HomeController extends Controller
                         'image'    => $lastGallery ? asset('storage/uploads/product/'.$lastGallery) : null,
                     ];
                 });
-        $popularproducts = popularProducts::with(['Product.galleries'])
+        $popularproducts = popularProducts::with(['Product.galleries','Product.category'])
                 ->orderByDesc('id')
                 ->whereHas('Product', function($q) {
                         $q->where('product_online', 1);
@@ -197,14 +202,17 @@ class HomeController extends Controller
                     $lastGallery = $item->Product && $item->Product->galleries->count() > 0
                         ? $item->Product->galleries->last()->file
                         : null;
+                    $category = optional($item->Product)->category;
                     return [
-                        'id'       => $item->id ?? 'N/A',
-                        'name'     => $item->Product->listing_name ?? 'N/A',
-                        'code'     => $item->Product->code ?? 'N/A',
-                        'search'   => $item->count ?? 'N/A',
-                        'offer_price'   => $item->Product->offer_price ?? 'N/A',
-                        'product_cost'   => $item->Product->product_cost ?? 'N/A',
-                        'image'    => $lastGallery ? asset('storage/uploads/product/'.$lastGallery) : null,
+                        'id'                => $item->id ?? 'N/A',
+                        'product_price_id'  => optional($item->Product)->id,
+                        'name'              => optional($item->Product)->listing_name ?? 'N/A',
+                        'code'              => optional($item->Product)->code ?? 'N/A',
+                        'category_slug'     => $category ? Str::slug($category->name) : null,
+                        'search'            => $item->count ?? 'N/A',
+                        'offer_price'       => optional($item->Product)->offer_price ?? null,
+                        'product_cost'      => optional($item->Product)->product_cost ?? 'N/A',
+                        'image'             => $lastGallery ? asset('storage/uploads/product/'.$lastGallery) : null,
                     ];
                 });
         $data = [];
@@ -224,7 +232,7 @@ class HomeController extends Controller
                 'product_name'     => $product->listing_name ?? 'N/A',
                 'product_file'     => $galleriess->file ?? null,
                 'category_name'    => $category->name ?? 'N/A',
-                'offer_price'      => $price->offer_price ?? 'N/A',
+                'offer_price'      => $price->offer_price ?? null,
                 'listing_name'     => $price->listing_name ?? '',
                 'product_cost'     => $price->product_cost ?? '',
             ];

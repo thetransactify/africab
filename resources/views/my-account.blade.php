@@ -74,12 +74,17 @@
 												</tr>
 											</thead>
 											<tbody>
-											@foreach($Orderhistory as $list)
+											@php $latestStatus = $latestorder[0] ?? null; @endphp
+											@if($latestStatus)
 												<tr>
-													<td>{{$list['order_date']}}</td>
-													<td><p><b>{{$list['order_status']}}</b></p>.</td>
+													<td>{{$latestStatus['order_date']}}</td>
+													<td><p><b>{{$latestStatus['order_status']}}</b></p></td>
 												</tr>
-											@endforeach
+											@else
+												<tr>
+													<td colspan="2">No recent orders found.</td>
+												</tr>
+											@endif
 											</tbody>
 										</table>
 								</div>

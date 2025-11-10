@@ -26,6 +26,11 @@
         {{ session('success') }}
     </div>
     @endif
+    @if (session('error'))
+    <div id="error-message" class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
 	<!-- Cart Page -->
 	<div class="cart-page">	
 		<div class="container">
@@ -201,6 +206,13 @@
         let msg = document.getElementById('success-message');
         if (msg) {
             msg.style.display = 'none';
+        }
+    }, 5000);
+
+    setTimeout(function() {
+        let errorMsg = document.getElementById('error-message');
+        if (errorMsg) {
+            errorMsg.style.display = 'none';
         }
     }, 5000);
 </script>

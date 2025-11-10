@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Orders;
+use App\Models\OrderUpdate;
+use App\Models\PaymentUpdate;
 use App\Models\address;
 use App\Models\shop;
 use Carbon\Carbon;
@@ -105,13 +107,57 @@ class DashboardController extends Controller
     #authr: vivek
     public function DashboardOrders($id){
         $orderId = Crypt::decrypt($id);
-        $orderlists = Orders::with(['users','products','Address'])->where('id',$orderId)->first();
-        //return  $orderlists;
-       $groupId = $orderlists->order_group_id;
-       $userid = $orderlists->user_id;
-       $shippingAddress = $orderlists->shipping_address;
-       $shopId = $orderlists->shop_id;
-       if (is_null($shippingAddress)) {
+        $orderlists = Orders::with(['users','products','Address'])->where('id',$orderId)->firstOrFail();
+
+        $orderStatusLabels = [
+            1 => 'Processing',
+            2 => 'Shipped',
+            3 => 'Delivered',
+            4 => 'Cancelled',
+            5 => 'Awaiting Fulfilment',
+            6 => 'Out for Delivery',
+            7 => 'Partially Refunded',
+            8 => 'Pending',
+            9 => 'Confirmed',
+        ];
+
+        $paymentStatusLabels = [
+            1 => 'Pending',
+            2 => 'Paid',
+            3 => 'Failed',
+        ];
+
+        $groupId = $orderlists->order_group_id;
+        $shippingAddress = $orderlists->shipping_address;
+        $shopId = $orderlists->shop_id;
+
+        $orderUpdates = OrderUpdate::with('createdByUser')
+            ->where('order_group_id', $groupId)
+            ->latest()
+            ->get();
+
+        $paymentUpdates = PaymentUpdate::with('createdByUser')
+            ->where('order_group_id', $groupId)
+            ->latest()
+            ->get();
+
+        $orderStatusLog = $orderUpdates->map(function ($update) use ($orderStatusLabels) {
+            return [
+                'date' => optional($update->created_at)->format('d/m/Y H:i') ?? '-',
+                'status' => $orderStatusLabels[$update->order_status] ?? 'Unknown',
+                'message' => $update->custom_message ?? '-',
+            ];
+        });
+
+        $paymentStatusLog = $paymentUpdates->map(function ($update) use ($paymentStatusLabels) {
+            return [
+                'date' => optional($update->created_at)->format('d/m/Y H:i') ?? '-',
+                'status' => $paymentStatusLabels[$update->payment_status] ?? 'Unknown',
+                'message' => $update->custom_message ?? '-',
+            ];
+        });
+
+        if (is_null($shippingAddress)) {
             $shippingDetails = DB::table('shop')
                 ->select('name as shop_name', 'address as shop_address')
                 ->where('id', $shopId)
@@ -124,7 +170,6 @@ class DashboardController extends Controller
                 'customer_mobile' => $orderlists->users->mobile ?? '-',
                 'customer_pincode' => $orderlists->pincode ?? '-',
             ];
-
         } else {
             $address = DB::table('address')->where('id', $shippingAddress)->first();
             $finalShipping = [
@@ -133,52 +178,59 @@ class DashboardController extends Controller
                                 ?? $address->office_address 
                                 ?? $address->other_address 
                                 ?? 'No Address',
-            'customer_email'  => $orderlists->users->email ?? '-',                    
-            'customer_mobile'  => $orderlists->mobile_no ?? '-',
-            'customer_pincode' => $orderlists->pincode ?? '-',
+                'customer_email'  => $orderlists->users->email ?? '-',                    
+                'customer_mobile'  => $orderlists->mobile_no ?? '-',
+                'customer_pincode' => $orderlists->pincode ?? '-',
             ];
         }
 
-       $shhippingDeatils = DB::table('orders')
+        $pickupStatus = !is_null($shippingAddress)
+            ? 'Pickup from Customer Location'
+            : (!is_null($shopId) ? 'Pickup from Shop' : 'Pickup status unknown');
+
+        $ordersDeatils = DB::table('orders')
                         ->join('product_details', 'orders.product_id', '=', 'product_details.id')
                         ->where('orders.order_group_id', $groupId)
-                        ->where('orders.shipping_address', $shippingAddress)
                         ->get();
 
-       $ordersDeatils = DB::table('orders')
-                        ->join('product_details', 'orders.product_id', '=', 'product_details.id')
-                        ->where('orders.order_group_id', $groupId)
-                        ->get();
-       $OrderDeatils = [];
-       $OrderItems = [];
+        $OrderDeatils = [];
+        $OrderItems = [];
         $OrderDeatils[] = [
-        'order_number'   => $orderlists->order_number,
-        'order_group_id'   => $orderlists->order_group_id,
-        'order_date'     => $orderlists->created_at->format('d-m-Y H:i'),
-        'order_status'   => $orderlists->order_status == 1 ? 'Processing' 
-                             : ($orderlists->order_status == 2 ? 'Shipped' 
-                             : ($orderlists->order_status == 3 ? 'Delivered' 
-                             : 'Cancelled')),
-        'method'         => $orderlists->method == 1 ? 'Online' : 'Cash on Delivery',
-        'total_amount'   => $orderlists->total_amount + $orderlists->shipping_charge ?? '0',
+            'order_number'   => $orderlists->order_number,
+            'order_group_id' => $orderlists->order_group_id,
+            'order_date'     => $orderlists->created_at->format('d-m-Y H:i'),
+            'order_status'   => $orderStatusLabels[$orderlists->order_status] ?? 'Unknown',
+            'method'         => $orderlists->method == 1 ? 'Online' : 'Cash on Delivery',
+            'total_amount'   => $orderlists->total_amount + ($orderlists->shipping_charge ?? 0),
+            'payment_status' => $paymentStatusLabels[$orderlists->payment_status] ?? 'Unknown',
+            'txn_reference'  => $orderlists->method == 1
+                ? ($orderlists->payment_token ?? $orderlists->order_group_id)
+                : $orderlists->order_group_id,
         ];
 
         foreach ($ordersDeatils as $order) {
-            if ($ordersDeatils) {
-                $price = $order->total_amount ?? 0;
-                $qty   = $order->quantity;
-                $OrderItems[] = [
-                    'product_name' => $order->listing_name ?? '-',
-                    'quantity'     => $order->quantity,
-                    'price'        => $order->total_amount ?? 0,
-                    'shipping_price' => $order->shipping_charge ?? 0,
-                    'total'        => $qty * $price,
-                    'grandtotal'  => $qty * $price + $order->shipping_charge,
-                ];
-            }
+            $price = $order->total_amount ?? 0;
+            $qty   = $order->quantity;
+            $OrderItems[] = [
+                'product_name' => $order->listing_name ?? '-',
+                'quantity'     => $order->quantity,
+                'price'        => $order->total_amount ?? 0,
+                'shipping_price' => $order->shipping_charge ?? 0,
+                'total'        => $qty * $price,
+                'grandtotal'  => $qty * $price + $order->shipping_charge,
+            ];
         }
 
-        return view(' Admin.Dashboard_Orders',compact('OrderDeatils','OrderItems','finalShipping'));
+        return view(' Admin.Dashboard_Orders',compact(
+            'OrderDeatils',
+            'OrderItems',
+            'finalShipping',
+            'orderStatusLabels',
+            'paymentStatusLabels',
+            'orderStatusLog',
+            'paymentStatusLog',
+            'pickupStatus'
+        ));
     }
     #view dashboard
     #authr: vivek
@@ -255,19 +307,105 @@ class DashboardController extends Controller
     }
 
     public function updateGroup(Request $request){
-    $order_group_id = $request->order_group_id;
-    $order_status = $request->order_status;
-    $updatedRows = Orders::where('order_group_id', $order_group_id)
-        ->update([ 
-            'order_status'   => $order_status,
-            'updated_at'     => now(),
+        $validated = $request->validate([
+            'order_group_id' => 'required|string',
+            'order_status' => 'required|integer',
+            'custom_message' => 'nullable|string|max:500',
         ]);
 
-    if($updatedRows){
-        return response()->json(['status' => 'success']);
-    } else {
-        return response()->json(['status' => 'error']);
+        $order_group_id = $validated['order_group_id'];
+        $referenceOrder = Orders::where('order_group_id', $order_group_id)->first();
+
+        if (!$referenceOrder) {
+            return response()->json(['status' => 'error', 'message' => 'Order group not found'], 404);
+        }
+        $payload = [
+            'order_status'   => $validated['order_status'],
+            'updated_at'     => now(),
+        ];
+
+        if (!empty($validated['payment_status'])) {
+            $payload['payment_status'] = $validated['payment_status'];
+        }
+
+        DB::beginTransaction();
+
+        try {
+            Orders::where('order_group_id', $order_group_id)->update($payload);
+
+            OrderUpdate::create([
+                'order_group_id' => $order_group_id,
+                'order_status'   => $validated['order_status'],
+                'payment_status' => $validated['payment_status'] ?? $referenceOrder->payment_status ?? 1,
+                'custom_message' => $validated['custom_message'] ?? null,
+                'created_by'     => Auth::id(),
+            ]);
+
+            if (!empty($validated['payment_status'])) {
+                PaymentUpdate::create([
+                    'order_group_id' => $order_group_id,
+                    'payment_status' => $validated['payment_status'],
+                    'custom_message' => $validated['custom_message'] ?? null,
+                    'created_by'     => Auth::id(),
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json(['status' => 'success']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Order update failed', [
+                'error' => $th->getMessage(),
+                'order_group_id' => $order_group_id,
+            ]);
+
+            return response()->json(['status' => 'error'], 500);
+        }
     }
-}
+
+    public function updatePaymentStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'order_group_id' => 'required|string',
+            'payment_status' => 'required|integer|in:1,2,3',
+            'custom_message' => 'nullable|string|max:500',
+        ]);
+
+        $order_group_id = $validated['order_group_id'];
+        $referenceOrder = Orders::where('order_group_id', $order_group_id)->first();
+
+        if (!$referenceOrder) {
+            return response()->json(['status' => 'error', 'message' => 'Order group not found'], 404);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            Orders::where('order_group_id', $order_group_id)->update([
+                'payment_status' => $validated['payment_status'],
+                'updated_at' => now(),
+            ]);
+
+            PaymentUpdate::create([
+                'order_group_id' => $order_group_id,
+                'payment_status' => $validated['payment_status'],
+                'custom_message' => $validated['custom_message'] ?? null,
+                'created_by' => Auth::id(),
+            ]);
+
+            DB::commit();
+
+            return response()->json(['status' => 'success']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Payment update failed', [
+                'error' => $th->getMessage(),
+                'order_group_id' => $order_group_id,
+            ]);
+
+            return response()->json(['status' => 'error'], 500);
+        }
+    }
 
 }

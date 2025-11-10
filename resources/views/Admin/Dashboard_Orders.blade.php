@@ -19,9 +19,16 @@
                         <div class="card-body">
                             <h3 class="text-white font-weight-bolder">{{$OrderDeatils[0]['order_number']}}</h3>
                             <p class="text-small text-white mb-2"><b>Date:</b> {{$OrderDeatils[0]['order_date']}}</p>
-                            <p class="text-small text-white mb-2"><b>Txn ID:</b> {{$OrderDeatils[0]['order_group_id']}}</p>
-                            <p class="text-small text-white mb-2"><b>Order Status:</b>{{$OrderDeatils[0]['order_status']}}</p>
-                            <a href="javascript:void(0);" data-toggle="modal" data-backdrop="static" data-target="#orderUpdates"   data-order_group_id="{{ $OrderDeatils[0]['order_group_id'] }}"  class="btn btn-primary mb-1 mt-1 float-right">Manage Updates</a> 
+                            <p class="text-small text-white mb-2"><b>Txn ID:</b> {{$OrderDeatils[0]['txn_reference'] ?? '-'}}</p>
+                            <p class="text-small text-white mb-2"><b>Order Status:</b> {{$OrderDeatils[0]['order_status']}}</p>
+                            <p class="text-small text-white mb-2"><b>Payment Status:</b> {{$OrderDeatils[0]['payment_status']}}</p>
+                            <p class="text-small text-white mb-2"><b>Pick Up Status:</b> {{$pickupStatus}}</p>
+                            <a href="javascript:void(0);" 
+                               data-toggle="modal" 
+                               data-backdrop="static" 
+                               data-target="#orderUpdates"   
+                               data-order_group_id="{{ $OrderDeatils[0]['order_group_id'] }}"  
+                               class="btn btn-primary mb-1 mt-1 float-right">Manage Updates</a> 
                         </div>
                     </div>
                     <div class="card mb-5">
@@ -78,11 +85,76 @@
                             </table>
                             </div>
                             <div class="d-block text-right">
-                            <a href="javascript:void(0);" data-toggle="modal" data-backdrop="static" data-target="#orderUpdates" class="btn btn-secondary m-1">Manage Updates</a>
+                            <a href="javascript:void(0);" 
+                               data-toggle="modal" 
+                               data-backdrop="static" 
+                               data-target="#orderUpdates" 
+                               data-order_group_id="{{ $OrderDeatils[0]['order_group_id'] }}"
+                               class="btn btn-secondary m-1">Manage Updates</a>
                             <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="btn btn-secondary m-1">Print Invoice</a>
                             </div>
                         </div>
-                    </div>                
+                    </div> 
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            <h5 class="font-weight-bold">Order Status Log</h5>
+                            <div class="separator mb-0"></div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($orderStatusLog as $log)
+                                            <tr>
+                                                <td>{{ $log['date'] }}</td>
+                                                <td>{{ $log['status'] }}</td>
+                                                <td>{{ $log['message'] }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted">No order updates recorded yet.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div> 
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            <h5 class="font-weight-bold">Payment Status Log</h5>
+                            <div class="separator mb-0"></div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Payment Status</th>
+                                            <th scope="col">Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($paymentStatusLog as $log)
+                                            <tr>
+                                                <td>{{ $log['date'] }}</td>
+                                                <td>{{ $log['status'] }}</td>
+                                                <td>{{ $log['message'] }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted">No payment updates recorded yet.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>               
                 </div>  
             
             </div>
@@ -103,34 +175,59 @@
                     <div class="modal-body">
 
                         <form>
-                            <div class="form-group">
-                                <label for="orderStatus">Order Status</label>
-                                <select id="orderStatus" class="form-control select2-single" data-width="100%">
-                                    <option label="&nbsp;">Select Status</option>
-                                    <option value="1">Processing</option>
-                                    <option value="2">Shipped</option>
-                                    <option value="3">Delivered</option>
-                                </select>
+                            <input type="hidden" id="orderGroupIdInput" value="">
 
-                            </div>
-                            <div class="form-group" id="hasShipped">
-                                <label for="shipperName">Delivery Company</label>
-                                <select id="shipperName" class="form-control select2-single" data-width="100%">
-                                    <option label="&nbsp;">Select Courier</option>
-                                    <option value="1">Fedex</option>
-                                    <option value="1">Delhivery</option>
-                                    <option value="2">Blue Dart</option>
-                                </select>
-                                <label for="trackingNo" class="mt-2">AWB/ Consignment No.</label>
-                                <input id="trackingNo" type="text" class="form-control" placeholder="">
+                            <div class="border rounded p-3 mb-4">
+                                <h6 class="font-weight-bold mb-3">Order Status Update</h6>
+                                <div class="form-group">
+                                    <label for="orderStatus">Order Status</label>
+                                    <select id="orderStatus" class="form-control select2-single" data-width="100%">
+                                        <option label="&nbsp;">Select Status</option>
+                                        @foreach($orderStatusLabels as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="hasShipped">
+                                    <label for="shipperName">Delivery Company</label>
+                                    <select id="shipperName" class="form-control select2-single" data-width="100%">
+                                        <option label="&nbsp;">Select Courier</option>
+                                        <option value="Fedex">Fedex</option>
+                                        <option value="Delhivery">Delhivery</option>
+                                        <option value="Blue Dart">Blue Dart</option>
+                                    </select>
+                                    <label for="trackingNo" class="mt-2">AWB/ Consignment No.</label>
+                                    <input id="trackingNo" type="text" class="form-control" placeholder="">
+                                </div>
+
+                                <div class="form-group" id="orderMessage">
+                                    <label for="orderMessageInput">Custom Message</label>
+                                    <textarea id="orderMessageInput" placeholder="" class="form-control" rows="2"></textarea>
+                                </div>
+                                <div class="form-group text-right mb-0">
+                                    <button type="button" class="btn btn-secondary" id="updateOrderBtn">Update Order Status</button>
+                                </div>
                             </div>
 
-                            <div class="form-group" id="customMessage">
-                                <label>Custom Message</label>
-                                <textarea placeholder="" class="form-control" rows="2"></textarea>
-                            </div>
-                            <div class="form-group text-right">
-                                <button type="button" class="btn btn-secondary" id="updateOrderBtn" >Update</button>
+                            <div class="border rounded p-3">
+                                <h6 class="font-weight-bold mb-3">Payment Status Update</h6>
+                                <div class="form-group">
+                                    <label for="paymentStatus">Payment Status</label>
+                                    <select id="paymentStatus" class="form-control select2-single" data-width="100%">
+                                        <option label="&nbsp;">Select Payment Status</option>
+                                        @foreach($paymentStatusLabels as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group" id="paymentMessage">
+                                    <label for="paymentMessageInput">Payment Note</label>
+                                    <textarea id="paymentMessageInput" placeholder="" class="form-control" rows="2"></textarea>
+                                </div>
+                                <div class="form-group text-right mb-0">
+                                    <button type="button" class="btn btn-primary" id="updatePaymentBtn">Update Payment Status</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -142,44 +239,107 @@
 
 <script>
 
-$(document).ready(function(){
-     var currentOrderGroupId = null;
-    $('.btn[data-toggle="modal"]').on('click', function(){
-        currentOrderGroupId = $(this).data('order_group_id');
-       // console.log('Current Group ID:', currentOrderGroupId);
-        $('#currentGroupId').text(currentOrderGroupId);
-    });
-    $(document).on('click', '#updateOrderBtn', function() {
+$(document).ready(function () {
+    const $orderGroupInput = $('#orderGroupIdInput');
 
-        if(!currentOrderGroupId){
+    function resetModalFields() {
+        $orderGroupInput.val('');
+        $('#orderStatus').val('');
+        $('#paymentStatus').val('');
+        $('#orderMessageInput').val('');
+        $('#paymentMessageInput').val('');
+        $('#shipperName').val('');
+        $('#trackingNo').val('');
+    }
+
+    $(document).on('click', '[data-toggle="modal"][data-target="#orderUpdates"]', function () {
+        const groupId = $(this).data('order_group_id') || '';
+        $orderGroupInput.val(groupId);
+    });
+
+    $('#orderUpdates').on('hidden.bs.modal', function () {
+        resetModalFields();
+    });
+
+    $(document).on('click', '#updateOrderBtn', function () {
+        const currentOrderGroupId = $orderGroupInput.val();
+
+        if (!currentOrderGroupId) {
             alert('Order Group ID not found!');
             return;
         }
-        var order_status = $('#orderStatus').val();
+
+        const order_status = $('#orderStatus').val();
+        const custom_message = $('#orderMessageInput').val();
+
+        if (!order_status) {
+            alert('Please select an order status!');
+            return;
+        }
+
         $.ajax({
             url: '{{ route("orders.updateGroup") }}',
             type: 'POST',
             data: {
                 order_group_id: currentOrderGroupId,
                 order_status: order_status,
+                custom_message: custom_message,
                 _token: '{{ csrf_token() }}'
             },
-            success: function(response) {
-                if(response.status == 'success'){
-                    alert('Orders updated successfully!');
-                    window.location.reload();
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert('Order status updated successfully!');
                     $('#orderUpdates').modal('hide');
+                    window.location.reload();
                 } else {
-                    alert('Update failed!');
+                    alert(response.message || 'Update failed!');
                 }
             },
-            error: function(xhr){
-                alert('Something went wrong!');
+            error: function () {
+                alert('Something went wrong while updating the order!');
             }
         });
-
     });
 
+    $(document).on('click', '#updatePaymentBtn', function () {
+        const currentOrderGroupId = $orderGroupInput.val();
+
+        if (!currentOrderGroupId) {
+            alert('Order Group ID not found!');
+            return;
+        }
+
+        const payment_status = $('#paymentStatus').val();
+        const custom_message = $('#paymentMessageInput').val();
+
+        if (!payment_status) {
+            alert('Please select a payment status!');
+            return;
+        }
+
+        $.ajax({
+            url: '{{ route("orders.updatePayment") }}',
+            type: 'POST',
+            data: {
+                order_group_id: currentOrderGroupId,
+                payment_status: payment_status,
+                custom_message: custom_message,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert('Payment status updated successfully!');
+                    $('#orderUpdates').modal('hide');
+                    window.location.reload();
+                } else {
+                    alert(response.message || 'Update failed!');
+                }
+            },
+            error: function () {
+                alert('Something went wrong while updating the payment status!');
+            }
+        });
+    });
 });
 </script>
 

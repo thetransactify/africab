@@ -12,6 +12,7 @@ use App\Models\Wishlist;
 use App\Models\address;
 use App\Models\faqs;
 use App\Models\ProductPrice;
+use App\Models\OrderUpdate;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -118,12 +119,18 @@ class ClientController extends Controller
         $latestorder = [];
         $Orderhistory= [];
         if($orderlist) {
-          $statusText =  match ((int)$orderlist->order_status) {
-              1 => 'Processing',
-              2 => 'Shipping',
-              3 => 'Delivered',
-              default => 'Cancelled'
-          };
+              $statusText = match ((int)$orderlist->order_status) {
+                  1 => 'Processing',
+                  2 => 'Shipped',
+                  3 => 'Delivered',
+                  4 => 'Canceled',
+                  5 => 'Awaiting Fulfilment',
+                  6 => 'Out of Delivery',
+                  7 => 'Partially Refunded',
+                  8 => 'Pending',
+                  9 => 'Confirmed',
+                  default => 'Cancelled'
+              };
             $latestorder[]=[
               'order_number' => $orderlist->order_number,
               'order_status' => $statusText,
@@ -175,7 +182,7 @@ class ClientController extends Controller
               default => 'Cancelled'
             };
             $Orderhistory[]=[
-              'id'           => $orderdeatils->id,
+              'id'           => Crypt::encrypt($orderdeatils->id),
               'order_number' => $orderdeatils->order_number,
               'order_status' => $statusTexts,
               'payment'     =>  $orderdeatils->payment_status == 1  ? 'Pending' : ($orderdeatils->payment_status == 2 ? 'Paid'  : ($orderdeatils->payment_status == 3  ? 'Failed' : 'Unknown')), 
@@ -183,7 +190,6 @@ class ClientController extends Controller
               'payment_method' => $orderdeatils->method
             ]; 
           } 
-          return $Orderhistory;
         return view('order-history',compact('Orderhistory'));
     }
 

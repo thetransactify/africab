@@ -66,7 +66,7 @@
                                                 <a href="javascript:void(0);" class="order-details-btn" 
                                                    data-bs-toggle="modal" 
                                                    data-bs-target="#odmwindow" 
-                                                   data-id="{{ $list['id'] }}">
+                                                   data-order-id="{{ $list['id'] }}">
                                                     <i class="material-symbols-outlined">open_in_new</i>Details
                                                 </a>
                                             </li>
@@ -111,6 +111,40 @@
                                 <p>Loading order details...</p>
                             </div>
                         </div>
+                        <div class="table-responsive mt-4">
+                            <h6>Order Status Log</h6>
+                            <table class="table table-sm" id="order-status-log">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">No status updates yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-responsive mt-4">
+                            <h6>Payment Status Log</h6>
+                            <table class="table table-sm" id="payment-status-log">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">No payment updates yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>            
@@ -122,7 +156,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.order-details-btn').forEach(button => {
         button.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-id');
+            const orderId = this.getAttribute('data-order-id');
             loadOrderDetails(orderId);
         });
     });
@@ -135,8 +169,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p>Loading order details...</p>
             </div>
         `;
+        document.querySelector('#order-status-log tbody').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>';
+        document.querySelector('#payment-status-log tbody').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Loading...</td></tr>';
 
-        fetch(`/order-details/${orderId}`)
+        fetch(`/order-history/${orderId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -144,12 +180,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                if (data.success) {
+                if (data.status === 'success') {
                     displayOrderDetails(data.order);
+                    renderLogs(data.order.status_log, '#order-status-log tbody');
+                    renderLogs(data.order.payment_log, '#payment-status-log tbody');
                 } else {
                     document.getElementById('order-details-content').innerHTML = `
                         <div class="alert alert-danger">Error loading order details: ${data.message}</div>
                     `;
+                    document.querySelector('#order-status-log tbody').innerHTML = '<tr><td colspan="3" class="text-center text-muted">No data available.</td></tr>';
+                    document.querySelector('#payment-status-log tbody').innerHTML = '<tr><td colspan="3" class="text-center text-muted">No data available.</td></tr>';
                 }
             })
             .catch(error => {
@@ -157,7 +197,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('order-details-content').innerHTML = `
                     <div class="alert alert-danger">Error loading order details. Please try again.</div>
                 `;
+                document.querySelector('#order-status-log tbody').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Failed to load.</td></tr>';
+                document.querySelector('#payment-status-log tbody').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Failed to load.</td></tr>';
             });
+    }
+
+    function renderLogs(logs, selector) {
+        const tbody = document.querySelector(selector);
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No records found.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = logs.map(entry => `
+            <tr>
+                <td>${entry.date}</td>
+                <td>${entry.status}</td>
+                <td>${entry.message}</td>
+            </tr>
+        `).join('');
     }
 
 function displayOrderDetails(order) {

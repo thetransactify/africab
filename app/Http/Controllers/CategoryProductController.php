@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductPrice;
 use App\Models\ProductGallery;
+use App\Models\Cart;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +24,7 @@ use App\Imports\ProductsImport;
 use App\Mail\ProductInStockMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -513,6 +515,7 @@ class CategoryProductController extends Controller
     if (!$category) {
         abort(404, 'Category not found.');
     }
+    $categorySlug = $slug;
     $products = Product::with(['productPrices' => function($query) {
                     $query->with(['galleries' => function($q) {
                         $q->orderByDesc('id')->limit(1);
@@ -538,7 +541,7 @@ class CategoryProductController extends Controller
                     'tag' => $product->check_remark ?? 'N/A',
                     'product_cost' => $product_price->product_cost ?? 'N/A',
                     'product_online' => $product_price->product_online ?? 'N/A',
-                    'offer_price' => $product_price->offer_price ?? 'N/A',
+                    'offer_price' => $product_price->offer_price ?? null,
                     'code' => $product_price->code ?? 'N/A',
                     'SubCategories'  => $product_price->product->name ?? 'N/A',
                     'category' => $product->category->name ?? 'N/A',
@@ -579,7 +582,37 @@ class CategoryProductController extends Controller
             ];
         }
         //return $productsList;
-    return view('product-category', compact('productsList', 'subcategoriesList','category','recentviewlist'));
+    return view('product-category', compact('productsList', 'subcategoriesList','category','recentviewlist','categorySlug'));
+   }
+
+   public function addCategoryProductToCart(Request $request, $slug, ProductPrice $product){
+        if (!Auth::check()) {
+            return redirect()->route('get.ClientLogin')->with('error', 'Please login to continue.');
+        }
+
+        $product->loadMissing('category');
+        if ($product->category && Str::slug($product->category->name) !== $slug) {
+            abort(404);
+        }
+
+        $userId = Auth::id();
+        $cartItem = Cart::where('user_id', $userId)
+                        ->where('product_id', $product->id)
+                        ->first();
+
+        if ($cartItem) {
+            $cartItem->increment('quantity');
+        } else {
+            Cart::create([
+                'user_id'    => $userId,
+                'product_id' => $product->id,
+                'price'      => $product->product_cost,
+                'quantity'   => 1,
+                'color'      => 'NA',
+            ]);
+        }
+
+        return redirect()->route('cart.get')->with('success', 'Product added to checkout.');
    }
 
    public function GetProduct($slug,$code){
@@ -623,7 +656,14 @@ class CategoryProductController extends Controller
         $reviewRatings = $productDetails->reviews->pluck('rating')->toArray();
         $reviewuser = $productDetails->reviews->pluck('user_id')->toArray();
         $reviewComment = $productDetails->reviews->pluck('comment')->toArray();
-        $colors = explode(',', $productDetails->color_name); 
+        $rawColors = $productDetails->color_name ?? '';
+        $colors = array_values(array_filter(array_map('trim', explode(',', $rawColors)), function ($color) {
+            if ($color === '' || $color === null) {
+                return false;
+            }
+            $normalized = strtolower($color);
+            return !in_array($normalized, ['na', 'n/a', 'none', 'null', 'undefined'], true);
+        }));
         $data = [
         'product_price' => [
             'id' => $productDetails->id,
@@ -897,6 +937,7 @@ return $html;
                 'po.proudct_deatils_id',
                 'pp.id as product_id',
                 'pp.listing_name',
+                'pp.code',
                 'pp.product_cost',
                 'pp.offer_price',
                 'po.file as image',
@@ -914,6 +955,7 @@ return $html;
                         'id' => $firstProduct->product_id,
                         'listing_name' => $firstProduct->listing_name,
                         'product_cost' => $firstProduct->product_cost,
+                        'code' => $firstProduct->code,
                         'offer_price' => $firstProduct->offer_price,
                         'images' => $firstProduct->image,
                         'gallery' => $productItems->pluck('file')->filter()->unique()->values(),

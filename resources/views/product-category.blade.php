@@ -1,7 +1,26 @@
 @extends('layout.app')
 @section('title', 'Product')
 @section('content')
+@php
+	$currentCategorySlug = $categorySlug ?? request()->route('slug');
+@endphp
 <div class="content-area">
+<style>
+.pab-list .add-to-checkout-form {
+	display: inline;
+}
+.pab-list .add-to-checkout-form .add-to-checkout-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	color: inherit;
+	text-decoration: none;
+}
+.pab-list .add-to-checkout-form .add-to-checkout-btn:hover {
+	color: #d93025;
+}
+</style>
 
 <!-- Banner Area -->
 <div class="page-headers">
@@ -39,8 +58,8 @@
 			<li class="mobile-only"><a href="javascript:void(0);" class="grid-1"><span></span></a></li>
 				</ul>
 	</div>
-	<div class="col-8">
-	<form class="standard-form-rules product-sorter">
+	<div class="col-8 d-flex justify-content-end align-items-center gap-3">
+	<form class="standard-form-rules product-sorter mb-0">
 				<p>Sort By:</p>
 				<select>
 					<option>Show All</option>
@@ -53,6 +72,7 @@
 					<option>Price (High - Low)</option>
 				</select>
 			</form>
+			<a href="{{ route('checkout.get') }}" class="general-button redbutton">Proceed to checkout</a>
 	</div>
 	
 	</div>
@@ -82,11 +102,23 @@
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $listname['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '/' . $listname['code']) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+							<li>
+								<form action="{{ route('product-category.add-to-cart', ['slug' => $currentCategorySlug, 'product' => $listname['id']]) }}" method="POST" class="add-to-checkout-form">
+									@csrf
+									<a href="#" class="add-to-checkout-btn" aria-label="Add to checkout" onclick="event.preventDefault(); event.stopPropagation(); this.closest('form').submit();">
+										<i class="material-symbols-outlined shop">add_shopping_cart</i>
+									</a>
+								</form>
+							</li>
 						</ul>
 					</figure>
 				<h3 class="prd-name"><span>{{$listname['productname']}}({{$listname['product_code']}})</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['productname']) . '/' . $listname['code']) }}">{{$listname['category']}}({{$listname['SubCategories']}})</a></h3>
-			<h5 class="prd-price"><span class="dc-price"><i>TSh</i>{{$listname['offer_price']}}</span><i>TSh</i>{{$listname['product_cost']}}</h5>
+			<h5 class="prd-price">
+				@if(!empty($listname['offer_price']))
+				<span class="dc-price"><i>TSh</i>{{$listname['offer_price']}}</span>
+				@endif
+				<i>TSh</i>{{$listname['product_cost']}}
+			</h5>
 				</div>	
 			</div>	
         @endforeach  

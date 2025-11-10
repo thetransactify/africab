@@ -137,10 +137,33 @@
 			@endphp
 			<a href="#"  class="home-single-ad"><img src="{{ asset('storage/uploads/advertisement/' . $lastAd['file']) }}" /></a>
 			</div>
-		</div>
-	</div>
+</div>
+</div>
 </div>
 @endif
+<style>
+.pab-list .quick-cart-form {
+	display: inline;
+}
+.pab-list .quick-cart-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	color: inherit;
+	text-decoration: none;
+}
+.pab-list .quick-cart-btn:hover {
+	color: #d93025;
+}
+.pab-list .disabled-cart-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+</style>
 <div class="home-top-picks">
 		<div class="container-fluid">
 		<div class="row align-items-center">
@@ -169,23 +192,50 @@
 		@foreach($productlist as $product)
 			<div class="col-xxl-3 col-xl-4 col-lg-4 col-6">
 				<div class="prd-item">
-					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category?->name ?? '')) }}'">
+					@php
+						$productBaseName = $product->product->listing_name
+							?? $product->product->name
+							?? $product->listing_name
+							?? $product->name
+							?? 'product';
+						$productSlug = \Illuminate\Support\Str::slug($productBaseName);
+						$productCode = $product->code ?? $product->product->code ?? '';
+						$productUrl = $productCode ? url('product/'.$productSlug.'/'.$productCode) : url('product/'.$productSlug);
+					@endphp
+					<figure onclick="location.href = '{{ $productUrl }}'">
 						<span class="prd-tag new">New</span>
 
                         @if($product->galleries && count($product->galleries) > 0)
 						<img src="{{ asset('storage/uploads/product/' . $product->galleries[0]->file) }}" />
 						@endif
 
+						@php
+							$newCategorySlug = $product->category?->name ? \Illuminate\Support\Str::slug($product->category->name) : null;
+						@endphp
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $product['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
-							<li><a href="#"><span class="material-symbols-rounded">open_in_new</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+							<li><a href="{{ $productUrl }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
+							<li>
+								@if($newCategorySlug)
+								<form action="{{ route('product-category.add-to-cart', ['slug' => $newCategorySlug, 'product' => $product->id]) }}" method="POST" class="quick-cart-form">
+									@csrf
+									<a href="#" class="quick-cart-btn" aria-label="Add to checkout" onclick="event.preventDefault(); event.stopPropagation(); this.closest('form').submit();">
+										<i class="material-symbols-outlined shop">add_shopping_cart</i>
+									</a>
+								</form>
+								@else
+								<span class="disabled-cart-icon"><i class="material-symbols-outlined shop">add_shopping_cart</i></span>
+								@endif
+							</li>
 						</ul>
 					</figure>
-					<h3 class="prd-name"><span>{{$product->category->name}}</span><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($product->category->name)) }}">{{$product->product->name}}</a></h3>
+					<h3 class="prd-name"><span>{{$product->category->name ?? ''}}</span><a href="{{ $productUrl }}">{{$product->listing_name}}</a></h3>
+					@php
+						$newOffer = $product->offer_price;
+					@endphp
 					<h5 class="prd-price">
-						@if(!empty($product->offer_price))
-						<span class="dc-price"><i>TSh</i>{{$product->offer_price}}</span>
+						@if(!empty($newOffer) && $newOffer > 0)
+						<span class="dc-price"><i>TSh</i>{{$newOffer}}</span>
 					@endif<i>TSh</i>{{$product->product_cost}}</h5>
 				</div>
 			</div>
@@ -205,15 +255,29 @@
 					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}'">
 						<span class="prd-tag bestsell">Bestsellers</span>
 						<img src="{{ asset('storage/uploads/product/' . $bestlist['product_file']) }}" />
+						@php
+							$bestsellerSlug = !empty($bestlist['category_name']) ? \Illuminate\Support\Str::slug($bestlist['category_name']) : null;
+						@endphp
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $bestlist['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
-							<li><a href="#"><i class="material-symbols-outlined shop">add_shopping_cart</i></a></li>
+							<li>
+								@if($bestsellerSlug)
+								<form action="{{ route('product-category.add-to-cart', ['slug' => $bestsellerSlug, 'product' => $bestlist['id']]) }}" method="POST" class="quick-cart-form">
+									@csrf
+									<a href="#" class="quick-cart-btn" aria-label="Add to checkout" onclick="event.preventDefault(); event.stopPropagation(); this.closest('form').submit();">
+										<i class="material-symbols-outlined shop">add_shopping_cart</i>
+									</a>
+								</form>
+								@else
+								<span class="disabled-cart-icon"><i class="material-symbols-outlined shop">add_shopping_cart</i></span>
+								@endif
+							</li>
 						</ul>
 					</figure>
 					<h3 class="prd-name"><span>{{$bestlist['category_name']}}</span><a href="{{ url('product/'.\Illuminate\Support\Str::slug($bestlist['product_name'])) }}">{{$bestlist['product_name']}}</a></h3>
 					<h5 class="prd-price">
-						@if(isset($bestlist['offer_price']) && $bestlist['offer_price'] !== null && $bestlist['offer_price'] !== '' && !empty($bestlist['offer_price']))
+						@if(isset($bestlist['offer_price']) && is_numeric($bestlist['offer_price']) && $bestlist['offer_price'] > 0)
                          <span class="dc-price"><i>TSh</i>{{$bestlist['offer_price']}}</span>
 						@endif<i>Tsh</i>{{$bestlist['product_cost']}}</h5>
 				</div>
@@ -232,13 +296,32 @@
 					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])  . '/' . $productss['code']) }}';">
 						<span class="prd-tag onsale">Popular</span>
 						<img src="{{ $productss['image'] }}" />
+						@php
+							$popularSlug = $productss['category_slug'] ?? null;
+							$popularProductId = $productss['product_price_id'] ?? null;
+						@endphp
 						<ul class="pab-list">
 							<li><a href="{{ route('wishlist.add', $productss['id']) }}"><i class="material-symbols-outlined fav">heart_plus</i></a></li>
 							<li><a href="{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}"><span class="material-symbols-rounded">open_in_new</span></a></li>
+							<li>
+								@if($popularSlug && $popularProductId)
+								<form action="{{ route('product-category.add-to-cart', ['slug' => $popularSlug, 'product' => $popularProductId]) }}" method="POST" class="quick-cart-form">
+									@csrf
+									<a href="#" class="quick-cart-btn" aria-label="Add to checkout" onclick="event.preventDefault(); event.stopPropagation(); this.closest('form').submit();">
+										<i class="material-symbols-outlined shop">add_shopping_cart</i>
+									</a>
+								</form>
+								@else
+								<span class="disabled-cart-icon"><i class="material-symbols-outlined shop">add_shopping_cart</i></span>
+								@endif
+							</li>
 						</ul>
 					</figure>
 					<h3 class="prd-name"><a href="{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])) }}">{{$productss['name']}}</a></h3>
-					<h5 class="prd-price">@if(!empty($productss['offer_price']))<span class="dc-price"><i>TSh</i>{{$productss['offer_price']}}</span>@endif<i>TSh</i>{{$productss['product_cost']}}</h5>
+					@php
+						$popularOffer = $productss['offer_price'] ?? null;
+					@endphp
+					<h5 class="prd-price">@if(!empty($popularOffer) && $popularOffer > 0)<span class="dc-price"><i>TSh</i>{{$popularOffer}}</span>@endif<i>TSh</i>{{$productss['product_cost']}}</h5>
 				</div>
 			</div>
 		 @endforeach	

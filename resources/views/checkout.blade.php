@@ -319,11 +319,14 @@ $(document).ready(function () {
     if ($(this).is(':checked')) {
       if ($(this).attr('id') === 'showShopOption') {
         $('#showaddress').prop('checked', false);
+        $('input[name="shiping_address"]').prop('checked', false);
         $('#Addressbutton').prop('checked', false);
+        $('#shopDropdownContainer').show();
       } else {
         $('#showShopOption').prop('checked', false);
-         $('#Addressbutton').show();
-         $('#shopDropdownContainer').hide();
+        $('#shopSelect').val('');
+        $('#shopDropdownContainer').hide();
+        $('#Addressbutton').show();
       }
     }
   });
@@ -347,6 +350,8 @@ $(document).ready(function () {
     $('#showaddress').change(function () {
         if ($(this).is(':checked')) {
             $('#show-more-address').show();
+            $('#shopSelect').val('');
+            $('#showShopOption').prop('checked', false);
         } else {
             $('#show-more-address').hide();
             updateTotalAmount(0);

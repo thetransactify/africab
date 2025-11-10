@@ -20,8 +20,9 @@
 										<th>Customer Name</th>
 										<th>Amount</th>
 										<th>Txn. ID</th>
-										<th>Status</th>
-										<th>Action</th>
+                                        <th>Order Status</th>
+                                        <th>Payment Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -33,6 +34,7 @@
                                         <td><small class="font-weight-bold ">TsH</small>{{ number_format($order['amount'], 2) }}</td>
                                         <td>{{ $order['txn_id'] }}</td>
                                         <td>{{ $order['order_status'] }}</td>
+                                        <td>{{ $order['payment_status'] }}</td>
                                         <td>
                                         <a href="{{ route('Dashboard-Orders', $order['id']) }}"  class="las la-eye btn btn-secondary mx-1 my-3" title="Manage Order"></a>
                                         <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Order"></a></td>

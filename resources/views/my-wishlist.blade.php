@@ -65,7 +65,12 @@
 									<span class="prd-name">{{$val['product_name']}}</span>
 									<span>{{$val['cat_name']}}</span>
 								</a>
-								<p class="prd-price"><span class="dc-price"><i>TSh</i>{{$val['offer']}}</span><i>TSh</i>{{$val['cost']}}</p>
+								<p class="prd-price">
+									@if(!empty($val['offer']) && $val['offer'] > 0)
+									<span class="dc-price"><i>TSh</i>{{$val['offer']}}</span>
+									@endif
+									<i>TSh</i>{{$val['cost']}}
+								</p>
 
 							</div>
 							<div class="col-lg-5 col-sm-5 dt-col">

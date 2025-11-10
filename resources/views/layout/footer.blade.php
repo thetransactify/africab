@@ -82,7 +82,7 @@
 
     <ul class="mobile-ecom-panel">
         <li class=""><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#searchModal" class="search-icon"></a></li>
-        <li class=""><a href="my-account.html" class="myacc-icon"></a></li>
+        <li class=""><a href="{{url('my-account')}}" class="myacc-icon"></a></li>
         <li class=""><a href="javascript:void(0);" class="shopbag-icon cartopenbutton"><span>99+</span></a></li>
     </ul>
     

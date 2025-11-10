@@ -31,6 +31,7 @@ Route::middleware(['auth', 'role:2'])->group(function () {
 Route::get('/dashboard', [DashboardController::class, 'GetDashboard']);
 Route::get('/Dashboard-Orders/{id}', [DashboardController::class, 'DashboardOrders'])->name('Dashboard-Orders');
 Route::post('/orders/update-group', [DashboardController::class, 'updateGroup'])->name('orders.updateGroup');
+Route::post('/orders/update-payment', [DashboardController::class, 'updatePaymentStatus'])->name('orders.updatePayment');
 
 //Category
 Route::get('/manage-profile', [DashboardController::class, 'ManageProfile']);
@@ -185,7 +186,8 @@ Route::get('/search-products', [CategoryProductController::class, 'search'])->na
 Route::middleware(['auth','role:1'])->group(function () {
 Route::get('/my-account', [ClientController::class, 'MyAccount'])->name('MyAccount.shows');
 Route::get('/order-history', [ClientController::class, 'Orderhistory'])->name('Orderhistory.shows');
-Route::get('/order-details/{id}', [ClientController::class, 'getOrderDetails'])->name('order.details');
+Route::get('/order-history/{id}', [ClientController::class, 'getOrderDetails'])->name('order.history.details');
+// Route::get('/order-details/{id}', [ClientController::class, 'getOrderDetails'])->name('order.details');
 
 Route::get('/my-wishlist', [ClientController::class, 'MyWishlist'])->name('MyWishlist.shows');
 Route::get('/manage-address', [ClientController::class, 'ManageAddress'])->name('ManageAddress.shows');
@@ -296,4 +298,3 @@ Route::get('/payment-method-selcom', function () {
         "payload_sent" => $payload,
     ]);
 });
-

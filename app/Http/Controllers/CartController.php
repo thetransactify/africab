@@ -174,6 +174,11 @@ class CartController extends Controller
 		])->where('user_id', $id)
 		->orderByDesc('id')
 		->get();
+
+        if ($cartList->isEmpty()) {
+            return redirect()->route('cart.get')->with('error', 'Add at least one product to proceed to checkout.');
+        }
+
 		$cartDetails = [];
 		$subtotal = [];
 		foreach ($cartList as $item) {

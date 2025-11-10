@@ -34,9 +34,20 @@ class PaymentController extends Controller
 
     
 public function createOrderselcom(Request $request){
+    //return $request->all();
     $id          = Crypt::decrypt($request->user_id);
     $billing_id  = $request->billing_address;
     $shippingCharge = $request->shipping_charge;
+    $shippingAddressId = $request->shiping_address;
+    $selectedShopId = $request->selected_shop;
+
+    if (empty($shippingAddressId) && empty($selectedShopId)) {
+        return redirect()->back()->with('error', 'Please select either a shipping address or a pickup shop.');
+    }
+
+    if (!empty($shippingAddressId) && !empty($selectedShopId)) {
+        return redirect()->back()->with('error', 'Please select only one option: shipping address or pickup shop.');
+    }
 
     $cartItems = Cart::with('product')->where('user_id', $id)->get();
     if ($cartItems->isEmpty()) {
@@ -164,7 +175,8 @@ public function createOrderselcom(Request $request){
                     'method' => '1',
                     'shipping_charge' => ($index === 0) ? $shippingCharge : 0,
                     'order_status' => '1',
-                    'shipping_address' => $request->shiping_address,
+                    'shipping_address' => $shippingAddressId ?: null,
+                    'shop_id' => $selectedShopId ?: null,
                     'color' => $request->color,
                     'payment_status' => '1',
                     'payment_token' => $paymentToken,

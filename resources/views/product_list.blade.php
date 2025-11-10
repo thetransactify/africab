@@ -82,7 +82,10 @@
 				<!-- Product Cost -->	
 				<div class="prd-price">
 					<h1 class="">
-						<span class="dc-price"><i>TSh</i>{{$data['product_price']['offer_price']}}</span><i>TSh</i>{{$data['product_price']['product_cost']}}</h1>
+						@if(!empty($data['product_price']['offer_price']))
+						<span class="dc-price"><i>TSh</i>{{$data['product_price']['offer_price']}}</span>
+						@endif
+						<i>TSh</i>{{$data['product_price']['product_cost']}}</h1>
 					</div>
 
 					<!-- Add to Wishlist / Add to Cart -->
@@ -99,15 +102,17 @@
 									<input type="number" step="1" max="" value="1" name="quantity" class="quantity-field" id="quantity">
 									<input type="button" value="+" class="button-plus" data-field="quantity">
 								</div>
-								<p><small>Max Allowed : 1000</small></p>		
+								<p><small>Max Allowed : 1000</small></p>
+								@if(is_array($data['product_price']['color']) && count($data['product_price']['color']) > 0)
 								<p>Select Color</p>
 								<div class="color-options mb-3">
 									<select name="color" id="color" class="form-control">
 										@foreach($data['product_price']['color'] as $color)
-										<option value="{{ trim($color) }}">{{ ucfirst(trim($color)) }}</option>
+										<option value="{{ $color }}">{{ ucfirst($color) }}</option>
 										@endforeach
 									</select>
 								</div>
+								@endif
 								<ul class="general-button-list">
 									<li><a href="{{ route('wishlist.add', $data['product_price']['id']) }}" class="redbutton"><i class="material-symbols-outlined">favorite</i>Wishlist</a></li>
 									<li><a href="javascript:void(0);" class="blackbutton" id="addToCartBtn"><i class="material-symbols-outlined" >add_shopping_cart</i>Add to Cart</a></li>
@@ -298,7 +303,8 @@ document.addEventListener("DOMContentLoaded", function () {
 		const quantity = document.getElementById("quantity").value;
 		const productId = document.getElementById("product_id").value;
 		const priceId = document.getElementById("price_id").value;
-		const color = document.getElementById("color").value;
+		const colorField = document.getElementById("color");
+		const color = colorField ? colorField.value : null;
 
 		if (quantity < 1 || quantity > 1000) {
 			alert("Quantity must be between 1 and 1000");

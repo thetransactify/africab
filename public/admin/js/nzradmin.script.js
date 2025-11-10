@@ -2936,6 +2936,7 @@ $.nzradmin = function (element, options) {
           { "data": "orderdate" },
           { "data": "customername" },
           { "data": "orderamt" },
+          { "data": "orderpaymnt" },
           { "data": "txnid" },
           { "data": "orderstatus" }, 
           { "data": "orderactions" }        

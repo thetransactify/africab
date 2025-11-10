@@ -58,13 +58,29 @@
 	</div>
 	
 	<div class="row product-list justify-content-start">
+@if (session('success'))
+    <div id="success-message" class="alert alert-success">
+        {{ session('success') }} <a href="{{ route('MyWishlist.shows') }}">Open wishlist</a>
+    </div>
+@endif
 @if(!empty($grouped) && count($grouped) > 0)
     <div class="row">
         @foreach($grouped as $val)
             @foreach($val['products'] as $listname)
                 <div class="col-lg-3 col-md-4 col-6 each-item">
                     <div class="prd-item">
-                        <figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($listname['listing_name'])) }}';">
+                        @php
+                            $productSlug = \Illuminate\Support\Str::slug($listname['listing_name'] ?? 'product');
+                            $productCode = $listname['code'] ?? '';
+                            $productUrl = $productCode
+                                ? url('product/'.$productSlug.'/'.$productCode)
+                                : url('product/'.$productSlug);
+                            $offerPrice = $listname['offer_price'] ?? null;
+                            $categorySlug = !empty($val['label'])
+                                ? \Illuminate\Support\Str::slug($val['label'])
+                                : null;
+                        @endphp
+                        <figure onclick="location.href = '{{ $productUrl }}';">
                             <span class="prd-tag new">New</span>
 
                             {{-- image --}}
@@ -88,23 +104,36 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['listing_name'])) }}">
+                                    <a href="{{ $productUrl }}">
                                         <span class="material-symbols-rounded">open_in_new</span>
                                     </a>
                                 </li>
-                               
+                               <!--  <li>
+                                    @if($categorySlug)
+                                    <form action="{{ route('product-category.add-to-cart', ['slug' => $categorySlug, 'product' => $listname['id']]) }}" method="POST" class="quick-cart-form">
+                                        @csrf
+                                        <a href="#" class="quick-cart-btn" aria-label="Add to checkout" onclick="event.preventDefault(); event.stopPropagation(); this.closest('form').submit();">
+                                            <i class="material-symbols-outlined shop">add_shopping_cart</i>
+                                        </a>
+                                    </form>
+                                    @else
+                                    <span class="disabled-cart-icon"><i class="material-symbols-outlined shop">add_shopping_cart</i></span>
+                                    @endif
+                                </li> -->
                             </ul>
                         </figure>
 
                         {{-- product info --}}
                         <h3 class="prd-name">
                             <span>{{ $listname['listing_name'] }}</span>
-                            <a href="{{ url('product/'.\Illuminate\Support\Str::slug($listname['listing_name'])) }}">
-                                {{ $val['label'] ?? 'Category' }}
+                            <a href="{{ $productUrl }}">
+                                {{ $listname['listing_name'] }}
                             </a>
                         </h3>
                         <h5 class="prd-price">
-                            <span class="dc-price"><i>TSh</i>{{ $listname['offer_price'] }}</span>
+                            @if(!empty($offerPrice) && $offerPrice > 0)
+                            <span class="dc-price"><i>TSh</i>{{ $offerPrice }}</span>
+                            @endif
                             <i>TSh</i>{{ $listname['product_cost'] }}
                         </h5>
                     </div>  
@@ -174,4 +203,12 @@
 </div>
 </div>
 
+<script>
+    setTimeout(function() {
+        let msg = document.getElementById('success-message');
+        if (msg) {
+            msg.style.display = 'none';
+        }
+    }, 5000);
+</script>
 @endsection
