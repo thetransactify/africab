@@ -2933,6 +2933,7 @@ $.nzradmin = function (element, options) {
         pageLength: 10,
         "columns": [
           { "data": "orderno" },
+          { "data": "oederid" },
           { "data": "orderdate" },
           { "data": "customername" },
           { "data": "orderamt" },

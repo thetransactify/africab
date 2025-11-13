@@ -51,7 +51,7 @@ $('.alert').alert('close');
 <th>#</th>
 <th>Date</th>
 <th>Product Name</th>
-<th>Pkg. Wt.</th>
+<th>Product Code</th>
 <th>Cost</th>
 <th>Actions</th>
 
@@ -63,8 +63,16 @@ $('.alert').alert('close');
 						<td>{{ $index + 1 }}</td>
 						<td>{{ $category->created_at->format('d-m-Y') }}</td>
 						<td>{{ $category->listing_name }}</td>
-						<td>{{ $category->packing_weight }}</td>
+                        @php
+                         $rawValue = $category->code;
+                         $displayValue = $rawValue; // default
+                         if (preg_match('/"([^"]+)"\s*\)$/', $rawValue, $matches)) {
+                            $displayValue = trim($matches[1]);
+                             }
+                        @endphp
+						<td>{{ $displayValue }}</td>
 						<td><small class="font-weight-bold "></small>{{ $category->product_cost }}</td>
+                       
 						<td class="text-center"><a href="{{ url('tsfy-admin/edit-productlist/' . Crypt::encrypt($category->id)) }}" class="las la-edit btn btn-secondary mx-1"></a>
 							<a href="{{ route('productlist.delete', Crypt::encrypt($category->id)) }}" onclick="return confirm('Are you sure you want to delete this product?')" class="las la-trash-alt btn btn-secondary mx-1"></a></td>
 						</tr>
@@ -83,3 +91,48 @@ $('.alert').alert('close');
 </div> 
 </div>                          
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const token = '{{ csrf_token() }}';
+    document.querySelectorAll('.txn-toggle').forEach(function (toggle) {
+        toggle.dataset.previous = toggle.checked ? '1' : '0';
+        toggle.addEventListener('change', function () {
+            const encryptedId = this.dataset.id;
+            const isChecked = this.checked;
+            const label = this.closest('.txn-switch-wrapper').querySelector('.txn-label');
+
+            fetch(`{{ url('tsfy-admin/product-list') }}/${encryptedId}/toggle-txn`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    label.textContent = data.label;
+                    toggle.dataset.previous = data.value == 1 ? '1' : '0';
+                } else {
+                    throw new Error('Toggle failed');
+                }
+            })
+            .catch(() => {
+                alert('Unable to update Txn status. Please try again.');
+                toggle.checked = toggle.dataset.previous === '1';
+                label.textContent = toggle.dataset.previous;
+            });
+        });
+    });
+});
+</script>
+@endpush

@@ -32,6 +32,7 @@ Route::get('/dashboard', [DashboardController::class, 'GetDashboard']);
 Route::get('/Dashboard-Orders/{id}', [DashboardController::class, 'DashboardOrders'])->name('Dashboard-Orders');
 Route::post('/orders/update-group', [DashboardController::class, 'updateGroup'])->name('orders.updateGroup');
 Route::post('/orders/update-payment', [DashboardController::class, 'updatePaymentStatus'])->name('orders.updatePayment');
+Route::get('/orders/{id}/invoice', [DashboardController::class, 'orderInvoice'])->name('orders.invoice');
 
 //Category
 Route::get('/manage-profile', [DashboardController::class, 'ManageProfile']);
@@ -138,6 +139,8 @@ Route::get('/delete-fasq/{id}', [HomeController::class, 'Deletefasq'])->name('fa
 //shhiping zone 
 Route::get('/shipping-zone', [WishlistController::class, 'Getshipping'])->name('get.shipping');
  Route::post('/post-shipping', [WishlistController::class, 'Createshipping'])->name('get.Createshipping');
+Route::get('/tax-formula', [HomeController::class, 'getTaxFormula'])->name('tax.formula');
+Route::post('/tax-formula', [HomeController::class, 'saveTaxFormula'])->name('tax.formula.save');
  Route::get('/delete-shipping/{id}', [WishlistController::class, 'Deleteshipping'])->name('product.gallery');
 // store list 
 Route::get('/shop-list', [WishlistController::class, 'Getshop'])->name('get.Getfasq');
@@ -158,12 +161,13 @@ Route::get('/popular-product', [WishlistController::class, 'GetPopularProduct'])
 // Route::get('/', function () {
 //     return view('index'); // loads resources/views/admin/index.blade.php
 // });
-Route::get('/', [HomeController::class, 'GetClientHomepagessss'])->name('get.Getfasqss');
-Route::get('/index', [HomeController::class, 'GetClientHomepagessss'])->name('get.Getfasqss');
+Route::get('/', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasqss');
+Route::get('/index', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasqss');
 
-Route::get('/testing', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
+//Route::get('/testing', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
 Route::get('/test', [HomeController::class, 'GetClientHomepage'])->name('get.Getfasq');
 Route::get('/product-category/{slug}', [CategoryProductController::class, 'Clientshow'])->name('product-category.show');
+Route::post('/product-category/{slug}/{product}/add-to-cart', [CategoryProductController::class, 'addCategoryProductToCart'])->name('product-category.add-to-cart');
 Route::get('/product/{slug}/{code}', [CategoryProductController::class, 'GetProduct'])->name('product.shows');
 Route::get('/offerlist/{label}', [CategoryProductController::class, 'showOffer'])->name('offerlist.show');
 

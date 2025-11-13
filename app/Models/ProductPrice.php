@@ -24,6 +24,7 @@ class ProductPrice extends Model
         'product_cost',
         'offer_price',
         'product_online',
+        'txn',
         'color_name',
         'code',
         'status',

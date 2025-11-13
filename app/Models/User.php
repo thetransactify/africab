@@ -20,6 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'mobile',
+        'tin_num',
+        'vrn_num',
         'avtar',
         'role',
         'is_suspended',

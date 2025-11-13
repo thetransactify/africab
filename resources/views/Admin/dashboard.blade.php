@@ -59,7 +59,7 @@
                             Ordered by - {{ $order['customer_name'] }}
                         </p>
                         <p class="text-extra-small mb-0 line-height-2">
-                            Txn ID - {{ $order['order_group'] }}
+                            Txn ID - {{ $order['payment_token'] }}
                         </p>
                     </div>
                 </a>
@@ -68,7 +68,7 @@
             {{-- Actions --}}
             <div class="col-md-auto col-12 text-right">
                 <a href="{{ route('Dashboard-Orders', $order['id']) }}" class="las la-pen btn btn-secondary mx-1 my-3" title="Manage Order"></a>
-                <a href="" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Order"></a>
+                <a href="{{ route('orders.invoice', $order['id']) }}" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Invoice"></a>
             </div>
 
         </div>

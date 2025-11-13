@@ -3,6 +3,7 @@
 @section('meta_description', $data['product_price']['meta_description'])
 @section('meta_keywords', $data['product_price']['keyword'])
 @section('content')
+@php $defaultImage = asset('client/assets/images/no-image-ph.jpg'); @endphp
 <div class="content-area">
  
 <!-- Banner Area -->
@@ -219,8 +220,11 @@
             <div class="col-lg-9 col-md-8 col-12">
                 <div class="category-slider">
                     @foreach($recentviewlist as $recentlist)
+                    @php
+                        $recentImage = !empty($recentlist['file']) ? $recentlist['file'] : $defaultImage;
+                    @endphp
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name']) . '/' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name']) . '/' . $recentlist['code']) }}"><img src="{{ $recentImage }}" alt="{{ $recentlist['product_name'] }}" /><span>{{ $recentlist['product_name'] }}</span>
                     </a>
                     </div>
                     @endforeach

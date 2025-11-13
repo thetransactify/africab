@@ -49,13 +49,19 @@
 					@csrf
 
 								<div class="sta-form-group">
-									<input type="text" id="contact_name" name="name" class="" value="" placeholder="Full Name"> 
+									<input type="text" id="contact_name" name="name" class="" value="{{ old('name') }}" placeholder="Full Name"> 
 								</div>
 								<div class="sta-form-group">
-									<input type="email" id="contact_name" name="email" class="" value="" placeholder="Email Address"> 
+									<input type="email" id="contact_name" name="email" class="" value="{{ old('email') }}" placeholder="Email Address"> 
 								</div>
 								<div class="sta-form-group">
-									<input type="text" id="contact_name" name="phone" class="callnoinput" value="" placeholder="Mobile Number"> 
+									<input type="text" id="contact_name" name="phone" class="callnoinput" value="{{ old('phone') }}" placeholder="Mobile Number"> 
+								</div>
+								<div class="sta-form-group">
+									<input type="text" id="tin_num" name="tin_num" class="" value="{{ old('tin_num') }}" placeholder="Your TIN (optional)">
+								</div>
+								<div class="sta-form-group">
+									<input type="text" id="vrn_num" name="vrn_num" class="" value="{{ old('vrn_num') }}" placeholder="Your VRN (optional)">
 								</div>
 								<div class="sta-form-group">
 									<input type="password" id="contact_name" name="password" class="" value="" placeholder="Set a Strong Password"> 

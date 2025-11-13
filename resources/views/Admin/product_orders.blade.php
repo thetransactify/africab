@@ -15,6 +15,7 @@
 							<table class="data-table data-table-orders">
 							<thead>
                                     <tr>
+                                        <th>Sr No.</th>
                                         <th>Order No.</th>
 										<th>Order Date</th>
 										<th>Customer Name</th>
@@ -26,10 +27,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                @foreach($ordergroups as $order)
+                                @foreach($ordergroups as $index => $order)
                                     <tr>
-                                        <td><a href="{{ route('Dashboard-Orders', $order['order_group']) }}" data-toggle="modal" data-target="#orderDetails" title="Manage Order" title="Go to Order">{{ $order['order_group'] }}</a></td>
-                                        <td>{{ $order['created_at'] }}</td>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $order['order_group'] }}</td>
+                                        <td data-order="{{ $order['created_at_display'] ?? '' }}">{{ $order['created_at_display'] ?? '' }}</td>
                                         <td>{{ $order['customer_name'] }}</td>
                                         <td><small class="font-weight-bold ">TsH</small>{{ number_format($order['amount'], 2) }}</td>
                                         <td>{{ $order['txn_id'] }}</td>
@@ -37,7 +39,7 @@
                                         <td>{{ $order['payment_status'] }}</td>
                                         <td>
                                         <a href="{{ route('Dashboard-Orders', $order['id']) }}"  class="las la-eye btn btn-secondary mx-1 my-3" title="Manage Order"></a>
-                                        <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Order"></a></td>
+                                        <a href="{{ route('orders.invoice', $order['id']) }}" target="_blank" class="las la-print btn btn-secondary mx-1 my-3" title="Print Order"></a></td>
                                     </tr>
                                 @endforeach                                      
 								</tbody>

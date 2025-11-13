@@ -42,25 +42,29 @@
                             <div class="row dt-row dt-head align-items-center">
                                 <div class="col-lg-2 col-sm-3 dt-col">Date</div>
                                 <div class="col-lg-3 col-sm-2 dt-col">Order ID</div>
-                                <div class="col-lg-3 col-sm-3 dt-col">Status</div>
-                                <div class="col-lg-4 col-sm-4 dt-col">Payment status</div>
-                                <div class="col-lg-4 col-sm-4 dt-col"></div>		
+                                <div class="col-lg-2 col-sm-3 dt-col">Order Status</div>
+                                <div class="col-lg-2 col-sm-2 dt-col">Payment Status</div>
+                                <div class="col-lg-2 col-sm-2 dt-col">Payment Method</div>
+                                <div class="col-lg-3 col-sm-4 dt-col"></div>		
                             </div>
                             @foreach($Orderhistory as $list)	 
                                 <div class="row dt-row dt-body align-items-center">
-                                    <div class="col-lg-2 col-sm-3 dt-col">{{ date('d-m-Y', strtotime($list['order_date'])) }}</div>
+                                    <div class="col-lg-2 col-sm-3 dt-col">{{ $list['order_date'] }}</div>
                                     <div class="col-lg-3 col-sm-2 dt-col">{{ $list['order_number'] }}</div>
-                                    <div class="col-lg-3 col-sm-3 dt-col">
+                                    <div class="col-lg-2 col-sm-3 dt-col">
                                       {{$list['order_status']}}
                                     </div>
-                                    <div class="col-lg-3 col-sm-3 dt-col">
+                                    <div class="col-lg-2 col-sm-2 dt-col">
+                                      {{$list['payment']}}
+                                    </div>
+                                    <div class="col-lg-2 col-sm-2 dt-col">
                                         @if($list['payment_method'] == 1)
                                             Online
                                         @else
                                             Cash on Delivery
                                         @endif
                                     </div>
-                                    <div class="col-lg-4 col-sm-4 dt-col">
+                                    <div class="col-lg-3 col-sm-4 dt-col">
                                         <ul class="general-button-list small-v no-text blackbutton my-0">
                                             <li class="">
                                                 <a href="javascript:void(0);" class="order-details-btn" 
@@ -92,7 +96,7 @@
 <div class="modal fade" id="odmwindow" tabindex="-1" aria-labelledby="odmwindowLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
                 <div class="row align-items-center">
                     <div class="col-12">
                         <a class="close-icon" href="javascript:void(0);" data-bs-dismiss="modal">
@@ -218,65 +222,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 function displayOrderDetails(order) {
-    const orderDate = new Date(order.order_date).toLocaleDateString('en-GB');
-    
+    const orderDateRaw = order.order_date || '';
+    const orderDate = orderDateRaw.split(' ')[0] || orderDateRaw || '-';
+
     let statusHistory = '';
-    
-    if (order.order_status == 1) {
+    if (Array.isArray(order.status_log) && order.status_log.length) {
+        order.status_log.forEach(entry => {
+            statusHistory += `
+                <tr>
+                    <td>${entry.date || orderDate}</td>
+                    <td>${entry.status || '-'}</td>
+                    <td>${entry.message || ''}</td>
+                </tr>
+            `;
+        });
+    } else {
         statusHistory = `
             <tr>
                 <td>${orderDate}</td>
-                <td>Processing</td>
-                <td>Your order has been received.</td>
-            </tr>
-        `;
-    } else if (order.order_status == 2) { 
-        statusHistory = `
-            <tr>
-                <td>${orderDate}</td>
-                <td>Processing</td>
-                <td>Your order has been received.</td>
-            </tr>
-            <tr>
-                <td>${orderDate}</td>
-                <td>Packed</td>
-                <td>Your order has been packed and ready to be shipped.</td>
-            </tr>
-            <tr>
-                <td>${orderDate}</td>
-                <td>Shipped</td>
-                <td>Your order has been shipped. ${order.tracking_number ? `Your AWB No. ${order.tracking_number}` : ''}</td>
-            </tr>
-        `;
-    } else if (order.order_status == 3) { // Delivered
-        statusHistory = `
-            <tr>
-                <td>${orderDate}</td>
-                <td>Processing</td>
-                <td>Your order has been received.</td>
-            </tr>
-            <tr>
-                <td>${orderDate}</td>
-                <td>Packed</td>
-                <td>Your order has been packed and ready to be shipped.</td>
-            </tr>
-            <tr>
-                <td>${orderDate}</td>
-                <td>Shipped</td>
-                <td>Your order has been shipped. ${order.tracking_number ? `Your AWB No. ${order.tracking_number}` : ''}</td>
-            </tr>
-            <tr>
-                <td>${orderDate}</td>
-                <td>Delivered</td>
-                <td>Your order has been delivered successfully.</td>
-            </tr>
-        `;
-    } else { // Cancelled
-        statusHistory = `
-            <tr>
-                <td>${orderDate}</td>
-                <td>Cancelled</td>
-                <td>Your order has been cancelled.</td>
+                <td>${order.order_status_text || 'Order Processing'}</td>
+                <td>Your order is being processed.</td>
             </tr>
         `;
     }
@@ -351,7 +316,7 @@ function displayOrderDetails(order) {
                 <h5>Payment Status: <span>${order.payment_status_text}</span></h5>
             </div>
             <div class="col-md-4 col-12">
-                <h5>Order Group ID: <span>${order.transaction_id}</span></h5>
+                <h5>Africab Selcom ID: <span>${order.order_group_id || '-'}</span></h5>
             </div>
         </div>
         

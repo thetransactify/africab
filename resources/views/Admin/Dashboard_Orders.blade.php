@@ -37,7 +37,7 @@
                             <p class="text-small line-height-2 mb-1"><b>{{$finalShipping['name']}}</b><br>{{$finalShipping['address']}}{{$finalShipping['customer_pincode']}}</p>
                             <p class="text-small line-height-2 mb-1"><b>Mobile Number:</b> {{$finalShipping['customer_mobile']}}<br>
                             <b>Email Address :</b>{{$finalShipping['customer_email']}}</p>
-                            <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="btn btn-secondary mt-1 float-right">Print Invoice</a>
+                            <a href="{{ route('orders.invoice', $encryptedId) }}" target="_blank" class="btn btn-secondary mt-1 float-right">Print Invoice</a>
 
                             <div>
                                 
@@ -91,7 +91,7 @@
                                data-target="#orderUpdates" 
                                data-order_group_id="{{ $OrderDeatils[0]['order_group_id'] }}"
                                class="btn btn-secondary m-1">Manage Updates</a>
-                            <a href="Pages.Misc.Invoice.Standalone.html" target="_blank" class="btn btn-secondary m-1">Print Invoice</a>
+                            <a href="{{ route('orders.invoice', $encryptedId) }}" target="_blank" class="btn btn-secondary m-1">Print Invoice</a>
                             </div>
                         </div>
                     </div> 
@@ -189,7 +189,7 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group" id="hasShipped">
+                            <!--     <div class="form-group" id="hasShipped">
                                     <label for="shipperName">Delivery Company</label>
                                     <select id="shipperName" class="form-control select2-single" data-width="100%">
                                         <option label="&nbsp;">Select Courier</option>
@@ -199,7 +199,7 @@
                                     </select>
                                     <label for="trackingNo" class="mt-2">AWB/ Consignment No.</label>
                                     <input id="trackingNo" type="text" class="form-control" placeholder="">
-                                </div>
+                                </div> -->
 
                                 <div class="form-group" id="orderMessage">
                                     <label for="orderMessageInput">Custom Message</label>

@@ -332,6 +332,8 @@ public function clientlogout(Request $request)
                 'email'    => 'required|email|unique:users,email',
                 'phone'    => 'required|unique:users,mobile',
                 'password' => 'required|string|min:6',
+                'tin_num'  => 'nullable|string|max:191',
+                'vrn_num'  => 'nullable|string|max:191',
             ]);
 
             \Log::info('Validation passed');
@@ -340,7 +342,9 @@ public function clientlogout(Request $request)
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
-                'mobile'    => $request->phone,
+                'mobile'   => $request->phone,
+                'tin_num'  => $request->tin_num,
+                'vrn_num'  => $request->vrn_num,
                 'password' => Hash::make($request->password)
             ]);
 

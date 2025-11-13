@@ -3,7 +3,7 @@
 @section('content')
 <div class="row">
             <div class="col-12">
-                <h1>CMS Management</h1>
+                <h1>eCommerce Settings</h1>
                 <nav class="breadcrumb-container d-none d-sm-block d-lg-inline-block" aria-label="breadcrumb">
                 </nav>
                 @if(session('success'))

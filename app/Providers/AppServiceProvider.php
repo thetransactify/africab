@@ -35,12 +35,17 @@ class AppServiceProvider extends ServiceProvider
         //
             Schema::defaultStringLength(191);
 
-    View::creator('layout.header', function ($view) {
+    View::composer(['layout.header','layout.navigation'], function ($view) {
+        $cartCount = 0;
+        if (Auth::check()) {
+            $cartCount = DB::table('carts')->where('user_id', Auth::id())->count();
+        }
         $view->with([
             'homeslider' => Homeslider::latest()->take(3)->get(),
             'Categories' => Category::where('status',1)->get(),
             'offerlist' => offerlist::where('product_online',1)->get(),
-            'message' => 'Welcome to MySite!'
+            'message' => 'Welcome to MySite!',
+            'cartCount' => $cartCount,
         ]);
     });
 
@@ -73,12 +78,15 @@ class AppServiceProvider extends ServiceProvider
         )
         ->get();
 
-                \Log::info('User Wishlist:', $wishlist->toArray());
+        \Log::info('User Wishlist:', $wishlist->toArray());
 
     }else {
          $wishlist = collect();
     }
-    $view->with('wishlist', $wishlist);
+    $view->with([
+        'wishlist' => $wishlist,
+        'cartCount' => $wishlist->count(),
+    ]);
     });
 
 

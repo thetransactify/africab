@@ -1,6 +1,7 @@
 @extends('layout.app')
 @section('title', 'Home')
 @section('content')
+@php $defaultImage = asset('client/assets/images/no-image-ph.jpg'); @endphp
 <div class="content-area">
 
 <!-- Banner Area -->
@@ -23,8 +24,13 @@
             <div class="col-lg-9 col-md-8 col-12">
                 <div class="category-slider">
                     @foreach($Categories as $category)
+                    @php
+                        $categoryImage = $category->file
+                            ? asset('storage/uploads/category/' . $category->file)
+                            : $defaultImage;
+                    @endphp
                     <div class="item">
-                    <a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($category->name)) }}"><img src="{{ asset('storage/uploads/category/'. $category->file) }}" /><span>{{ $category->name }}</span>
+                    <a href="{{ url('product-category/'.\Illuminate\Support\Str::slug($category->name)) }}"><img src="{{ $categoryImage }}" alt="{{ $category->name }}" /><span>{{ $category->name }}</span>
                     </a>
                     </div>
                     @endforeach
@@ -47,8 +53,11 @@
             <div class="col-lg-9 col-md-8 col-12">
                 <div class="reco-slider">
                     @foreach($productsPositioning as $categorys)
+                    @php
+                        $recommendedImage = !empty($categorys['image']) ? $categorys['image'] : $defaultImage;
+                    @endphp
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($categorys['name'])) }}"><img src="{{ $categorys['image'] }}" /><span>{{ $categorys['name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($categorys['name'])) }}"><img src="{{ $recommendedImage }}" alt="{{ $categorys['name'] }}" /><span>{{ $categorys['name'] }}</span>
                     </a>
                     </div>
                     @endforeach
@@ -71,9 +80,14 @@
                         @foreach($grouped as $index => $ad)
                             @if($index < 2) {{-- Display first 2 products on left --}}
                                 @foreach($ad['products'] as $product)
+                                    @php
+                                        $offerImage = !empty($product['images'])
+                                            ? asset('storage/uploads/product/' . $product['images'])
+                                            : $defaultImage;
+                                    @endphp
                                     <div class="col-md-12 col-sm-12 col-6">
                                         <a href="{{ url('offerlist/' . Crypt::encrypt($product['ids'])) }}" class="home-single-ad my-2 d-block">
-                                            <img src="{{ asset('storage/uploads/product/' . $product['images']) }}"
+                                            <img src="{{ $offerImage }}"
                                                  class="img-fluid rounded shadow-sm"
                                                  alt="{{ $product['listing_name'] }}">
                                         </a>
@@ -97,9 +111,14 @@
                         @foreach($grouped as $index => $ad)
                             @if($index >= 2 && $index < 4) {{-- Display next 2 products on right --}}
                                 @foreach($ad['products'] as $product)
+                                    @php
+                                        $offerImage = !empty($product['images'])
+                                            ? asset('storage/uploads/product/' . $product['images'])
+                                            : $defaultImage;
+                                    @endphp
                                     <div class="col-md-12 col-sm-12 col-6">
                                         <a href="{{ url('offerlist/' . Crypt::encrypt($product['ids'])) }}" class="home-single-ad my-2 d-block">
-                                            <img src="{{ asset('storage/uploads/product/' . $product['images']) }}"
+                                            <img src="{{ $offerImage }}"
                                                  class="img-fluid rounded shadow-sm"
                                                  alt="{{ $product['listing_name'] }}">
                                         </a>
@@ -205,9 +224,15 @@
 					<figure onclick="location.href = '{{ $productUrl }}'">
 						<span class="prd-tag new">New</span>
 
-                        @if($product->galleries && count($product->galleries) > 0)
-						<img src="{{ asset('storage/uploads/product/' . $product->galleries[0]->file) }}" />
-						@endif
+                        @php
+                            $galleryFile = ($product->galleries && count($product->galleries) > 0)
+                                ? $product->galleries[0]->file
+                                : null;
+                            $newProductImage = $galleryFile
+                                ? asset('storage/uploads/product/' . $galleryFile)
+                                : $defaultImage;
+                        @endphp
+                        <img src="{{ $newProductImage }}" alt="{{ $product->listing_name }}">
 
 						@php
 							$newCategorySlug = $product->category?->name ? \Illuminate\Support\Str::slug($product->category->name) : null;
@@ -253,8 +278,13 @@
 			<div class="col-xxl-3 col-xl-4 col-lg-4 col-6">
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product-category/'.\Illuminate\Support\Str::slug($bestlist['category_name'])) }}'">
-						<span class="prd-tag bestsell">Bestsellers</span>
-						<img src="{{ asset('storage/uploads/product/' . $bestlist['product_file']) }}" />
+                        <span class="prd-tag bestsell">Bestsellers</span>
+                        @php
+                            $bestsellerImage = !empty($bestlist['product_file'])
+                                ? asset('storage/uploads/product/' . $bestlist['product_file'])
+                                : $defaultImage;
+                        @endphp
+                        <img src="{{ $bestsellerImage }}" alt="{{ $bestlist['product_name'] }}">
 						@php
 							$bestsellerSlug = !empty($bestlist['category_name']) ? \Illuminate\Support\Str::slug($bestlist['category_name']) : null;
 						@endphp
@@ -295,7 +325,10 @@
 				<div class="prd-item">
 					<figure onclick="location.href = '{{ url('product/'.\Illuminate\Support\Str::slug($productss['name'])  . '/' . $productss['code']) }}';">
 						<span class="prd-tag onsale">Popular</span>
-						<img src="{{ $productss['image'] }}" />
+						@php
+							$popularImage = !empty($productss['image']) ? $productss['image'] : $defaultImage;
+						@endphp
+						<img src="{{ $popularImage }}" alt="{{ $productss['name'] }}" />
 						@php
 							$popularSlug = $productss['category_slug'] ?? null;
 							$popularProductId = $productss['product_price_id'] ?? null;
@@ -411,7 +444,7 @@ open_in_new
 
 <!-- News / Testimonials -->
 
-<div class="home-testimonials">
+<!-- <div class="home-testimonials">
 		<div class="container-fluid">
 		
 		<div class="row justify-content-center">
@@ -448,7 +481,7 @@ open_in_new
 		</div>
 		
 </div>
-
+ -->
 <!-- Brand Logo -->
 
 <div class="home-brands">
@@ -467,6 +500,7 @@ open_in_new
 	</div>
 
 <!-- Recent -->
+@if(!empty($recentviewlist))
 <div class="browse-category">
     <div class="container-fluid">
         <div class="row align-items-center">
@@ -479,7 +513,7 @@ open_in_new
                 <div class="category-slider">
                     @foreach($recentviewlist as $recentlist)
                     <div class="item">
-                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])  . '/' . $recentlist['code']) }}"><img src="{{ asset('storage/uploads/product/'. $recentlist['file']) }}" /><span>{{ $recentlist['product_name'] }}</span>
+                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($recentlist['product_name'])  . '/' . $recentlist['code']) }}"><img src="{{ $recentlist['file'] }}" /><span>{{ $recentlist['product_name'] }}</span>
                     </a>
                     </div>
                     @endforeach
@@ -488,6 +522,7 @@ open_in_new
         </div>
     </div>
 </div>	
+@endif
 <!-- eCom Features-->
 
 <div class="ecom-feat-container">

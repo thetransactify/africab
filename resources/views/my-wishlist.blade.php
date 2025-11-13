@@ -56,9 +56,14 @@
 						</div>
 
                     @foreach($wishlistDeatils as $val)
-						<div class="row dt-row dt-body align-items-center">
-							<div class="col-lg-2 col-sm-3 dt-col table-img">
-								<img src="{{ asset('storage/uploads/product/' . $val['file']) }}" />
+                    <div class="row dt-row dt-body align-items-center">
+                        <div class="col-lg-2 col-sm-3 dt-col table-img">
+                            @php
+                                $wishlistImage = !empty($val['file'])
+                                    ? asset('storage/uploads/product/' . $val['file'])
+                                    : asset('client/assets/images/no-image-ph.jpg');
+                            @endphp
+                            <img src="{{ $wishlistImage }}" alt="{{ $val['product_name'] }}">
 							</div>
 							<div class="col-lg-5 col-sm-5 dt-col">
 								<a href="{{ url('product/'.\Illuminate\Support\Str::slug($val['product_name']) . '/' . $val['code']) }}" class="prd-caption">

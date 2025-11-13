@@ -44,7 +44,8 @@
 <ul class="ecom-panel align-items-center">
 		<li class=""><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#searchModal" class="search-icon"></a></li>
 		<li class=""><a href="my-account.html" class="myacc-icon"></a></li>
-		<li class=""><a href="javascript:void(0);" class="shopbag-icon cartopenbutton"><span>99+</span></a></li>
+        @php $cartTotalNav = $cartCount ?? 0; @endphp
+		<li class=""><a href="javascript:void(0);" class="shopbag-icon cartopenbutton">@if($cartTotalNav > 0)<span>{{ $cartTotalNav > 99 ? '99+' : $cartTotalNav }}</span>@endif</a></li>
 		<li class=""><a href="javascript:void(0);" class="menu-icon menuopenbutton"></a></li>
 	</ul>
 

@@ -202,7 +202,7 @@ class CategoryProductController extends Controller
     #Add ProdcutList
     #authr: vivek
     public function CreateProductList(Request $request){
-       // return $request->all();
+        //return $request->all();
         $request->validate([
             'CategoryList' => 'required',
             'productList' => 'required',
@@ -224,6 +224,7 @@ class CategoryProductController extends Controller
             $ProductList->packing_type = $request->input('packing_type');
             $ProductList->product_cost = $request->input('Item_cost');
             $ProductList->product_online = $request->input('OnlineProduct',2);
+            $ProductList->txn = $request->input('TransactionEnabled',2);
             $ProductList->code = $request->input('Code');
             $ProductList->color_name =  implode(',', $request->input('colors'));
             $ProductList->offer_price = $request->input('offer_price');
@@ -276,6 +277,7 @@ class CategoryProductController extends Controller
         $ProductPrice->code = $request->Code;
         $ProductPrice->color_name =  implode(',', $request->colors);
         $ProductPrice->product_online = $request->input('Online', 2);
+        $ProductPrice->txn = $request->input('TransactionEnabled', 2);
         $ProductPrice->save();
         if ($oldStatus == 2 && $ProductPrice->product_online == 1) {
             $this->notifyCustomers($ProductPrice);
@@ -311,7 +313,7 @@ class CategoryProductController extends Controller
 
     #soft delete ProductPrice list
     #authr: vivek
-   public function DeleteProductList($id){
+    public function DeleteProductList($id){
         try {
             $decryptedId = Crypt::decrypt($id);
             $ProductList = ProductPrice::findOrFail($decryptedId);
@@ -323,6 +325,27 @@ class CategoryProductController extends Controller
         }
 
 }
+
+    public function toggleTxn(Request $request, $encryptedId){
+        try {
+            $id = Crypt::decrypt($encryptedId);
+            $product = ProductPrice::findOrFail($id);
+            $product->product_online = $product->product_online == 1 ? 2 : 1;
+            $product->save();
+
+            return response()->json([
+                'status' => 'success',
+                'value' => $product->product_online,
+                'label' => $product->product_online == 1 ? '1' : '0',
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Txn toggle failed', [
+                'error' => $th->getMessage(),
+                'product_id' => $encryptedId,
+            ]);
+            return response()->json(['status' => 'error'], 500);
+        }
+    }
 
     #Product Gallery 
     #authr: vivek
@@ -474,7 +497,7 @@ class CategoryProductController extends Controller
     #authr: vivek
     public function GetOrders(){
        $orderlist = Orders::with(['users','products'])
-       ->latest()
+       ->orderByDesc('id')
        ->get()
        ->groupBy('order_group_id');
        //return   $orderlist;
@@ -492,12 +515,24 @@ class CategoryProductController extends Controller
             'customer_email' => $firstOrder->users->email ?? '-',
             'customer_mobile'=> $firstOrder->users->mobile ?? '-',
             'amount'         => $orders->sum(fn($o) => $o->total_amount + ($o->shipping_charge ?? 0)),
-            'order_status'   => [1 => 'Processing', 2 => 'Shipped', 3 => 'Delivered'][$firstOrder->order_status] ?? 'Unknown',
+            'order_status'   => [9 => 'Order Placed',
+                                1 => 'Order Processing', 
+                                7 => 'Order Packed',
+                                2 => 'Order Shipped',
+                                6 => 'Out for Delivery',
+                                5 => 'Order Undelivered',
+                                3 => 'Order Delivered', 
+                                4 => 'Order Cancelled',
+                                8 => 'Refund Status'][$firstOrder->order_status] ?? 'Unknown',
             'payment_status' => [1 => 'Pending', 2 => 'Paid', 3 => 'Failed'][$firstOrder->payment_status] ?? 'Unknown',
             'method'         => [1 => 'Online', 2 => 'Cash on Delivery'][$firstOrder->method] ?? 'Unknown',
-            'created_at'     => $firstOrder->created_at->format('d/m/Y'),
+            'created_at_display' => $firstOrder->created_at->format('d/m/Y'),
+            'created_at_timestamp' => $firstOrder->created_at->timestamp,
         ];
     }
+        // usort($ordergroups, function ($a, $b) {
+        //     return ($b['created_at_timestamp'] ?? 0) <=> ($a['created_at_timestamp'] ?? 0);
+        // });
          return view(' Admin.product_orders', compact('ordergroups'));
     }
 
@@ -547,7 +582,7 @@ class CategoryProductController extends Controller
                     'category' => $product->category->name ?? 'N/A',
                     'product_image' => $product_price->galleries->isNotEmpty()
                     ? asset('storage/uploads/product/' . $product_price->galleries->first()->file)
-                    : asset('storage/no-image.png'),
+                    : asset('client/assets/images/no-image-ph.jpg'),
                     'category_image' => asset('storage/uploads/category/' . $category->file), 
                 ];
             }
@@ -578,7 +613,9 @@ class CategoryProductController extends Controller
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
             'code' => $product->code ?? '',
-            'file' => $file ?? 'default.jpg',
+            'file' => $file
+                ? asset('storage/uploads/product/' . $file)
+                : asset('client/assets/images/no-image-ph.jpg'),
             ];
         }
         //return $productsList;
@@ -718,7 +755,9 @@ class CategoryProductController extends Controller
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
             'code' => $product->code ?? '',
-            'file' => $file ?? 'default.jpg',
+            'file' => $file
+                ? asset('storage/uploads/product/' . $file)
+                : asset('client/assets/images/no-image-ph.jpg'),
             ];
         }
         // product tracker 
@@ -763,8 +802,12 @@ class CategoryProductController extends Controller
    $html = '';
 if ($products->count()) {
     foreach ($products as $product) {
-        $productImg = asset('storage/uploads/product/' . ($product->product_image ?? 'default.png'));
-        $categoryImg = asset('storage/uploads/category/' . ($product->category_image ?? 'default.png'));
+        $productImg = $product->product_image
+            ? asset('storage/uploads/product/' . $product->product_image)
+            : asset('client/assets/images/no-image-ph.jpg');
+        $categoryImg = $product->category_image
+            ? asset('storage/uploads/category/' . $product->category_image)
+            : asset('client/assets/images/no-image-ph.jpg');
 
         // Generate slugs for URL
         $categorySlug = Str::slug($product->category_name);
@@ -982,7 +1025,9 @@ return $html;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
             'code' => $product->code ?? '',
-            'file' => $file ?? 'default.jpg',
+            'file' => $file
+                ? asset('storage/uploads/product/' . $file)
+                : asset('client/assets/images/no-image-ph.jpg'),
             ];
         }
         return view('offerlist', compact('grouped','recentviewlist') );

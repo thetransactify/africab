@@ -19,6 +19,7 @@ use App\Models\Review;
 use App\Models\RecentViews;
 use App\Models\productsPostion;
 use App\Models\popularProducts;
+use App\Models\TaxFormula;
 use Illuminate\Support\Facades\DB;
 
 
@@ -156,6 +157,27 @@ class HomeController extends Controller
             return redirect()->back()->with('error', 'Something went wrong.');
         }
 
+    }
+
+    public function getTaxFormula(){
+        $taxFormula = TaxFormula::first();
+        return view('Admin.tax_formula', compact('taxFormula'));
+    }
+
+    public function saveTaxFormula(Request $request){
+        $validated = $request->validate([
+            'txn_value' => 'required|numeric',
+        ]);
+
+        $taxFormula = TaxFormula::first();
+
+        if ($taxFormula) {
+            $taxFormula->update($validated);
+        } else {
+            TaxFormula::create($validated);
+        }
+
+        return back()->with('success', 'Tax formula saved successfully.');
     }
 
 
@@ -305,11 +327,13 @@ class HomeController extends Controller
                  if (!$product || $product->product_online == 2) {
                     continue;
                 }
-              $file = optional($product->galleries->first())->file ?? '-';
+              $file = optional($product->galleries->first())->file;
             $recentviewlist[] = [
             'product_name' => $product->listing_name ?? '',
             'code' => $product->code ?? '',
-            'file' => $file ?? 'default.jpg',
+            'file' => $file
+                ? asset('storage/uploads/product/' . $file)
+                : asset('client/assets/images/no-image-ph.jpg'),
             ];
         }
         return view('index',compact('Homeslider','Categories','productlist','data','reviewlists','brandList','ads','grouped','recentviewlist','videourl','productsPositioning','popularproducts'));

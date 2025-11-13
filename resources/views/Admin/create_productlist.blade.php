@@ -127,7 +127,17 @@
                 <label class="custom-switch-btn" for="switch3"></label>
               </div>
             </div>
-          </div>
+      
+
+             <div class="col-md-6">
+                <label class="font-weight-bold">Transaction Enabled</label>
+                    <div class="custom-switch custom-switch-primary-inverse">
+                        <input class="custom-switch-input" name="TransactionEnabled" id="switch4" type="checkbox" value="1" checked>
+                        <label class="custom-switch-btn" for="switch4"></label>
+                    </div>
+                </div>
+            </div>
+
 
           <div class="form-group text-right mt-4">
             <button class="btn btn-primary px-4" type="submit">List Product</button>

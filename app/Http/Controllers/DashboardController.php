@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Orders;
 use App\Models\OrderUpdate;
 use App\Models\PaymentUpdate;
+use App\Models\TaxFormula;
 use App\Models\address;
-use App\Models\shop;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Crypt;
 
@@ -93,8 +93,17 @@ class DashboardController extends Controller
             'customer_mobile'=> $order->users->mobile ?? '-',
             'product_name'  => $order->products->listing_name ?? '-',
             'quantity'      => $order->quantity,
+            'payment_token'      => $order->payment_token ?? null,
             'amount'        => $order->total_amount + ($order->shipping_charge ?? 0),
-            'order_status'  =>  [1 => 'Processing', 2 => 'Shipped', 3 => 'Delivered'][$order->order_status] ?? 'Cancelled',
+            'order_status'  =>  [9 => 'Order Placed',
+            1 => 'Order Processing',
+            7 => 'Order Packed', 
+            2 => 'Order Shipped',
+            6 => 'Out for Delivery',
+            5 => 'Order Undelivered',
+            3 => 'Order Delivered',
+            4 => 'Order Cancelled',
+            8 => 'Refund Status',][$order->order_status] ?? 'Cancelled',
             'payment_status'=> [1 => 'Pending', 2 => 'Paid', 3 => 'Failed'][$order->payment_status] ?? 'Unknown',
             'method'        => [1 => 'Online', 2 => 'Cash on Delivery'][$order->method] ?? 'Unknown',
             'created_at'    => $order->created_at->format('d-m-Y H:i'),
@@ -110,15 +119,15 @@ class DashboardController extends Controller
         $orderlists = Orders::with(['users','products','Address'])->where('id',$orderId)->firstOrFail();
 
         $orderStatusLabels = [
-            1 => 'Processing',
-            2 => 'Shipped',
-            3 => 'Delivered',
-            4 => 'Cancelled',
-            5 => 'Awaiting Fulfilment',
+            9 => 'Order Placed',
+            1 => 'Order Processing',
+            7 => 'Order Packed',
+            2 => 'Order Shipped',
             6 => 'Out for Delivery',
-            7 => 'Partially Refunded',
-            8 => 'Pending',
-            9 => 'Confirmed',
+            5 => 'Order Undelivered',
+            3 => 'Order Delivered',
+            4 => 'Order Cancelled',
+            8 => 'Refund Status',
         ];
 
         $paymentStatusLabels = [
@@ -198,7 +207,7 @@ class DashboardController extends Controller
         $OrderDeatils[] = [
             'order_number'   => $orderlists->order_number,
             'order_group_id' => $orderlists->order_group_id,
-            'order_date'     => $orderlists->created_at->format('d-m-Y H:i'),
+            'order_date'     => $orderlists->created_at->format('d-m-Y'),
             'order_status'   => $orderStatusLabels[$orderlists->order_status] ?? 'Unknown',
             'method'         => $orderlists->method == 1 ? 'Online' : 'Cash on Delivery',
             'total_amount'   => $orderlists->total_amount + ($orderlists->shipping_charge ?? 0),
@@ -221,6 +230,8 @@ class DashboardController extends Controller
             ];
         }
 
+        $encryptedId = $id;
+
         return view(' Admin.Dashboard_Orders',compact(
             'OrderDeatils',
             'OrderItems',
@@ -229,7 +240,8 @@ class DashboardController extends Controller
             'paymentStatusLabels',
             'orderStatusLog',
             'paymentStatusLog',
-            'pickupStatus'
+            'pickupStatus',
+            'encryptedId'
         ));
     }
     #view dashboard
@@ -406,6 +418,145 @@ class DashboardController extends Controller
 
             return response()->json(['status' => 'error'], 500);
         }
+    }
+
+    public function orderInvoice($id)
+    {
+        $orderId = Crypt::decrypt($id);
+        $order = Orders::with(['users','products'])->where('id', $orderId)->firstOrFail();
+        $orders = Orders::with('products')
+            ->where('order_group_id', $order->order_group_id)
+            ->get();
+        $subtotal = $orders->sum('total_amount');
+        $shippingTotal = $orders->sum('shipping_charge');
+        $grandTotal = $subtotal + $shippingTotal;
+
+        $statusLabels = [
+            9 => 'Order Placed',
+            1 => 'Order Processing',
+            7 => 'Order Packed',
+            2 => 'Order Shipped',
+            6 => 'Out for Delivery',
+            5 => 'Order Undelivered',
+            3 => 'Order Delivered',
+            4 => 'Order Cancelled',
+            8 => 'Refund Status',
+        ];
+
+        $paymentStatusLabels = [
+            1 => 'Pending',
+            2 => 'Paid',
+            3 => 'Failed',
+        ];
+
+        $shippingAddress = $order->shipping_address;
+        $billingAddressId = $order->billing_address;
+        $shopId = $order->shop_id;
+        $sellerLines = [
+            'Sold By : Africab',
+            'Address : P.O.Box # 2562, Africab Business Park',
+            'Plot no 34, Kilwa Road, Kurasini, Mivenjeni Area',
+            'Opposite Tanesco - Kurasini,',
+            'Dar es Salaam, Tanzania',
+            'Email : sales@africab.co.tz',
+            'Phone : +255 682 121 112',
+        ];
+
+        if (is_null($shippingAddress)) {
+            $addressBlock = [
+                'name'    => $order->users->name ?? 'Guest',
+                'address' => 'No Address Available',
+                'customer_email'  => $order->users->email ?? '-',
+                'customer_mobile' => $order->users->mobile ?? $order->mobile_no ?? '-',
+                'customer_pincode' => $order->pincode ?? '-',
+            ];
+        } else {
+            $address = DB::table('address')->where('id', $shippingAddress)->first();
+            $addressBlock = [
+                'name'    => $order->users->name ?? 'Guest',
+                'address' => $address->home_address 
+                                ?? $address->office_address 
+                                ?? $address->other_address 
+                                ?? 'No Address',
+                'customer_email'  => $order->users->email ?? '-',                    
+                'customer_mobile'  => $order->users->mobile ?? $order->mobile_no ?? '-',
+                'customer_pincode' => $order->pincode ?? '-',
+            ];
+        }
+
+        $billingBlock = $addressBlock;
+        if ($billingAddressId) {
+            $billingAddress = DB::table('address')->where('id', $billingAddressId)->first();
+            if ($billingAddress) {
+                $billingBlock = [
+                    'name'    => $order->users->name ?? 'Guest',
+                    'address' => $billingAddress->home_address 
+                                    ?? $billingAddress->office_address 
+                                    ?? $billingAddress->other_address 
+                                    ?? 'No Address',
+                    'customer_email'  => $order->users->email ?? '-',                    
+                    'customer_mobile'  => $order->users->mobile ?? $order->mobile_no ?? '-',
+                    'customer_pincode' => $billingAddress->pincode ?? '-',
+                ];
+            }
+        }
+
+        $pickupBlock = $addressBlock;
+        if ($shopId) {
+            $pickup = DB::table('shop')->select('name','address')->where('id', $shopId)->first();
+            if ($pickup) {
+                $pickupBlock = [
+                    'name' => $pickup->name ?? 'Pickup Point',
+                    'address' => $pickup->address ?? 'No Address Available',
+                    'customer_email' => null,
+                    'customer_mobile' => null,
+                    'customer_pincode' => '',
+                ];
+            }
+        }
+
+        $orderItems = [];
+        foreach ($orders as $item) {
+            $orderItems[] = [
+                'product_name' => $item->products->listing_name ?? '-',
+                'quantity' => $item->quantity,
+                'price' => $item->total_amount ?? 0,
+                'shipping' => $item->shipping_charge ?? 0,
+                'total' => ($item->total_amount ?? 0) + ($item->shipping_charge ?? 0),
+            ];
+        }
+
+        $taxAmount = null;
+        $taxPercentage = null;
+        $taxFormula = TaxFormula::first();
+        $hasTxn = $orders->contains(function ($item) {
+            return (int)($item->txn ?? 0) === 1;
+        });
+        if ($hasTxn && $taxFormula && $taxFormula->txn_value !== null) {
+            $taxAmount = ($subtotal * $taxFormula->txn_value) / 100;
+            $taxPercentage = $taxFormula->txn_value;
+        }
+
+        $customerVatNo = $order->users->tin_num ?? null;
+        $customerTrnNo = $order->users->vrn_num ?? null;
+
+        return view('Admin.invoice', [
+            'order' => $order,
+            'orderItems' => $orderItems,
+            'subtotal' => $subtotal,
+            'shippingTotal' => $shippingTotal,
+            'grandTotal' => $grandTotal,
+            'addressBlock' => $addressBlock,
+            'billingBlock' => $billingBlock,
+            'pickupBlock' => $pickupBlock,
+            'sellerLines' => $sellerLines,
+            'statusLabels' => $statusLabels,
+            'paymentStatusLabels' => $paymentStatusLabels,
+            'customerVatNo' => $customerVatNo,
+            'customerTrnNo' => $customerTrnNo,
+            'taxPercentage' => $taxPercentage,
+            'taxAmount' => $taxAmount,
+        ]);
     }
 
 }

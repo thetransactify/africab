@@ -13,6 +13,7 @@ use App\Models\address;
 use App\Models\faqs;
 use App\Models\ProductPrice;
 use App\Models\OrderUpdate;
+use App\Models\PaymentUpdate;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -116,52 +117,83 @@ class ClientController extends Controller
             ->orderbydesc('id')
             ->first();
 
+        $statusLabels = [
+            9 => 'Order Placed',
+            1 => 'Order Processing',
+            7 => 'Order Packed',
+            2 => 'Order Shipped',
+            6 => 'Out for Delivery',
+            5 => 'Order Undelivered',
+            3 => 'Order Delivered',
+            4 => 'Order Cancelled',
+            8 => 'Refund Status',
+        ];
+
         $latestorder = [];
         $Orderhistory= [];
+        $orderStatusLog = [];
         if($orderlist) {
-              $statusText = match ((int)$orderlist->order_status) {
-                  1 => 'Processing',
-                  2 => 'Shipped',
-                  3 => 'Delivered',
-                  4 => 'Canceled',
-                  5 => 'Awaiting Fulfilment',
-                  6 => 'Out of Delivery',
-                  7 => 'Partially Refunded',
-                  8 => 'Pending',
-                  9 => 'Confirmed',
-                  default => 'Cancelled'
-              };
+            $latestStatusKey = OrderUpdate::where('order_group_id', $orderlist->order_group_id)
+                ->orderByDesc('created_at')
+                ->value('order_status');
+            $statusText = $statusLabels[$latestStatusKey ?? $orderlist->order_status] ?? 'Cancelled';
+
             $latestorder[]=[
               'order_number' => $orderlist->order_number,
               'order_status' => $statusText,
+              'payment_token' =>$orderlist->payment_token,
               'order_date' => $orderlist->created_at->format('d-m-y'),
               'payment_method' => $orderlist->method
             ];
+
+            $orderStatusLog = OrderUpdate::where('order_group_id', $orderlist->order_group_id)
+                ->orderBy('created_at')
+                ->get()
+                ->map(function ($update) use ($statusLabels) {
+                    return [
+                        'date' => optional($update->created_at)->format('d-m-Y H:i') ?? '-',
+                        'status' => $statusLabels[$update->order_status] ?? 'Unknown',
+                        'message' => $update->custom_message ?? '-',
+                    ];
+                })
+                ->toArray();
+
+            if (empty($orderStatusLog)) {
+                $orderStatusLog[] = [
+                    'date' => $orderlist->created_at->format('d-m-Y H:i'),
+                    'status' => $statusText,
+                    'message' => 'Order placed.',
+                ];
+            }
+
+            if ((int)$orderlist->payment_status === 3) {
+                $latestorder[0]['order_status'] = $statusLabels[4];
+                $orderStatusLog[] = [
+                    'date' => now()->format('d-m-Y H:i'),
+                    'status' => $statusLabels[4],
+                    'message' => 'Payment cancelled. Order marked as cancelled.',
+                ];
+            }
+
             $secondLatestOrder = Orders::with('users')
                   ->where('user_id', $id)
                   ->where('id', '<', $orderlist->id)
                   ->orderByDesc('id')
                   ->get();
 
-          foreach($secondLatestOrder as $orderdeatils) {
-             $statusTexts =  match ((int)$orderdeatils->order_status) {
-              1 => 'Processing',
-              2 => 'Shipping',
-              3 => 'Delivered',
-              default => 'Cancelled'
-            };
-            $Orderhistory[]=[
-              'order_number' => $orderdeatils->order_number,
-              'order_status' => $statusTexts,
-              'order_date' => $orderdeatils->created_at->format('d-m-y') ?? '',
-              'payment_method' => $orderdeatils->method
-            ];
-          } 
+            foreach($secondLatestOrder as $orderdeatils) {
+               $statusTexts = $statusLabels[$orderdeatils->order_status] ?? 'Order Processing';
+              $Orderhistory[]=[
+                'order_number' => $orderdeatils->order_number,
+                'order_status' => $statusTexts,
+                'order_date' => $orderdeatils->created_at->format('d-m-y') ?? '',
+                'payment_method' => $orderdeatils->method
+              ];
+            } 
 
 
-          }   
-        // return  $Orderhistory;
-        return view('my-account',compact('latestorder','Orderhistory'));
+        }   
+        return view('my-account',compact('latestorder','Orderhistory','orderStatusLog'));
     }
 
    # client MyAccount
@@ -169,21 +201,30 @@ class ClientController extends Controller
     public function Orderhistory(){
         $id = Auth::user()->id;
         $Orderhistory= [];
-              $secondLatestOrder = Orders::with('users')
-                  ->where('user_id', $id)
-                  ->orderByDesc('id')
-                  ->get();
+        $ordersByGroup = Orders::with('users')
+            ->where('user_id', $id)
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('order_group_id');
 
-          foreach($secondLatestOrder as $orderdeatils) {
-             $statusTexts =  match ((int)$orderdeatils->order_status) {
-              1 => 'Processing',
-              2 => 'Shipping',
-              3 => 'Delivered',
-              default => 'Cancelled'
-            };
+          $statusLabels = [
+            9 => 'Order Placed',
+            1 => 'Order Processing',
+            7 => 'Order Packed',
+            2 => 'Order Shipped',
+            6 => 'Out for Delivery',
+            5 => 'Order Undelivered',
+            3 => 'Order Delivered',
+            4 => 'Order Cancelled',
+            8 => 'Refund Status',
+          ];
+
+          foreach($ordersByGroup as $groupOrders) {
+             $orderdeatils = $groupOrders->first();
+             $statusTexts = $statusLabels[$orderdeatils->order_status] ?? 'Order Processing';
             $Orderhistory[]=[
               'id'           => Crypt::encrypt($orderdeatils->id),
-              'order_number' => $orderdeatils->order_number,
+              'order_number' => $orderdeatils->payment_token ?? $orderdeatils->order_number,
               'order_status' => $statusTexts,
               'payment'     =>  $orderdeatils->payment_status == 1  ? 'Pending' : ($orderdeatils->payment_status == 2 ? 'Paid'  : ($orderdeatils->payment_status == 3  ? 'Failed' : 'Unknown')), 
               'order_date' => $orderdeatils->created_at->format('d-m-y'),
@@ -191,6 +232,104 @@ class ClientController extends Controller
             ]; 
           } 
         return view('order-history',compact('Orderhistory'));
+    }
+
+    public function getOrderDetails($orderId){
+        try {
+            $orderId = Crypt::decrypt($orderId);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid order reference'], 400);
+        }
+
+        $primaryOrder = Orders::with(['products'])
+            ->where('id', $orderId)
+            ->first();
+
+        if (!$primaryOrder) {
+            return response()->json(['status' => 'error', 'message' => 'Order not found'], 404);
+        }
+
+        $orderGroupId = $primaryOrder->order_group_id;
+        $orders = Orders::with('products')
+            ->where('order_group_id', $orderGroupId)
+            ->get();
+
+        $orderStatusLabels = [
+            9 => 'Order Placed',
+            1 => 'Order Processing',
+            7 => 'Order Packed',
+            2 => 'Order Shipped',
+            6 => 'Out for Delivery',
+            5 => 'Order Undelivered',
+            3 => 'Order Delivered',
+            4 => 'Order Cancelled',
+            8 => 'Refund Status',
+        ];
+
+        $paymentStatusLabels = [
+            1 => 'Pending',
+            2 => 'Paid',
+            3 => 'Failed',
+        ];
+
+        $orderUpdates = OrderUpdate::where('order_group_id', $orderGroupId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $statusLog = $orderUpdates->map(function ($update) use ($orderStatusLabels) {
+            return [
+                'date' => optional($update->created_at)->format('d-m-Y H:i') ?? '-',
+                'status' => $orderStatusLabels[$update->order_status] ?? 'Unknown',
+                'message' => $update->custom_message ?? '-',
+            ];
+        });
+
+        $paymentUpdates = PaymentUpdate::where('order_group_id', $orderGroupId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $paymentLog = $paymentUpdates->map(function ($update) use ($paymentStatusLabels) {
+            return [
+                'date' => optional($update->created_at)->format('d-m-Y H:i') ?? '-',
+                'status' => $paymentStatusLabels[$update->payment_status] ?? 'Unknown',
+                'message' => $update->custom_message ?? '-',
+            ];
+        });
+
+        $products = $orders->map(function ($order) {
+            return [
+                'product_name' => $order->products->listing_name ?? '-',
+                'quantity' => $order->quantity,
+                'total_amount' => $order->total_amount,
+                'shipping_charge' => $order->shipping_charge ?? 0,
+            ];
+        });
+
+        $totalAmount = $orders->sum(function ($item) {
+            return $item->total_amount + ($item->shipping_charge ?? 0);
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'order' => [
+                'order_number' => $primaryOrder->order_number,
+                'order_group_id' => $orderGroupId,
+                'order_status_text' => $orderStatusLabels[$primaryOrder->order_status] ?? 'Unknown',
+                'order_status' => $primaryOrder->order_status,
+                'order_date' => optional($primaryOrder->created_at)->format('d-m-Y H:i'),
+                'payment_method_text' => $primaryOrder->method == 1 ? 'Online' : 'Cash on Delivery',
+                'payment_status_text' => $paymentStatusLabels[$primaryOrder->payment_status] ?? 'Unknown',
+                'payment_method' => $primaryOrder->method,
+                'payment_status' => $primaryOrder->payment_status,
+                'tracking_number' => $primaryOrder->tracking_no ?? '',
+                'subtotal' => $orders->sum('total_amount'),
+                'shipping_charge' => $orders->sum('shipping_charge'),
+                'total_amount' => $totalAmount,
+                'products' => $products,
+                'status_log' => $statusLog,
+                'payment_log' => $paymentLog,
+            ],
+        ]);
     }
 
    # client MyAccount
@@ -278,14 +417,18 @@ class ClientController extends Controller
     $user = Auth::user();
 
     $request->validate([
-        'name' => 'required',
+        'name'   => 'required',
         //'email' => 'required|email|unique:users,email,' . $user->id,
-        'phone' => 'required',
+        'phone'  => 'required',
+        'tin_num'=> 'nullable|string|max:191',
+        'vrn_num'=> 'nullable|string|max:191',
         // Add more fields if needed
     ]);
     $user->update([
-        'name' => $request->name,
-        'mobile' => $request->phone,
+        'name'    => $request->name,
+        'mobile'  => $request->phone,
+        'tin_num' => $request->tin_num,
+        'vrn_num' => $request->vrn_num,
         // More fields...
     ]);
 
@@ -676,101 +819,101 @@ public function createOrderSelcoms(Request $request)
 
  # customer deatils
  # auth : vivek yadav
-public function getOrderDetails($id)
-{
-    try {
-        // Get the main order
-        $order = Orders::where('id', $id)->first();
+// public function getOrderDetails($id)
+// {
+//     try {
+//         // Get the main order
+//         $order = Orders::where('id', $id)->first();
         
-        if (!$order) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order not found'
-            ], 404);
-        }
-        $allOrdersInGroup = Orders::with(['products'])
-                            ->where('order_group_id', $order->order_group_id)
-                            ->get();
-        $subtotal = 0;
-        $totalShippingCharge = 0;
-        $finalTotal = 0;
-        $products = [];
+//         if (!$order) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'Order not found'
+//             ], 404);
+//         }
+//         $allOrdersInGroup = Orders::with(['products'])
+//                             ->where('order_group_id', $order->order_group_id)
+//                             ->get();
+//         $subtotal = 0;
+//         $totalShippingCharge = 0;
+//         $finalTotal = 0;
+//         $products = [];
         
-        foreach ($allOrdersInGroup as $orderItem) {
-            $subtotal += $orderItem->total_amount;
-            if ($orderItem->method == 1) {
-                $totalShippingCharge += $orderItem->shipping_charge;
-            }
+//         foreach ($allOrdersInGroup as $orderItem) {
+//             $subtotal += $orderItem->total_amount;
+//             if ($orderItem->method == 1) {
+//                 $totalShippingCharge += $orderItem->shipping_charge;
+//             }
             
-            if ($orderItem->products) {
-                $products[] = [
-                    'product_id' => $orderItem->product_id,
-                    'product_name' => $orderItem->products->listing_name ?? 'Unknown Product',
-                    'quantity' => $orderItem->quantity,
-                    'price' => $orderItem->price,
-                    'total_amount' => $orderItem->total_amount,
-                    'shipping_charge' => $orderItem->shipping_charge
-                ];
-            }
-        }
+//             if ($orderItem->products) {
+//                 $products[] = [
+//                     'product_id' => $orderItem->product_id,
+//                     'product_name' => $orderItem->products->listing_name ?? 'Unknown Product',
+//                     'quantity' => $orderItem->quantity,
+//                     'price' => $orderItem->price,
+//                     'total_amount' => $orderItem->total_amount,
+//                     'shipping_charge' => $orderItem->shipping_charge
+//                 ];
+//             }
+//         }
         
-        if ($order->method == 1) { 
-            $finalTotal = $subtotal + $totalShippingCharge;
-        } else {
-            $finalTotal = $subtotal; 
-        }
+//         if ($order->method == 1) { 
+//             $finalTotal = $subtotal + $totalShippingCharge;
+//         } else {
+//             $finalTotal = $subtotal; 
+//         }
         
-        $orderStatusText = '';
-        if ($order->order_status == 1) {
-            $orderStatusText = 'Processing';
-        } else if ($order->order_status == 2) {
-            $orderStatusText = 'Shipped';
-        } else if ($order->order_status == 3) {
-            $orderStatusText = 'Delivered';
-        } else {
-            $orderStatusText = 'Cancelled';
-        }
+//         $orderStatusText = '';
+//         if ($order->order_status == 1) {
+//             $orderStatusText = 'Processing';
+//         } else if ($order->order_status == 2) {
+//             $orderStatusText = 'Shipped';
+//         } else if ($order->order_status == 3) {
+//             $orderStatusText = 'Delivered';
+//         } else {
+//             $orderStatusText = 'Cancelled';
+//         }
         
-        $paymentStatusText = '';
-        if ($order->payment_status == 1) {
-            $paymentStatusText = 'Pending';
-        } else if ($order->payment_status == 2) {
-            $paymentStatusText = 'Paid';
-        } else if ($order->payment_status == 3) {
-            $paymentStatusText = 'Failed';
-        }
+//         $paymentStatusText = '';
+//         if ($order->payment_status == 1) {
+//             $paymentStatusText = 'Pending';
+//         } else if ($order->payment_status == 2) {
+//             $paymentStatusText = 'Paid';
+//         } else if ($order->payment_status == 3) {
+//             $paymentStatusText = 'Failed';
+//         }
         
-        $paymentMethodText = $order->method == 1 ? 'Online' : 'Cash on Delivery';
+//         $paymentMethodText = $order->method == 1 ? 'Online' : 'Cash on Delivery';
         
-        $formattedOrder = [
-            'id' => $order->id,
-            'order_number' => $order->order_number,
-            'order_date' => $order->created_at,
-            'order_status' => $order->order_status,
-            'order_status_text' => $orderStatusText,
-            'payment_status' => $order->payment_status,
-            'payment_status_text' => $paymentStatusText,
-            'payment_method' => $order->method,
-            'payment_method_text' => $paymentMethodText,
-            'transaction_id' => $order->order_group_id,
-            'tracking_number' => $order->order_group_id,
-            'subtotal' => $subtotal,
-            'shipping_charge' => $totalShippingCharge,
-            'total_amount' => $finalTotal,
-            'products' => $products
-        ];
+//         $formattedOrder = [
+//             'id' => $order->id,
+//             'order_number' => $order->order_number,
+//             'order_date' => $order->created_at,
+//             'order_status' => $order->order_status,
+//             'order_status_text' => $orderStatusText,
+//             'payment_status' => $order->payment_status,
+//             'payment_status_text' => $paymentStatusText,
+//             'payment_method' => $order->method,
+//             'payment_method_text' => $paymentMethodText,
+//             'transaction_id' => $order->order_group_id,
+//             'tracking_number' => $order->order_group_id,
+//             'subtotal' => $subtotal,
+//             'shipping_charge' => $totalShippingCharge,
+//             'total_amount' => $finalTotal,
+//             'products' => $products
+//         ];
         
-        return response()->json([
-            'success' => true,
-            'order' => $formattedOrder
-        ]);
+//         return response()->json([
+//             'success' => true,
+//             'order' => $formattedOrder
+//         ]);
         
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error fetching order details: ' . $e->getMessage()
-        ], 500);
-    }
-}
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Error fetching order details: ' . $e->getMessage()
+//         ], 500);
+//     }
+// }
 
 }

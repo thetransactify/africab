@@ -13,6 +13,7 @@ use App\Models\Review;
 use App\Models\Orders;
 use App\Models\Cart;
 use App\Models\address;
+use App\Models\ProductPrice;
 
 class PaymentController extends Controller
 {
@@ -53,6 +54,11 @@ public function createOrderselcom(Request $request){
     if ($cartItems->isEmpty()) {
         return redirect()->back()->with('error', 'Your cart is empty.');
     }
+
+    $productIds = $cartItems->pluck('product_id')->toArray();
+    $productTxns = ProductPrice::whereIn('id', $productIds)
+                ->pluck('txn', 'id')
+                ->toArray();
 
     $userDetails = User::find($id);
     if (!$userDetails) {
@@ -155,7 +161,7 @@ public function createOrderselcom(Request $request){
         Log::info('Selcom Success Response:', $body);
 
         $encodedUrl = $body['data'][0]['payment_gateway_url'] ?? null;
-        $paymentToken = $body['data'][0]['payment_token'] ?? null;
+        $paymentToken = $body['payment_token'] ?? null;
         $orderRef = $body['reference'] ?? null;
 
         if (empty($encodedUrl)) {
@@ -167,6 +173,7 @@ public function createOrderselcom(Request $request){
         DB::beginTransaction();
         try {
             foreach ($cartItems as $index => $item) {
+
                 Orders::create([
                     'user_id' => $id,
                     'product_id' => $item->product_id,
@@ -174,10 +181,11 @@ public function createOrderselcom(Request $request){
                     'order_group_id' => $orderGroupId,
                     'method' => '1',
                     'shipping_charge' => ($index === 0) ? $shippingCharge : 0,
-                    'order_status' => '1',
+                    'order_status' => '9',
                     'shipping_address' => $shippingAddressId ?: null,
                     'shop_id' => $selectedShopId ?: null,
                     'color' => $request->color,
+                    'txn' => $productTxns[$item->product_id] ?? '0',
                     'payment_status' => '1',
                     'payment_token' => $paymentToken,
                     'order_number' => $orderRef,
@@ -229,7 +237,7 @@ return redirect()->away($paymentUrl, 302, [], false);
      Orders::where('order_group_id', $orderIds)
           ->update([
             'payment_status' => '2',
-            'order_status' => '1'
+            'order_status' => '9'
         ]);
 
     return redirect()->route('order.success')
@@ -247,7 +255,7 @@ return redirect()->away($paymentUrl, 302, [], false);
      $updatedCount = Orders::where('order_group_id', $orderIds)
                             ->update([
                                 'payment_status' => '3',
-                                'order_status' => '0'
+                                'order_status' => '4'
                             ]);
      return redirect()->route('checkout.get')->with('error', 'Payment was cancelled.');
   }
@@ -286,7 +294,7 @@ return redirect()->away($paymentUrl, 302, [], false);
             $updatedCount = Orders::where('order_group_id', $orderId)
             ->update([
                 'payment_status' => '2',
-                'order_status' => '1',
+                'order_status' => '9',
                 'transaction_id' => $transactionId,
                 'payment_reference' => $reference
             ]);
@@ -304,7 +312,7 @@ return redirect()->away($paymentUrl, 302, [], false);
             $updatedCount = Orders::where('order_group_id', $orderId)
             ->update([
                 'payment_status' => '3',
-                'order_status' => '0',
+                'order_status' => '4',
                 'transaction_id' => $transactionId
             ]);
 

@@ -9,11 +9,17 @@
 <li class="has-submenu red-text"><a href="javascript:void(0);" style="color: red !important;">Shop For Products</a>
     <ul class="sub-menu">
     @foreach($Categories as $category)
-        <li><a href="{{ url('product-category/' .\Illuminate\Support\Str::slug($category->name)) }}" class=""><img src="{{ asset('storage/uploads/category/'. $category->file) }}" /><span>{{$category->name}}</span></a></li>
+        @php
+            $categorySlug = \Illuminate\Support\Str::slug($category->name);
+            $categoryImg = $category->file
+                ? asset('storage/uploads/category/' . $category->file)
+                : asset('client/assets/images/no-image-ph.jpg');
+        @endphp
+        <li><a href="{{ url('product-category/' . $categorySlug) }}" class=""><img src="{{ $categoryImg }}" alt="{{ $category->name }}" /><span>{{$category->name}}</span></a></li>
     @endforeach
     </ul>
     </li>
-    <li class=""><a href="{{url('/reviews')}}" style="color: red !important;">Reviews</a></li>
+    <li class=""><a href="#" style="color: red !important;">Africab Corporate</a></li>
 <!--     <li class=""><a href="{{url('/offers')}}">Offers</a></li> -->
     <li class="desktop-hidden"><a href="{{url('/register')}}">Register Account</a></li>
     <li class="desktop-hidden"><a href="{{url('/login')}}">Account Login</a></li>
@@ -27,7 +33,7 @@
         <li><a href="{{url('/refund-policy')}}">Return & Refund Policy</a></li>
         <li><a href="{{url('/support-centre')}}">Support Centre</a></li>
     </ul>
-    <li class=""><a href="https://africabgroup.com/" target="_blank" style="color: red !important;">Visit Africab Group Website</a></li>
+    <li class=""><a href="https://africabgroup.com/" target="_blank" style="color: red !important;">Africab Group</a></li>
     </li>
     
 </ul>
@@ -39,7 +45,14 @@
 <ul class="ecom-panel align-items-center">
         <li class=""><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#searchModal" class="search-icon"></a></li>
         <li class=""><a href="{{url('/my-account')}}" class="myacc-icon"></a></li>
-        <li class=""><a href="javascript:void(0);" class="shopbag-icon cartopenbutton"><span>99+</span></a></li>
+        @php $cartTotal = $cartCount ?? 0; @endphp
+        <li class="">
+            <a href="javascript:void(0);" class="shopbag-icon cartopenbutton">
+                @if($cartTotal > 0)
+                    <span>{{ $cartTotal > 99 ? '99+' : $cartTotal }}</span>
+                @endif
+            </a>
+        </li>
         <li class=""><a href="javascript:void(0);" class="menu-icon menuopenbutton"></a></li>
     </ul>
 

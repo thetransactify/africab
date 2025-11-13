@@ -40,7 +40,7 @@
                 <li>
                     <a href="#cms-management">
                         <i class="iconsminds-equalizer"></i>
-                        <span>CMS Management</span>
+                        <span>eCommerce Settings</span>
                     </a>
                 </li>              
             </ul>
@@ -253,9 +253,14 @@
                         <i class="simple-icon-cup"></i> <span class="d-inline-block">Shipping Zones</span>
                     </a>
                 </li>
-                 <li>
-                    <a href="{{url('tsfy-admin/shop-list')}}">
-                        <i class="simple-icon-plus"></i> <span class="d-inline-block">Store List</span>
+                <li>
+                   <a href="{{url('tsfy-admin/shop-list')}}">
+                       <i class="simple-icon-plus"></i> <span class="d-inline-block">Store List</span>
+                   </a>
+               </li>
+                <li>
+                    <a href="{{url('tsfy-admin/tax-formula')}}">
+                        <i class="simple-icon-calculator"></i> <span class="d-inline-block">Tax Formula</span>
                     </a>
                 </li>
 				<!-- <li> -->

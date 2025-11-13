@@ -75,6 +75,16 @@
 								<input type="text" id="contact_name" name="phone" class="callnoinput" value="{{$profileDeatils->mobile}}" placeholder="Mobile Numbers">
 							</div>
 						</div>
+						<div class="col-lg-6 col-md-6 col-12">
+							<div class="sta-form-group">
+								<input type="text" id="tin_num" name="tin_num" class="" value="{{$profileDeatils->tin_num ?? ''}}" placeholder="Your TIN (optional)">
+							</div>
+						</div>
+						<div class="col-lg-6 col-md-6 col-12">
+							<div class="sta-form-group">
+								<input type="text" id="vrn_num" name="vrn_num" class="" value="{{$profileDeatils->vrn_num ?? ''}}" placeholder="Your VRN (optional)">
+							</div>
+						</div>
 						<!-- <div class="col-lg-6 col-md-6 col-12">	
 							<div class="sta-form-group">
 								<input type="text" id="contact_name" name="contact_name" data-toggle="datepicker" class="" value="" placeholder="Date of Birth" data-date-format="mm/dd/yyyy">

@@ -63,12 +63,22 @@
                                              class="las la-trash-alt btn btn-secondary mx-1"><i class="material-symbols-outlined">delete</i></a>
                                             </div>
 												<div class="col-lg-2 col-md-3 col-12 table-img">
-													<img src="{{ asset('storage/uploads/product/' . $value['gallery_file']) }}" alt="">
+													@php
+														$cartImage = $value['gallery_file']
+															? asset('storage/uploads/product/' . $value['gallery_file'])
+															: asset('client/assets/images/no-image-ph.jpg');
+													@endphp
+													<img src="{{ $cartImage }}" alt="">
 												</div>
-												<div class="col-lg-6 col-md-5 col-12">
-													<a href="{{ url('product/'.\Illuminate\Support\Str::slug($value['product_name'])) }}" class="prd-caption">{{$value['product_name']}}<span>{{$value['category_name']}}</span></a>
-													<p class="prd-price"><span class="dc-price"><i>TSh</i>{{$value['offer_price']}}</span><i>TSh</i>{{$value['price']}}</p>
-												</div>										 	
+                                                <div class="col-lg-6 col-md-5 col-12">
+                                                    <a href="{{ url('product/'.\Illuminate\Support\Str::slug($value['product_name'])) }}" class="prd-caption">{{$value['product_name']}}<span>{{$value['category_name']}}</span></a>
+                                                    <p class="prd-price">
+                                                        @if(!empty($value['offer_price']))
+                                                            <span class="dc-price"><i>TSh</i>{{$value['offer_price']}}</span>
+                                                        @endif
+                                                        <i>TSh</i>{{$value['price']}}
+                                                    </p>
+                                                </div>										 	
 												<div class="col-lg-3 col-md-3 col-12">
 													<div class="sta-form-group">
 														<div class="qty-input">
@@ -161,7 +171,12 @@
                                 </a>
                             </div>
                             <div class="col-lg-2 col-md-3 col-12 table-img">
-                                <img src="{{ asset('storage/uploads/product/' . $item['gallery_file']) }}" alt="">
+                                @php
+                                    $saveImage = $item['gallery_file']
+                                        ? asset('storage/uploads/product/' . $item['gallery_file'])
+                                        : asset('client/assets/images/no-image-ph.jpg');
+                                @endphp
+                                <img src="{{ $saveImage }}" alt="">
                             </div>
                             <div class="col-lg-6 col-md-5 col-12">
                                 <a href="{{ url('product/'.\Illuminate\Support\Str::slug($item['product_name'])) }}" 
@@ -170,14 +185,17 @@
                                     <span>{{$item['category_name']}}</span>
                                 </a>
                                 <p class="prd-price">
-                                    <span class="dc-price"><i>TSh</i>{{$item['offer_price']}}</span>
+                                    @if(!empty($item['offer_price']))
+                                        <span class="dc-price"><i>TSh</i>{{$item['offer_price']}}</span>
+                                    @endif
                                     <i>TSh</i>{{$item['price']}}
                                 </p>
                             </div>										 	
                             <div class="col-lg-3 col-md-3 col-12">
                                 <a href="{{ url('/move-to-cart', $item['savetoCart_id']) }}" 
-                                   class="btn btn-sm btn-primary">
-                                    Move to Cart
+                                   class="d-block mt-1 text-muted" 
+                                   style="font-size: 12px; text-decoration: underline;">
+                                   Move to Cart
                                 </a>
                             </div>
                         </div>

@@ -49,6 +49,9 @@
 					<h5>Order No:<span>{{$latestorder[0]['order_number'] ?? ''}}</span></h5>
 					</div>
 					<div class="col-md-4 col-12">
+					<h5>Payment Id:<span>{{$latestorder[0]['payment_token'] ?? ''}}</span></h5>
+					</div>
+					<div class="col-md-4 col-12">
 					<h5>Order Status:<span>{{$latestorder[0]['order_status'] ?? ''}}</span></h5>
 					</div>
 					<div class="col-md-4 col-12">
@@ -71,18 +74,22 @@
 												<tr>
 													<th>Date</th>
 													<th>Status</th>
+													<th>Notes</th>
 												</tr>
 											</thead>
 											<tbody>
-											@php $latestStatus = $latestorder[0] ?? null; @endphp
-											@if($latestStatus)
-												<tr>
-													<td>{{$latestStatus['order_date']}}</td>
-													<td><p><b>{{$latestStatus['order_status']}}</b></p></td>
-												</tr>
+											@php $statusLogEntries = $orderStatusLog ?? []; @endphp
+											@if(!empty($statusLogEntries))
+												@foreach($statusLogEntries as $log)
+													<tr>
+														<td>{{ $log['date'] }}</td>
+														<td><b>{{ $log['status'] }}</b></td>
+														<td>{{ $log['message'] }}</td>
+													</tr>
+												@endforeach
 											@else
 												<tr>
-													<td colspan="2">No recent orders found.</td>
+													<td colspan="3">No status updates found.</td>
 												</tr>
 											@endif
 											</tbody>

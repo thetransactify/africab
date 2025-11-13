@@ -83,7 +83,8 @@
     <ul class="mobile-ecom-panel">
         <li class=""><a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#searchModal" class="search-icon"></a></li>
         <li class=""><a href="{{url('my-account')}}" class="myacc-icon"></a></li>
-        <li class=""><a href="javascript:void(0);" class="shopbag-icon cartopenbutton"><span>99+</span></a></li>
+        @php $cartTotalFooter = $cartCount ?? 0; @endphp
+        <li class=""><a href="javascript:void(0);" class="shopbag-icon cartopenbutton">@if($cartTotalFooter > 0)<span>{{ $cartTotalFooter > 99 ? '99+' : $cartTotalFooter }}</span>@endif</a></li>
     </ul>
     
 <!-- Cart Modal-->
@@ -96,13 +97,23 @@
             @foreach($wishlist ?? [] as $item) 
                 <div class="row g-0 each-product">
                     <div class="col-5">
-                        <a class="prd-img" href="{{ url('product/'.\Illuminate\Support\Str::slug($item->listing_name) . '-' . $item->code) }}"><img src="{{ asset('storage/uploads/product/' . $item->file) }}" /></a>
+                        @php
+                            $footerImg = $item->file
+                                ? asset('storage/uploads/product/' . $item->file)
+                                : asset('client/assets/images/no-image-ph.jpg');
+                        @endphp
+                        <a class="prd-img" href="{{ url('product/'.\Illuminate\Support\Str::slug($item->listing_name) . '-' . $item->code) }}"><img src="{{ $footerImg }}" /></a>
                     </div>
                     <div class="col-7">
                         <a href="{{ url('product/'.\Illuminate\Support\Str::slug($item->listing_name) . '-' . $item->code) }}" class="prd-caption">
                             <span class="prd-name">{{$item->listing_name}}</span>
                             <ul class="prd-price">
-                                <li><span ><i>TSh</i>{{$item->product_cost}}</span><span class="dc-price"><i>TSh</i>{{$item->offer_price}}</span></li>
+                                <li>
+                                    <span><i>TSh</i>{{$item->product_cost}}</span>
+                                    @if(!empty($item->offer_price))
+                                        <span class="dc-price"><i>TSh</i>{{$item->offer_price}}</span>
+                                    @endif
+                                </li>
 
                             </ul>
                         </a>
